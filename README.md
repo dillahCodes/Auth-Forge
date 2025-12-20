@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Authentication Flow Documentation
 
-## Getting Started
+## 📌 Flow Register (User Registration)
 
-First, run the development server:
+1. **Client mengirim data register:**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+   - email
+   - password
+   - name (opsional)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Server validasi input:**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   - format email valid
+   - password memenuhi panjang minimum
+   - email belum terdaftar
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. **Server hashing password** (misalnya bcrypt).
 
-## Learn More
+4. **Server menyimpan user baru ke database**:
 
-To learn more about Next.js, take a look at the following resources:
+   - id (UUID)
+   - email
+   - hashed password
+   - name (opsional)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. **Opsional — langsung membuat session:**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   - membuat row baru di tabel `Sessions`
+   - mengirim refresh token + access token ke client
 
-## Deploy on Vercel
+6. **Server mengirim response sukses ke client.**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📌 Flow Login (User Authentication)
+
+1. **Client mengirim kredensial login:**
+
+   - email
+   - password
+
+2. **Server validasi input**  
+   (format email & panjang password).
+
+3. **Server mencari user berdasarkan email.**
+
+   - jika user tidak ditemukan → _login gagal_
+
+4. **Server verifikasi password:**
+
+   - compare password plain vs hashed password
+   - jika tidak cocok → _login gagal_
+
+5. **Server membuat session baru:**
+
+   - generate refresh token (random string & hashed)
+   - insert ke tabel Sessions:
+     - userId
+     - hashed refresh token
+     - expiresAt (mis. 7 hari)
+     - ipAddress (opsional)
+     - userAgent (opsional)
+
+6. **Server membuat access token (JWT)**  
+   (umur pendek, mis. 15 menit).
+
+7. **Server mengirim ke client:**
+
+   - access token (header/body/cookie — sesuai arsitektur)
+   - refresh token (HTTPOnly Cookie, Secure, SameSite=Strict)
+
+8. **Client menggunakan access token**  
+   untuk request selanjutnya.
+
+---
+
+## 📌 Flow Refresh Token Rotation
+
+1. **Client mengirim refresh token lama**  
+   (`session.id = A`).
+
+2. **Server memvalidasi session A:**
+
+   - belum `revoked`
+   - belum `expired`
+
+3. **Server membuat session baru**  
+   (`session.id = B`) + refresh token baru.
+
+4. **Server menandai session lama (A) sebagai invalid:**
+
+   - set `revoked = true`
+   - set `replacedBy = B`
+
+5. **Server mengirim refresh token baru (B)** ke client.
+
+---
