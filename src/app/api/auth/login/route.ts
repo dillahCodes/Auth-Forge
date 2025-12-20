@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: Request) {
   try {
-    const { ip, userAgent } = await getClientInfo(req);
+    const { ip, userAgent } = getClientInfo(req);
 
     // Validate Request
     const parsed = await validateLoginForm(req);
