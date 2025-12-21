@@ -1,6 +1,8 @@
 import {
+  createRefreshToken,
+  getRefreshToken,
   setAuthCookies,
-  upsertSession,
+  updateRefreshToken,
   validateLoginForm,
   validateUser,
 } from "@/features/auth/helper/login-helper";
@@ -37,31 +39,45 @@ export async function POST(req: Request) {
       });
     }
 
-    // Generate Tokens
+    const userData = { userId: user.id, name: user.name, email: user.email };
+
+    // check existing session
+    const isExistingSession = await getRefreshToken({ ip, userId: user.id, userAgent });
+
+    if (isExistingSession) {
+      const sessionId = isExistingSession.id;
+
+      // create new access token and refresh token
+      const accessToken = await signAccessToken({ userId: user.id, sessionId });
+      const refreshToken = await signRefreshToken({ sessionId });
+      await updateRefreshToken({ refreshToken, sessionId });
+
+      const response = sendSuccess(userData, "Login successfully");
+      setAuthCookies(response, accessToken, refreshToken);
+      return response;
+    }
+
+    // Generate Tokens if no existing session
     const sessionId = uuidv4();
     const accessToken = await signAccessToken({ userId: user.id, sessionId });
     const refreshToken = await signRefreshToken({ sessionId });
 
-    // Insert / Update Session
-    await upsertSession({
-      userId: user.id,
+    // insert new session
+    await createRefreshToken({
       sessionId,
       refreshToken,
+      userId: user.id,
       ip,
-      userAgent,
       city,
       country,
       countryRegion,
       region,
+      userAgent,
     });
 
     // Send Response
-    const response = sendSuccess(
-      { userId: user.id, name: user.name, email: user.email },
-      "Login successfully"
-    );
+    const response = sendSuccess(userData, "Login successfully");
     setAuthCookies(response, accessToken, refreshToken);
-
     return response;
   } catch (error) {
     console.error("Login Error:", error);

@@ -35,30 +35,42 @@ interface UpsertSession {
   userAgent: string;
 }
 
-// DOC: create or update session (refresh token) in database
-async function upsertSession({
-  ip,
+type GetRefreshTokenParams = Pick<UpsertSession, "userId" | "userAgent" | "ip">;
+
+// DOC: get existing refresh token from database
+async function getRefreshToken({ ip, userAgent, userId }: GetRefreshTokenParams) {
+  return await prisma.sessions.findFirst({
+    where: { userId, ipAddress: ip, userAgent, revoked: false },
+  });
+}
+
+type UpdateRefreshTokenParams = Pick<UpsertSession, "sessionId" | "refreshToken">;
+
+// DOC: update existing refresh token
+async function updateRefreshToken({ refreshToken, sessionId }: UpdateRefreshTokenParams) {
+  const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MILLISECONDS);
+
+  await prisma.sessions.update({
+    where: { id: sessionId },
+    data: { refreshToken, expiresAt },
+  });
+}
+
+type CreateRefreshTokenParams = UpsertSession;
+
+// DOC: create new refresh token
+async function createRefreshToken({
+  sessionId,
   refreshToken,
   userId,
-  sessionId,
-  userAgent,
+  ip,
   city,
   country,
   countryRegion,
   region,
-}: UpsertSession) {
-  const existing = await prisma.sessions.findFirst({
-    where: { userId, userAgent, ipAddress: ip },
-  });
-
+  userAgent,
+}: CreateRefreshTokenParams) {
   const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MILLISECONDS);
-
-  if (existing) {
-    return prisma.sessions.update({
-      where: { id: existing.id },
-      data: { refreshToken, expiresAt },
-    });
-  }
 
   return prisma.sessions.create({
     data: {
@@ -99,4 +111,11 @@ function setAuthCookies(
   });
 }
 
-export { validateLoginForm, validateUser, upsertSession, setAuthCookies };
+export {
+  validateLoginForm,
+  validateUser,
+  setAuthCookies,
+  getRefreshToken,
+  updateRefreshToken,
+  createRefreshToken,
+};
