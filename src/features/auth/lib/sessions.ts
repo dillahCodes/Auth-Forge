@@ -10,8 +10,8 @@ export const ACCESS_TOKEN_EXPIRES_MILLISECONDS = ACCESS_TOKEN_EXPIRES_SECONDS * 
 export const REFRESH_TOKEN_EXPIRES_SECONDS = 60 * 60 * 24 * 7; // 7 days
 export const REFRESH_TOKEN_EXPIRES_MILLISECONDS = REFRESH_TOKEN_EXPIRES_SECONDS * 1000; // 7 days
 
-export async function signAccessToken({ userId }: { userId: string }) {
-  return new SignJWT({ userId })
+export async function signAccessToken({ userId, sessionId }: { userId: string; sessionId: string }) {
+  return new SignJWT({ userId, sessionId })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("15m")
