@@ -16,15 +16,22 @@ model User {
 }
 
 model Sessions {
-  id           String   @id @default(uuid())
+  id           String @id @default(uuid())
   userId       String
-  refreshToken String   @unique
-  createdAt    DateTime @default(now())
-  expiresAt    DateTime
-  revoked      Boolean  @default(false)
-  replacedBy   String?
-  userAgent    String?
-  ipAddress    String?
+  refreshToken String @unique
+
+  ipAddress     String?
+  city          String?
+  country       String?
+  countryRegion String?
+  region        String?
+
+  userAgent String?
+
+  replacedBy String?
+  revoked    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
