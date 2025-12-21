@@ -1,5 +1,6 @@
 import { ApiResponse } from "@/types/response";
 import { AxiosError } from "axios";
+import { errors } from "jose";
 import { NextResponse } from "next/server";
 
 export function sendSuccess<T>(
@@ -23,14 +24,15 @@ export function badRequest(
 }
 
 export function unauthorized(
-  message: string = "Unauthorized access"
+  message: string = "Unauthorized access",
+  errors?: Record<string, string[]>
 ): NextResponse<ApiResponse<null>> {
   return NextResponse.json(
     {
       isSuccess: false,
       message,
       data: null,
-      errors: null,
+      errors: errors || null,
     },
     { status: 401 }
   );
