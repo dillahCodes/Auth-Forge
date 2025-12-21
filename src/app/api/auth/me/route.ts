@@ -1,4 +1,4 @@
-import { decrypt, deleteSession, getCookie } from "@/features/auth/lib/sessions";
+import { decrypt, getCookie } from "@/features/auth/lib/sessions";
 import {
   badRequest,
   sendSuccess,

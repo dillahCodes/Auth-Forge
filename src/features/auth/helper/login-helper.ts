@@ -28,6 +28,10 @@ interface UpsertSession {
   userId: string;
   refreshToken: string;
   ip: string;
+  city: string;
+  country: string;
+  countryRegion: string;
+  region: string;
   userAgent: string;
 }
 
@@ -38,6 +42,10 @@ async function upsertSession({
   userId,
   sessionId,
   userAgent,
+  city,
+  country,
+  countryRegion,
+  region,
 }: UpsertSession) {
   const existing = await prisma.sessions.findFirst({
     where: { userId, userAgent, ipAddress: ip },
@@ -53,7 +61,18 @@ async function upsertSession({
   }
 
   return prisma.sessions.create({
-    data: { userId, refreshToken, ipAddress: ip, userAgent, expiresAt, id: sessionId },
+    data: {
+      userId,
+      refreshToken,
+      ipAddress: ip,
+      userAgent,
+      expiresAt,
+      id: sessionId,
+      city,
+      country,
+      countryRegion,
+      region,
+    },
   });
 }
 

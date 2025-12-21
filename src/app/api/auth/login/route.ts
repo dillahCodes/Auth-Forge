@@ -12,11 +12,13 @@ import {
   unauthorized,
 } from "@/helper/response-helper";
 import { getClientInfo } from "@/lib/client-info";
+import { getClientLocation } from "@/lib/client-location";
 import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: Request) {
   try {
     const { ip, userAgent } = getClientInfo(req);
+    const { city, country, countryRegion, region } = getClientLocation(req);
 
     // Validate Request
     const parsed = await validateLoginForm(req);
@@ -28,15 +30,30 @@ export async function POST(req: Request) {
 
     // Validate User
     const user = await validateUser(email, password);
-    if (!user) return unauthorized("Invalid email or password");
+    if (!user) {
+      return unauthorized("Please check your input", {
+        email: ["Invalid email or password"],
+        password: ["Invalid email or password"],
+      });
+    }
 
     // Generate Tokens
     const sessionId = uuidv4();
-    const accessToken = await signAccessToken({ userId: user.id });
+    const accessToken = await signAccessToken({ userId: user.id, sessionId });
     const refreshToken = await signRefreshToken({ sessionId });
 
     // Insert / Update Session
-    await upsertSession({ userId: user.id, sessionId, refreshToken, ip, userAgent });
+    await upsertSession({
+      userId: user.id,
+      sessionId,
+      refreshToken,
+      ip,
+      userAgent,
+      city,
+      country,
+      countryRegion,
+      region,
+    });
 
     // Send Response
     const response = sendSuccess(
