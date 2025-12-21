@@ -7,10 +7,8 @@ import { AxiosError } from "axios";
 import { useFormStatus } from "react-dom";
 
 export default function Register() {
-  const { mutate: register, isPending, error } = useRegister();
+  const { mutate: register, error } = useRegister();
   const axiosError = error as AxiosError<ApiResponse>;
-
-  // const [state, register] = useActionState(registerAction, undefined); // <-- dinonaktifkan
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
