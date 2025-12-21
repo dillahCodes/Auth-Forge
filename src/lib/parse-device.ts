@@ -4,8 +4,9 @@ export function parseDevice(userAgent?: string | null): string {
   if (!userAgent) return "Unknown Device";
 
   const parser = new UAParser(userAgent);
-  const browser = parser.getBrowser().name ?? "Unknown Browser";
+  const Device = parser.getDevice().type ?? "Unknown Device";
   const os = parser.getOS().name ?? "Unknown OS";
+  const browser = parser.getBrowser().name ?? "Unknown Browser";
 
-  return `${browser} · ${os}`;
+  return `${Device} · ${os} · ${browser}`;
 }
