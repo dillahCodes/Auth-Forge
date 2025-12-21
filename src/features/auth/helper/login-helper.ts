@@ -35,31 +35,8 @@ interface UpsertSession {
   userAgent: string;
 }
 
-type GetRefreshTokenParams = Pick<UpsertSession, "userId" | "userAgent" | "ip">;
-
-// DOC: get existing refresh token from database
-async function getRefreshToken({ ip, userAgent, userId }: GetRefreshTokenParams) {
-  return await prisma.sessions.findFirst({
-    where: { userId, ipAddress: ip, userAgent, revoked: false },
-  });
-}
-
-type UpdateRefreshTokenParams = Pick<UpsertSession, "sessionId" | "refreshToken">;
-
-// DOC: update existing refresh token
-async function updateRefreshToken({ refreshToken, sessionId }: UpdateRefreshTokenParams) {
-  const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MILLISECONDS);
-
-  await prisma.sessions.update({
-    where: { id: sessionId },
-    data: { refreshToken, expiresAt },
-  });
-}
-
-type CreateRefreshTokenParams = UpsertSession;
-
-// DOC: create new refresh token
-async function createRefreshToken({
+// DOC: upsert refresh token
+async function upsertRefreshToken({
   sessionId,
   refreshToken,
   userId,
@@ -69,23 +46,56 @@ async function createRefreshToken({
   countryRegion,
   region,
   userAgent,
-}: CreateRefreshTokenParams) {
+}: UpsertSession) {
   const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MILLISECONDS);
 
-  return prisma.sessions.create({
-    data: {
+  return prisma.sessions.upsert({
+    where: {
+      userId_userAgent_ipAddress: {
+        userId,
+        userAgent,
+        ipAddress: ip,
+      },
+    },
+    update: {
+      refreshToken,
+      expiresAt,
+      revoked: false,
+      city,
+      country,
+      countryRegion,
+      region,
+    },
+    create: {
+      id: sessionId,
       userId,
       refreshToken,
       ipAddress: ip,
       userAgent,
       expiresAt,
-      id: sessionId,
       city,
       country,
       countryRegion,
       region,
     },
   });
+}
+
+type GetSessionId = Pick<UpsertSession, "userId" | "userAgent" | "ip">;
+
+// DOC: get existing session id
+async function getSessionId({ ip, userAgent, userId }: GetSessionId) {
+  const session = await prisma.sessions.findUnique({
+    where: {
+      userId_userAgent_ipAddress: {
+        userId,
+        userAgent,
+        ipAddress: ip,
+      },
+    },
+    select: { id: true },
+  });
+  return session ? session.id : null;
 }
 
 // DOC: set auth cookies in client browser
@@ -115,7 +125,6 @@ export {
   validateLoginForm,
   validateUser,
   setAuthCookies,
-  getRefreshToken,
-  updateRefreshToken,
-  createRefreshToken,
+  upsertRefreshToken,
+  getSessionId,
 };

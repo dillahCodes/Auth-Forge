@@ -1,8 +1,7 @@
 import {
-  createRefreshToken,
-  getRefreshToken,
+  getSessionId,
   setAuthCookies,
-  updateRefreshToken,
+  upsertRefreshToken,
   validateLoginForm,
   validateUser,
 } from "@/features/auth/helper/login-helper";
@@ -22,7 +21,7 @@ export async function POST(req: Request) {
     const { ip, userAgent } = getClientInfo(req);
     const { city, country, countryRegion, region } = getClientLocation(req);
 
-    // Validate Request
+    // Validate login form
     const parsed = await validateLoginForm(req);
     if (!parsed.success) {
       return badRequest("Please check your input", parsed.error.flatten().fieldErrors);
@@ -30,7 +29,7 @@ export async function POST(req: Request) {
 
     const { email, password } = parsed.data;
 
-    // Validate User
+    // Validate user
     const user = await validateUser(email, password);
     if (!user) {
       return unauthorized("Please check your input", {
@@ -39,31 +38,14 @@ export async function POST(req: Request) {
       });
     }
 
-    const userData = { userId: user.id, name: user.name, email: user.email };
+    // Generate session & tokens
+    const resultgetSessionId = await getSessionId({ ip, userAgent, userId: user.id });
+    const sessionId = resultgetSessionId ? resultgetSessionId : uuidv4();
 
-    // check existing session
-    const isExistingSession = await getRefreshToken({ ip, userId: user.id, userAgent });
-
-    if (isExistingSession) {
-      const sessionId = isExistingSession.id;
-
-      // create new access token and refresh token
-      const accessToken = await signAccessToken({ userId: user.id, sessionId });
-      const refreshToken = await signRefreshToken({ sessionId });
-      await updateRefreshToken({ refreshToken, sessionId });
-
-      const response = sendSuccess(userData, "Login successfully");
-      setAuthCookies(response, accessToken, refreshToken);
-      return response;
-    }
-
-    // Generate Tokens if no existing session
-    const sessionId = uuidv4();
     const accessToken = await signAccessToken({ userId: user.id, sessionId });
     const refreshToken = await signRefreshToken({ sessionId });
 
-    // insert new session
-    await createRefreshToken({
+    await upsertRefreshToken({
       sessionId,
       refreshToken,
       userId: user.id,
@@ -75,7 +57,7 @@ export async function POST(req: Request) {
       userAgent,
     });
 
-    // Send Response
+    const userData = { userId: user.id, name: user.name, email: user.email };
     const response = sendSuccess(userData, "Login successfully");
     setAuthCookies(response, accessToken, refreshToken);
     return response;
