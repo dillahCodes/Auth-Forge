@@ -1,4 +1,5 @@
 import { parseDevice } from "@/lib/parse-device";
+import { prisma } from "@/lib/prisma";
 
 interface Sessions {
   id: string;
