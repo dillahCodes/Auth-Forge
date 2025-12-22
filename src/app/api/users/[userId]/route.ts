@@ -1,9 +1,10 @@
-import { decrypt, getCookie } from "@/features/auth/lib/sessions";
+import requiredAuth from "@/features/auth/guard/require-auth";
 import {
+  AppError,
   badRequest,
+  errorResponse,
+  internalServerError,
   sendSuccess,
-  serverError,
-  unauthorized,
 } from "@/helper/response-helper";
 import { prisma } from "@/lib/prisma";
 
@@ -11,19 +12,11 @@ type Params = RouteContext<"/api/users/[userId]">;
 
 export async function GET(req: Request, { params }: Params) {
   try {
+    await requiredAuth(req);
+
     // Validate Request
     const { userId } = await params;
     if (!userId) return badRequest("No user id found");
-
-    // Validate Token
-    const accessToken = getCookie(req, "access_token");
-    if (!accessToken) return badRequest("Missing access token in cookies");
-
-    // Validate Token
-    const payload = await decrypt(accessToken);
-    if (!payload?.userId || typeof payload.userId !== "string") {
-      return unauthorized("Invalid access token");
-    }
 
     // Get User
     const user = await prisma.user.findUnique({
@@ -34,7 +27,7 @@ export async function GET(req: Request, { params }: Params) {
 
     return sendSuccess(user, "Get user successfully");
   } catch (error) {
-    console.error("Get User Error:", error);
-    return serverError(error);
+    if (error instanceof AppError) return errorResponse(error);
+    return internalServerError(error);
   }
 }

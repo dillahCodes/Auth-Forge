@@ -1,34 +1,27 @@
+import requiredAuth from "@/features/auth/guard/require-auth";
 import { sessionsMapping } from "@/features/auth/helper/sessions-helper";
-import { decrypt, getCookie } from "@/features/auth/lib/sessions";
 import {
+  AppError,
   badRequest,
+  errorResponse,
+  internalServerError,
   sendSuccess,
-  serverError,
-  unauthorized,
 } from "@/helper/response-helper";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
   try {
-    // Validate Request
-    const refreshToken = getCookie(req, "access_token");
-    if (!refreshToken) return badRequest("No access token found");
-
-    // validate token signature
-    const payload = await decrypt(refreshToken);
-    if (!payload?.userId || typeof payload.userId !== "string") {
-      return unauthorized("Invalid refresh token");
-    }
+    const { sessionid, id: userId } = await requiredAuth(req);
 
     const sessions = await prisma.sessions.findMany({
-      where: { userId: payload.userId, revoked: false },
+      where: { userId, revoked: false },
     });
     if (!sessions.length) return badRequest("No active sessions found");
 
-    const mappedSessions = sessionsMapping(sessions, payload.sessionId as string);
+    const mappedSessions = sessionsMapping(sessions, sessionid);
     return sendSuccess(mappedSessions, "Get Sessions successfully");
   } catch (error) {
-    console.error("Get Sessions Error:", error);
-    return serverError(error);
+    if (error instanceof AppError) return errorResponse(error);
+    return internalServerError(error);
   }
 }
