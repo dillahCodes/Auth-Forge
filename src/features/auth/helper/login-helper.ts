@@ -98,6 +98,17 @@ async function getSessionId({ ip, userAgent, userId }: GetSessionId) {
   return session ? session.id : null;
 }
 
+type GetRevokedSession = Pick<UpsertSession, "userId" | "userAgent" | "ip">;
+
+// DOC: get revoked sessions
+async function getRevokedSession({ ip, userAgent, userId }: GetRevokedSession) {
+  const session = await prisma.sessions.findUnique({
+    where: { userId_userAgent_ipAddress: { userId, userAgent, ipAddress: ip } },
+    select: { revoked: true },
+  });
+  return Boolean(session?.revoked);
+}
+
 // DOC: set auth cookies in client browser
 function setAuthCookies(
   response: NextResponse,
@@ -127,4 +138,5 @@ export {
   setAuthCookies,
   upsertRefreshToken,
   getSessionId,
+  getRevokedSession,
 };
