@@ -13,8 +13,8 @@ export interface Session {
 }
 
 export interface Location {
-  city: string;
-  country: string;
-  countryRegion: string;
-  region: string;
+  city: string | null;
+  country: string | null;
+  countryRegion: string | null;
+  region: string | null;
 }
