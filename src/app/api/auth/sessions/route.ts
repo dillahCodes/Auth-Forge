@@ -1,8 +1,7 @@
-import requiredAuth from "@/features/auth/guard/require-auth";
+import { AppError } from "@/errors/app-error";
+import requiredAccessToken from "@/features/auth/guard/required-access-token";
 import { sessionsMapping } from "@/features/auth/helper/sessions-helper";
 import {
-  AppError,
-  badRequest,
   errorResponse,
   internalServerError,
   sendSuccess,
@@ -11,15 +10,18 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
   try {
-    const { sessionid, id: userId } = await requiredAuth(req);
+    const { sessionId, userId } = await requiredAccessToken(req);
 
     const sessions = await prisma.sessions.findMany({
       where: { userId, revoked: false },
     });
-    if (!sessions.length) return badRequest("No active sessions found");
 
-    const mappedSessions = sessionsMapping(sessions, sessionid);
-    return sendSuccess(mappedSessions, "Get Sessions successfully");
+    const mappedSessions = sessionsMapping(sessions, sessionId);
+
+    const message = sessions.length
+      ? "Get Sessions successfully"
+      : "No active sessions found";
+    return sendSuccess(mappedSessions, message);
   } catch (error) {
     if (error instanceof AppError) return errorResponse(error);
     return internalServerError(error);
