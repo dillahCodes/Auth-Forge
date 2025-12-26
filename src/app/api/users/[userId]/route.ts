@@ -1,7 +1,7 @@
-import requiredAuth from "@/features/auth/guard/require-auth";
+import { AppError } from "@/errors/app-error";
+import { ResourceNotFound, ResourceParamsInvalid } from "@/errors/resource-error";
+import requiredAccessToken from "@/features/auth/guard/required-access-token";
 import {
-  AppError,
-  badRequest,
   errorResponse,
   internalServerError,
   sendSuccess,
@@ -12,18 +12,18 @@ type Params = RouteContext<"/api/users/[userId]">;
 
 export async function GET(req: Request, { params }: Params) {
   try {
-    await requiredAuth(req);
+    await requiredAccessToken(req);
 
     // Validate Request
     const { userId } = await params;
-    if (!userId) return badRequest("No user id found");
+    if (!userId) throw new ResourceParamsInvalid("parameter userId is required");
 
     // Get User
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, email: true, name: true },
     });
-    if (!user) return badRequest("User not found");
+    if (!user) throw new ResourceNotFound(`User With id ${userId} not found`);
 
     return sendSuccess(user, "Get user successfully");
   } catch (error) {
