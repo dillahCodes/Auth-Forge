@@ -1,21 +1,30 @@
+import { AppError } from "@/errors/app-error";
+import { AuthInvalidCredentials } from "@/errors/auth-error";
+import { ResourceConflict } from "@/errors/resource-error";
 import { validateRegisterForm } from "@/features/auth/helper/register-helper";
-import { badRequest, sendSuccess, serverError } from "@/helper/response-helper";
-import bcrypt from "bcrypt";
+import {
+  errorResponse,
+  internalServerError,
+  sendSuccess,
+} from "@/helper/response-helper";
 import { prisma } from "@/lib/prisma";
+import bcrypt from "bcrypt";
 
 export async function POST(req: Request) {
   try {
     // Parse & validate request
     const parsed = await validateRegisterForm(req);
+
     if (!parsed.success) {
-      return badRequest("Please check your input", parsed.error.flatten().fieldErrors);
+      const errors = parsed.error.flatten().fieldErrors;
+      throw new AuthInvalidCredentials(errors);
     }
 
     const { name, email, password } = parsed.data;
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser) return badRequest("User already exists");
+    if (existingUser) throw new ResourceConflict("User already exists");
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -26,12 +35,10 @@ export async function POST(req: Request) {
     });
 
     // Return success
-    return sendSuccess(
-      { userId: user.id, name: user.name, email: user.email },
-      "Register successfully"
-    );
+    const userData = { userId: user.id, name: user.name, email: user.email };
+    return sendSuccess(userData, "Register successfully");
   } catch (error) {
-    console.error("Register Error:", error);
-    return serverError(error);
+    if (error instanceof AppError) return errorResponse(error);
+    return internalServerError(error);
   }
 }
