@@ -1,3 +1,5 @@
+import "server-only";
+
 const toNumberOrNull = (value?: string | null): number | null => {
   if (!value) return null;
   const parsed = Number(value);
@@ -9,6 +11,7 @@ const toStringOrNull = (value?: string | null): string | null => {
   return value;
 };
 
+// TODO: implement https://ipwho.is/
 const getClientLocation = (req: Request) => {
   const countryRegion = req.headers.get("x-vercel-ip-continent");
   const country = req.headers.get("x-vercel-ip-country");

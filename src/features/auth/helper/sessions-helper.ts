@@ -1,4 +1,4 @@
-"server-only";
+import "server-only";
 import { parseDevice } from "@/lib/parse-device";
 
 interface Sessions {
