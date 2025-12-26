@@ -91,6 +91,8 @@ export const SessionsScalarFieldEnum = {
   country: 'country',
   countryRegion: 'countryRegion',
   region: 'region',
+  latitude: 'latitude',
+  longitude: 'longitude',
   replacedBy: 'replacedBy',
   revoked: 'revoked',
   createdAt: 'createdAt',

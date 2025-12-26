@@ -48,6 +48,8 @@ export async function createSession({
   countryRegion,
   region,
   userAgent,
+  latitude,
+  longitude,
 }: CreateSession) {
   const expiresAt = expiresInMiliseconds(ACCESS_TOKEN_EXPIRES_SECONDS);
 
@@ -63,6 +65,8 @@ export async function createSession({
       country,
       countryRegion,
       region,
+      latitude,
+      longitude,
     },
   });
 }
