@@ -18,6 +18,7 @@ interface CreateSession {
   country: string | null;
   countryRegion: string | null;
   region: string | null;
+  continent: string | null;
   latitude: number | null;
   longitude: number | null;
   userAgent: string;
@@ -47,6 +48,7 @@ export async function createSession({
   country,
   countryRegion,
   region,
+  continent,
   userAgent,
   latitude,
   longitude,
@@ -67,6 +69,7 @@ export async function createSession({
       region,
       latitude,
       longitude,
+      continent,
     },
   });
 }

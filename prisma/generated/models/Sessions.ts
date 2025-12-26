@@ -42,9 +42,10 @@ export type SessionsMinAggregateOutputType = {
   refreshToken: string | null
   userAgent: string | null
   ipAddress: string | null
-  city: string | null
+  continent: string | null
   country: string | null
   countryRegion: string | null
+  city: string | null
   region: string | null
   latitude: number | null
   longitude: number | null
@@ -60,9 +61,10 @@ export type SessionsMaxAggregateOutputType = {
   refreshToken: string | null
   userAgent: string | null
   ipAddress: string | null
-  city: string | null
+  continent: string | null
   country: string | null
   countryRegion: string | null
+  city: string | null
   region: string | null
   latitude: number | null
   longitude: number | null
@@ -78,9 +80,10 @@ export type SessionsCountAggregateOutputType = {
   refreshToken: number
   userAgent: number
   ipAddress: number
-  city: number
+  continent: number
   country: number
   countryRegion: number
+  city: number
   region: number
   latitude: number
   longitude: number
@@ -108,9 +111,10 @@ export type SessionsMinAggregateInputType = {
   refreshToken?: true
   userAgent?: true
   ipAddress?: true
-  city?: true
+  continent?: true
   country?: true
   countryRegion?: true
+  city?: true
   region?: true
   latitude?: true
   longitude?: true
@@ -126,9 +130,10 @@ export type SessionsMaxAggregateInputType = {
   refreshToken?: true
   userAgent?: true
   ipAddress?: true
-  city?: true
+  continent?: true
   country?: true
   countryRegion?: true
+  city?: true
   region?: true
   latitude?: true
   longitude?: true
@@ -144,9 +149,10 @@ export type SessionsCountAggregateInputType = {
   refreshToken?: true
   userAgent?: true
   ipAddress?: true
-  city?: true
+  continent?: true
   country?: true
   countryRegion?: true
+  city?: true
   region?: true
   latitude?: true
   longitude?: true
@@ -249,9 +255,10 @@ export type SessionsGroupByOutputType = {
   refreshToken: string
   userAgent: string | null
   ipAddress: string | null
-  city: string | null
+  continent: string | null
   country: string | null
   countryRegion: string | null
+  city: string | null
   region: string | null
   latitude: number | null
   longitude: number | null
@@ -290,9 +297,10 @@ export type SessionsWhereInput = {
   refreshToken?: Prisma.StringFilter<"Sessions"> | string
   userAgent?: Prisma.StringNullableFilter<"Sessions"> | string | null
   ipAddress?: Prisma.StringNullableFilter<"Sessions"> | string | null
-  city?: Prisma.StringNullableFilter<"Sessions"> | string | null
+  continent?: Prisma.StringNullableFilter<"Sessions"> | string | null
   country?: Prisma.StringNullableFilter<"Sessions"> | string | null
   countryRegion?: Prisma.StringNullableFilter<"Sessions"> | string | null
+  city?: Prisma.StringNullableFilter<"Sessions"> | string | null
   region?: Prisma.StringNullableFilter<"Sessions"> | string | null
   latitude?: Prisma.FloatNullableFilter<"Sessions"> | number | null
   longitude?: Prisma.FloatNullableFilter<"Sessions"> | number | null
@@ -309,9 +317,10 @@ export type SessionsOrderByWithRelationInput = {
   refreshToken?: Prisma.SortOrder
   userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
   ipAddress?: Prisma.SortOrderInput | Prisma.SortOrder
-  city?: Prisma.SortOrderInput | Prisma.SortOrder
+  continent?: Prisma.SortOrderInput | Prisma.SortOrder
   country?: Prisma.SortOrderInput | Prisma.SortOrder
   countryRegion?: Prisma.SortOrderInput | Prisma.SortOrder
+  city?: Prisma.SortOrderInput | Prisma.SortOrder
   region?: Prisma.SortOrderInput | Prisma.SortOrder
   latitude?: Prisma.SortOrderInput | Prisma.SortOrder
   longitude?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -331,9 +340,10 @@ export type SessionsWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.StringFilter<"Sessions"> | string
   userAgent?: Prisma.StringNullableFilter<"Sessions"> | string | null
   ipAddress?: Prisma.StringNullableFilter<"Sessions"> | string | null
-  city?: Prisma.StringNullableFilter<"Sessions"> | string | null
+  continent?: Prisma.StringNullableFilter<"Sessions"> | string | null
   country?: Prisma.StringNullableFilter<"Sessions"> | string | null
   countryRegion?: Prisma.StringNullableFilter<"Sessions"> | string | null
+  city?: Prisma.StringNullableFilter<"Sessions"> | string | null
   region?: Prisma.StringNullableFilter<"Sessions"> | string | null
   latitude?: Prisma.FloatNullableFilter<"Sessions"> | number | null
   longitude?: Prisma.FloatNullableFilter<"Sessions"> | number | null
@@ -350,9 +360,10 @@ export type SessionsOrderByWithAggregationInput = {
   refreshToken?: Prisma.SortOrder
   userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
   ipAddress?: Prisma.SortOrderInput | Prisma.SortOrder
-  city?: Prisma.SortOrderInput | Prisma.SortOrder
+  continent?: Prisma.SortOrderInput | Prisma.SortOrder
   country?: Prisma.SortOrderInput | Prisma.SortOrder
   countryRegion?: Prisma.SortOrderInput | Prisma.SortOrder
+  city?: Prisma.SortOrderInput | Prisma.SortOrder
   region?: Prisma.SortOrderInput | Prisma.SortOrder
   latitude?: Prisma.SortOrderInput | Prisma.SortOrder
   longitude?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -376,9 +387,10 @@ export type SessionsScalarWhereWithAggregatesInput = {
   refreshToken?: Prisma.StringWithAggregatesFilter<"Sessions"> | string
   userAgent?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   ipAddress?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
-  city?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
+  continent?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   country?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   countryRegion?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
+  city?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   region?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   latitude?: Prisma.FloatNullableWithAggregatesFilter<"Sessions"> | number | null
   longitude?: Prisma.FloatNullableWithAggregatesFilter<"Sessions"> | number | null
@@ -393,9 +405,10 @@ export type SessionsCreateInput = {
   refreshToken: string
   userAgent?: string | null
   ipAddress?: string | null
-  city?: string | null
+  continent?: string | null
   country?: string | null
   countryRegion?: string | null
+  city?: string | null
   region?: string | null
   latitude?: number | null
   longitude?: number | null
@@ -412,9 +425,10 @@ export type SessionsUncheckedCreateInput = {
   refreshToken: string
   userAgent?: string | null
   ipAddress?: string | null
-  city?: string | null
+  continent?: string | null
   country?: string | null
   countryRegion?: string | null
+  city?: string | null
   region?: string | null
   latitude?: number | null
   longitude?: number | null
@@ -429,9 +443,10 @@ export type SessionsUpdateInput = {
   refreshToken?: Prisma.StringFieldUpdateOperationsInput | string
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  continent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -448,9 +463,10 @@ export type SessionsUncheckedUpdateInput = {
   refreshToken?: Prisma.StringFieldUpdateOperationsInput | string
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  continent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -466,9 +482,10 @@ export type SessionsCreateManyInput = {
   refreshToken: string
   userAgent?: string | null
   ipAddress?: string | null
-  city?: string | null
+  continent?: string | null
   country?: string | null
   countryRegion?: string | null
+  city?: string | null
   region?: string | null
   latitude?: number | null
   longitude?: number | null
@@ -483,9 +500,10 @@ export type SessionsUpdateManyMutationInput = {
   refreshToken?: Prisma.StringFieldUpdateOperationsInput | string
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  continent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -501,9 +519,10 @@ export type SessionsUncheckedUpdateManyInput = {
   refreshToken?: Prisma.StringFieldUpdateOperationsInput | string
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  continent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -529,9 +548,10 @@ export type SessionsCountOrderByAggregateInput = {
   refreshToken?: Prisma.SortOrder
   userAgent?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrder
-  city?: Prisma.SortOrder
+  continent?: Prisma.SortOrder
   country?: Prisma.SortOrder
   countryRegion?: Prisma.SortOrder
+  city?: Prisma.SortOrder
   region?: Prisma.SortOrder
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
@@ -552,9 +572,10 @@ export type SessionsMaxOrderByAggregateInput = {
   refreshToken?: Prisma.SortOrder
   userAgent?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrder
-  city?: Prisma.SortOrder
+  continent?: Prisma.SortOrder
   country?: Prisma.SortOrder
   countryRegion?: Prisma.SortOrder
+  city?: Prisma.SortOrder
   region?: Prisma.SortOrder
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
@@ -570,9 +591,10 @@ export type SessionsMinOrderByAggregateInput = {
   refreshToken?: Prisma.SortOrder
   userAgent?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrder
-  city?: Prisma.SortOrder
+  continent?: Prisma.SortOrder
   country?: Prisma.SortOrder
   countryRegion?: Prisma.SortOrder
+  city?: Prisma.SortOrder
   region?: Prisma.SortOrder
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
@@ -650,9 +672,10 @@ export type SessionsCreateWithoutUserInput = {
   refreshToken: string
   userAgent?: string | null
   ipAddress?: string | null
-  city?: string | null
+  continent?: string | null
   country?: string | null
   countryRegion?: string | null
+  city?: string | null
   region?: string | null
   latitude?: number | null
   longitude?: number | null
@@ -667,9 +690,10 @@ export type SessionsUncheckedCreateWithoutUserInput = {
   refreshToken: string
   userAgent?: string | null
   ipAddress?: string | null
-  city?: string | null
+  continent?: string | null
   country?: string | null
   countryRegion?: string | null
+  city?: string | null
   region?: string | null
   latitude?: number | null
   longitude?: number | null
@@ -714,9 +738,10 @@ export type SessionsScalarWhereInput = {
   refreshToken?: Prisma.StringFilter<"Sessions"> | string
   userAgent?: Prisma.StringNullableFilter<"Sessions"> | string | null
   ipAddress?: Prisma.StringNullableFilter<"Sessions"> | string | null
-  city?: Prisma.StringNullableFilter<"Sessions"> | string | null
+  continent?: Prisma.StringNullableFilter<"Sessions"> | string | null
   country?: Prisma.StringNullableFilter<"Sessions"> | string | null
   countryRegion?: Prisma.StringNullableFilter<"Sessions"> | string | null
+  city?: Prisma.StringNullableFilter<"Sessions"> | string | null
   region?: Prisma.StringNullableFilter<"Sessions"> | string | null
   latitude?: Prisma.FloatNullableFilter<"Sessions"> | number | null
   longitude?: Prisma.FloatNullableFilter<"Sessions"> | number | null
@@ -731,9 +756,10 @@ export type SessionsCreateManyUserInput = {
   refreshToken: string
   userAgent?: string | null
   ipAddress?: string | null
-  city?: string | null
+  continent?: string | null
   country?: string | null
   countryRegion?: string | null
+  city?: string | null
   region?: string | null
   latitude?: number | null
   longitude?: number | null
@@ -748,9 +774,10 @@ export type SessionsUpdateWithoutUserInput = {
   refreshToken?: Prisma.StringFieldUpdateOperationsInput | string
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  continent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -765,9 +792,10 @@ export type SessionsUncheckedUpdateWithoutUserInput = {
   refreshToken?: Prisma.StringFieldUpdateOperationsInput | string
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  continent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -782,9 +810,10 @@ export type SessionsUncheckedUpdateManyWithoutUserInput = {
   refreshToken?: Prisma.StringFieldUpdateOperationsInput | string
   userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  continent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -802,9 +831,10 @@ export type SessionsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   refreshToken?: boolean
   userAgent?: boolean
   ipAddress?: boolean
-  city?: boolean
+  continent?: boolean
   country?: boolean
   countryRegion?: boolean
+  city?: boolean
   region?: boolean
   latitude?: boolean
   longitude?: boolean
@@ -821,9 +851,10 @@ export type SessionsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   refreshToken?: boolean
   userAgent?: boolean
   ipAddress?: boolean
-  city?: boolean
+  continent?: boolean
   country?: boolean
   countryRegion?: boolean
+  city?: boolean
   region?: boolean
   latitude?: boolean
   longitude?: boolean
@@ -840,9 +871,10 @@ export type SessionsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   refreshToken?: boolean
   userAgent?: boolean
   ipAddress?: boolean
-  city?: boolean
+  continent?: boolean
   country?: boolean
   countryRegion?: boolean
+  city?: boolean
   region?: boolean
   latitude?: boolean
   longitude?: boolean
@@ -859,9 +891,10 @@ export type SessionsSelectScalar = {
   refreshToken?: boolean
   userAgent?: boolean
   ipAddress?: boolean
-  city?: boolean
+  continent?: boolean
   country?: boolean
   countryRegion?: boolean
+  city?: boolean
   region?: boolean
   latitude?: boolean
   longitude?: boolean
@@ -871,7 +904,7 @@ export type SessionsSelectScalar = {
   expiresAt?: boolean
 }
 
-export type SessionsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "refreshToken" | "userAgent" | "ipAddress" | "city" | "country" | "countryRegion" | "region" | "latitude" | "longitude" | "replacedBy" | "revoked" | "createdAt" | "expiresAt", ExtArgs["result"]["sessions"]>
+export type SessionsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "refreshToken" | "userAgent" | "ipAddress" | "continent" | "country" | "countryRegion" | "city" | "region" | "latitude" | "longitude" | "replacedBy" | "revoked" | "createdAt" | "expiresAt", ExtArgs["result"]["sessions"]>
 export type SessionsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -893,9 +926,10 @@ export type $SessionsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     refreshToken: string
     userAgent: string | null
     ipAddress: string | null
-    city: string | null
+    continent: string | null
     country: string | null
     countryRegion: string | null
+    city: string | null
     region: string | null
     latitude: number | null
     longitude: number | null
@@ -1332,9 +1366,10 @@ export interface SessionsFieldRefs {
   readonly refreshToken: Prisma.FieldRef<"Sessions", 'String'>
   readonly userAgent: Prisma.FieldRef<"Sessions", 'String'>
   readonly ipAddress: Prisma.FieldRef<"Sessions", 'String'>
-  readonly city: Prisma.FieldRef<"Sessions", 'String'>
+  readonly continent: Prisma.FieldRef<"Sessions", 'String'>
   readonly country: Prisma.FieldRef<"Sessions", 'String'>
   readonly countryRegion: Prisma.FieldRef<"Sessions", 'String'>
+  readonly city: Prisma.FieldRef<"Sessions", 'String'>
   readonly region: Prisma.FieldRef<"Sessions", 'String'>
   readonly latitude: Prisma.FieldRef<"Sessions", 'Float'>
   readonly longitude: Prisma.FieldRef<"Sessions", 'Float'>
