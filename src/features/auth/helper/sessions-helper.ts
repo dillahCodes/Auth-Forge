@@ -1,5 +1,5 @@
+"server-only";
 import { parseDevice } from "@/lib/parse-device";
-import { prisma } from "@/lib/prisma";
 
 interface Sessions {
   id: string;
@@ -31,7 +31,7 @@ const sessionsMapping = (data: Sessions[], currentSessionId: string) => {
       },
       isCurrent: session.id === currentSessionId,
       loggedInAt: session.createdAt,
-      status: session.revoked ? "Revoked" : "Active",
+      status: "Active",
     })),
   };
 

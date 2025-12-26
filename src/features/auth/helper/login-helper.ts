@@ -1,12 +1,27 @@
-import { prisma } from "@/lib/prisma";
+import "server-only";
 import {
   ACCESS_TOKEN_EXPIRES_SECONDS,
-  REFRESH_TOKEN_EXPIRES_MILLISECONDS,
   REFRESH_TOKEN_EXPIRES_SECONDS,
 } from "@/features/auth/lib/sessions";
 import { loginSchema } from "@/features/auth/schemas/loginSchema";
+import { expiresInMiliseconds } from "@/helper/expires-in-miliseconds";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import { NextResponse } from "next/server";
+
+interface CreateSession {
+  sessionId: string;
+  userId: string;
+  refreshToken: string;
+  ip: string | null;
+  city: string | null;
+  country: string | null;
+  countryRegion: string | null;
+  region: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  userAgent: string;
+}
 
 // DOC: validate login form
 async function validateLoginForm(req: Request) {
@@ -23,50 +38,21 @@ async function validateUser(email: string, password: string) {
   return isValid ? user : null;
 }
 
-interface UpsertSession {
-  sessionId: string;
-  userId: string;
-  refreshToken: string;
-  ip: string;
-  city: string;
-  country: string;
-  countryRegion: string;
-  region: string;
-  userAgent: string;
-}
-
-// DOC: upsert refresh token
-async function upsertRefreshToken({
+export async function createSession({
   sessionId,
-  refreshToken,
   userId,
+  refreshToken,
   ip,
   city,
   country,
   countryRegion,
   region,
   userAgent,
-}: UpsertSession) {
-  const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MILLISECONDS);
+}: CreateSession) {
+  const expiresAt = expiresInMiliseconds(ACCESS_TOKEN_EXPIRES_SECONDS);
 
-  return prisma.sessions.upsert({
-    where: {
-      userId_userAgent_ipAddress: {
-        userId,
-        userAgent,
-        ipAddress: ip,
-      },
-    },
-    update: {
-      refreshToken,
-      expiresAt,
-      revoked: false,
-      city,
-      country,
-      countryRegion,
-      region,
-    },
-    create: {
+  return prisma.sessions.create({
+    data: {
       id: sessionId,
       userId,
       refreshToken,
@@ -81,34 +67,6 @@ async function upsertRefreshToken({
   });
 }
 
-type GetSessionId = Pick<UpsertSession, "userId" | "userAgent" | "ip">;
-
-// DOC: get existing session id
-async function getSessionId({ ip, userAgent, userId }: GetSessionId) {
-  const session = await prisma.sessions.findUnique({
-    where: {
-      userId_userAgent_ipAddress: {
-        userId,
-        userAgent,
-        ipAddress: ip,
-      },
-    },
-    select: { id: true },
-  });
-  return session ? session.id : null;
-}
-
-type GetRevokedSession = Pick<UpsertSession, "userId" | "userAgent" | "ip">;
-
-// DOC: get revoked sessions
-async function getRevokedSession({ ip, userAgent, userId }: GetRevokedSession) {
-  const session = await prisma.sessions.findUnique({
-    where: { userId_userAgent_ipAddress: { userId, userAgent, ipAddress: ip } },
-    select: { revoked: true },
-  });
-  return Boolean(session?.revoked);
-}
-
 // DOC: set auth cookies in client browser
 function setAuthCookies(
   response: NextResponse,
@@ -118,7 +76,7 @@ function setAuthCookies(
   response.cookies.set("access_token", accessToken, {
     httpOnly: true,
     secure: true,
-    sameSite: "strict",
+    sameSite: "lax",
     path: "/",
     maxAge: ACCESS_TOKEN_EXPIRES_SECONDS,
   });
@@ -126,17 +84,10 @@ function setAuthCookies(
   response.cookies.set("refresh_token", refreshToken, {
     httpOnly: true,
     secure: true,
-    sameSite: "strict",
+    sameSite: "lax",
     path: "/",
     maxAge: REFRESH_TOKEN_EXPIRES_SECONDS,
   });
 }
 
-export {
-  validateLoginForm,
-  validateUser,
-  setAuthCookies,
-  upsertRefreshToken,
-  getSessionId,
-  getRevokedSession,
-};
+export { setAuthCookies, validateLoginForm, validateUser };
