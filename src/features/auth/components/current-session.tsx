@@ -1,7 +1,11 @@
 import { Activity } from "react";
 import { Session } from "../types/sessions";
 
-export default function CurrentSession({ currentSession }: { currentSession: Session | undefined }) {
+export default function CurrentSession({
+  currentSession,
+}: {
+  currentSession: Session | undefined;
+}) {
   return (
     <Activity name="Current Session" mode={currentSession ? "visible" : "hidden"}>
       <section className="border p-3 rounded-md">
@@ -9,7 +13,8 @@ export default function CurrentSession({ currentSession }: { currentSession: Ses
         <div className="text-sm border border-white p-2 rounded-sm">
           <p className="font-semibold">{currentSession?.device}</p>
           <p>
-            {currentSession?.location.city}, {currentSession?.location.country}
+            <span>{currentSession?.location.city || "Unknown City"}</span>,{" "}
+            <span>{currentSession?.location.country || "Unknown Country"}</span>
           </p>
           <p className="text-xs text-gray-500">
             Login at {new Date(currentSession?.loggedInAt || 0).toLocaleString()}

@@ -49,7 +49,8 @@ export default function OtherSessions({ isLoading, otherSessions }: OtherSession
               <div className="text-sm">
                 <p className="font-semibold">{session.device}</p>
                 <p>
-                  {session.location.city}, {session.location.country}
+                  <span>{session.location.city || "Unknown City"}</span>,{" "}
+                  <span>{session.location.country || "Unknown Country"}</span>
                 </p>
                 <p className="text-xs text-gray-500">
                   Login at {new Date(session.loggedInAt).toLocaleString()}
