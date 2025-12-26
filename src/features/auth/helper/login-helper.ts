@@ -53,7 +53,7 @@ export async function createSession({
   latitude,
   longitude,
 }: CreateSession) {
-  const expiresAt = expiresInMiliseconds(ACCESS_TOKEN_EXPIRES_SECONDS);
+  const expiresAt = expiresInMiliseconds(REFRESH_TOKEN_EXPIRES_SECONDS);
 
   return prisma.sessions.create({
     data: {
