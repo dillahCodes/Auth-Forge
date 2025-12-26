@@ -20,13 +20,15 @@ model Sessions {
   userId       String
   refreshToken String @unique
 
+  userAgent String?
+
   ipAddress     String?
   city          String?
   country       String?
   countryRegion String?
   region        String?
-
-  userAgent String?
+  latitude      Float?
+  longitude     Float?
 
   replacedBy String?
   revoked    Boolean  @default(false)
@@ -35,6 +37,5 @@ model Sessions {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, userAgent, ipAddress])
   @@index([userId])
 }

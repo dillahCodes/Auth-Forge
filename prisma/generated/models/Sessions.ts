@@ -28,12 +28,12 @@ export type SessionsMinAggregateOutputType = {
   id: string | null
   userId: string | null
   refreshToken: string | null
+  userAgent: string | null
   ipAddress: string | null
   city: string | null
   country: string | null
   countryRegion: string | null
   region: string | null
-  userAgent: string | null
   replacedBy: string | null
   revoked: boolean | null
   createdAt: Date | null
@@ -44,12 +44,12 @@ export type SessionsMaxAggregateOutputType = {
   id: string | null
   userId: string | null
   refreshToken: string | null
+  userAgent: string | null
   ipAddress: string | null
   city: string | null
   country: string | null
   countryRegion: string | null
   region: string | null
-  userAgent: string | null
   replacedBy: string | null
   revoked: boolean | null
   createdAt: Date | null
@@ -60,12 +60,12 @@ export type SessionsCountAggregateOutputType = {
   id: number
   userId: number
   refreshToken: number
+  userAgent: number
   ipAddress: number
   city: number
   country: number
   countryRegion: number
   region: number
-  userAgent: number
   replacedBy: number
   revoked: number
   createdAt: number
@@ -78,12 +78,12 @@ export type SessionsMinAggregateInputType = {
   id?: true
   userId?: true
   refreshToken?: true
+  userAgent?: true
   ipAddress?: true
   city?: true
   country?: true
   countryRegion?: true
   region?: true
-  userAgent?: true
   replacedBy?: true
   revoked?: true
   createdAt?: true
@@ -94,12 +94,12 @@ export type SessionsMaxAggregateInputType = {
   id?: true
   userId?: true
   refreshToken?: true
+  userAgent?: true
   ipAddress?: true
   city?: true
   country?: true
   countryRegion?: true
   region?: true
-  userAgent?: true
   replacedBy?: true
   revoked?: true
   createdAt?: true
@@ -110,12 +110,12 @@ export type SessionsCountAggregateInputType = {
   id?: true
   userId?: true
   refreshToken?: true
+  userAgent?: true
   ipAddress?: true
   city?: true
   country?: true
   countryRegion?: true
   region?: true
-  userAgent?: true
   replacedBy?: true
   revoked?: true
   createdAt?: true
@@ -199,12 +199,12 @@ export type SessionsGroupByOutputType = {
   id: string
   userId: string
   refreshToken: string
+  userAgent: string | null
   ipAddress: string | null
   city: string | null
   country: string | null
   countryRegion: string | null
   region: string | null
-  userAgent: string | null
   replacedBy: string | null
   revoked: boolean
   createdAt: Date
@@ -236,12 +236,12 @@ export type SessionsWhereInput = {
   id?: Prisma.StringFilter<"Sessions"> | string
   userId?: Prisma.StringFilter<"Sessions"> | string
   refreshToken?: Prisma.StringFilter<"Sessions"> | string
+  userAgent?: Prisma.StringNullableFilter<"Sessions"> | string | null
   ipAddress?: Prisma.StringNullableFilter<"Sessions"> | string | null
   city?: Prisma.StringNullableFilter<"Sessions"> | string | null
   country?: Prisma.StringNullableFilter<"Sessions"> | string | null
   countryRegion?: Prisma.StringNullableFilter<"Sessions"> | string | null
   region?: Prisma.StringNullableFilter<"Sessions"> | string | null
-  userAgent?: Prisma.StringNullableFilter<"Sessions"> | string | null
   replacedBy?: Prisma.StringNullableFilter<"Sessions"> | string | null
   revoked?: Prisma.BoolFilter<"Sessions"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Sessions"> | Date | string
@@ -253,12 +253,12 @@ export type SessionsOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   refreshToken?: Prisma.SortOrder
+  userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
   ipAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   city?: Prisma.SortOrderInput | Prisma.SortOrder
   country?: Prisma.SortOrderInput | Prisma.SortOrder
   countryRegion?: Prisma.SortOrderInput | Prisma.SortOrder
   region?: Prisma.SortOrderInput | Prisma.SortOrder
-  userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
   replacedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   revoked?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -269,34 +269,33 @@ export type SessionsOrderByWithRelationInput = {
 export type SessionsWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   refreshToken?: string
-  userId_userAgent_ipAddress?: Prisma.SessionsUserIdUserAgentIpAddressCompoundUniqueInput
   AND?: Prisma.SessionsWhereInput | Prisma.SessionsWhereInput[]
   OR?: Prisma.SessionsWhereInput[]
   NOT?: Prisma.SessionsWhereInput | Prisma.SessionsWhereInput[]
   userId?: Prisma.StringFilter<"Sessions"> | string
+  userAgent?: Prisma.StringNullableFilter<"Sessions"> | string | null
   ipAddress?: Prisma.StringNullableFilter<"Sessions"> | string | null
   city?: Prisma.StringNullableFilter<"Sessions"> | string | null
   country?: Prisma.StringNullableFilter<"Sessions"> | string | null
   countryRegion?: Prisma.StringNullableFilter<"Sessions"> | string | null
   region?: Prisma.StringNullableFilter<"Sessions"> | string | null
-  userAgent?: Prisma.StringNullableFilter<"Sessions"> | string | null
   replacedBy?: Prisma.StringNullableFilter<"Sessions"> | string | null
   revoked?: Prisma.BoolFilter<"Sessions"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Sessions"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"Sessions"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-}, "id" | "refreshToken" | "userId_userAgent_ipAddress">
+}, "id" | "refreshToken">
 
 export type SessionsOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   refreshToken?: Prisma.SortOrder
+  userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
   ipAddress?: Prisma.SortOrderInput | Prisma.SortOrder
   city?: Prisma.SortOrderInput | Prisma.SortOrder
   country?: Prisma.SortOrderInput | Prisma.SortOrder
   countryRegion?: Prisma.SortOrderInput | Prisma.SortOrder
   region?: Prisma.SortOrderInput | Prisma.SortOrder
-  userAgent?: Prisma.SortOrderInput | Prisma.SortOrder
   replacedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   revoked?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -313,12 +312,12 @@ export type SessionsScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Sessions"> | string
   userId?: Prisma.StringWithAggregatesFilter<"Sessions"> | string
   refreshToken?: Prisma.StringWithAggregatesFilter<"Sessions"> | string
+  userAgent?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   ipAddress?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   city?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   country?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   countryRegion?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   region?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
-  userAgent?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   replacedBy?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   revoked?: Prisma.BoolWithAggregatesFilter<"Sessions"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Sessions"> | Date | string
@@ -328,12 +327,12 @@ export type SessionsScalarWhereWithAggregatesInput = {
 export type SessionsCreateInput = {
   id?: string
   refreshToken: string
+  userAgent?: string | null
   ipAddress?: string | null
   city?: string | null
   country?: string | null
   countryRegion?: string | null
   region?: string | null
-  userAgent?: string | null
   replacedBy?: string | null
   revoked?: boolean
   createdAt?: Date | string
@@ -345,12 +344,12 @@ export type SessionsUncheckedCreateInput = {
   id?: string
   userId: string
   refreshToken: string
+  userAgent?: string | null
   ipAddress?: string | null
   city?: string | null
   country?: string | null
   countryRegion?: string | null
   region?: string | null
-  userAgent?: string | null
   replacedBy?: string | null
   revoked?: boolean
   createdAt?: Date | string
@@ -360,12 +359,12 @@ export type SessionsUncheckedCreateInput = {
 export type SessionsUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   refreshToken?: Prisma.StringFieldUpdateOperationsInput | string
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replacedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -377,12 +376,12 @@ export type SessionsUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   refreshToken?: Prisma.StringFieldUpdateOperationsInput | string
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replacedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -393,12 +392,12 @@ export type SessionsCreateManyInput = {
   id?: string
   userId: string
   refreshToken: string
+  userAgent?: string | null
   ipAddress?: string | null
   city?: string | null
   country?: string | null
   countryRegion?: string | null
   region?: string | null
-  userAgent?: string | null
   replacedBy?: string | null
   revoked?: boolean
   createdAt?: Date | string
@@ -408,12 +407,12 @@ export type SessionsCreateManyInput = {
 export type SessionsUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   refreshToken?: Prisma.StringFieldUpdateOperationsInput | string
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replacedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -424,12 +423,12 @@ export type SessionsUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   refreshToken?: Prisma.StringFieldUpdateOperationsInput | string
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replacedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -446,22 +445,16 @@ export type SessionsOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type SessionsUserIdUserAgentIpAddressCompoundUniqueInput = {
-  userId: string
-  userAgent: string
-  ipAddress: string
-}
-
 export type SessionsCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   refreshToken?: Prisma.SortOrder
+  userAgent?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrder
   city?: Prisma.SortOrder
   country?: Prisma.SortOrder
   countryRegion?: Prisma.SortOrder
   region?: Prisma.SortOrder
-  userAgent?: Prisma.SortOrder
   replacedBy?: Prisma.SortOrder
   revoked?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -472,12 +465,12 @@ export type SessionsMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   refreshToken?: Prisma.SortOrder
+  userAgent?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrder
   city?: Prisma.SortOrder
   country?: Prisma.SortOrder
   countryRegion?: Prisma.SortOrder
   region?: Prisma.SortOrder
-  userAgent?: Prisma.SortOrder
   replacedBy?: Prisma.SortOrder
   revoked?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -488,12 +481,12 @@ export type SessionsMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   refreshToken?: Prisma.SortOrder
+  userAgent?: Prisma.SortOrder
   ipAddress?: Prisma.SortOrder
   city?: Prisma.SortOrder
   country?: Prisma.SortOrder
   countryRegion?: Prisma.SortOrder
   region?: Prisma.SortOrder
-  userAgent?: Prisma.SortOrder
   replacedBy?: Prisma.SortOrder
   revoked?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -553,12 +546,12 @@ export type DateTimeFieldUpdateOperationsInput = {
 export type SessionsCreateWithoutUserInput = {
   id?: string
   refreshToken: string
+  userAgent?: string | null
   ipAddress?: string | null
   city?: string | null
   country?: string | null
   countryRegion?: string | null
   region?: string | null
-  userAgent?: string | null
   replacedBy?: string | null
   revoked?: boolean
   createdAt?: Date | string
@@ -568,12 +561,12 @@ export type SessionsCreateWithoutUserInput = {
 export type SessionsUncheckedCreateWithoutUserInput = {
   id?: string
   refreshToken: string
+  userAgent?: string | null
   ipAddress?: string | null
   city?: string | null
   country?: string | null
   countryRegion?: string | null
   region?: string | null
-  userAgent?: string | null
   replacedBy?: string | null
   revoked?: boolean
   createdAt?: Date | string
@@ -613,12 +606,12 @@ export type SessionsScalarWhereInput = {
   id?: Prisma.StringFilter<"Sessions"> | string
   userId?: Prisma.StringFilter<"Sessions"> | string
   refreshToken?: Prisma.StringFilter<"Sessions"> | string
+  userAgent?: Prisma.StringNullableFilter<"Sessions"> | string | null
   ipAddress?: Prisma.StringNullableFilter<"Sessions"> | string | null
   city?: Prisma.StringNullableFilter<"Sessions"> | string | null
   country?: Prisma.StringNullableFilter<"Sessions"> | string | null
   countryRegion?: Prisma.StringNullableFilter<"Sessions"> | string | null
   region?: Prisma.StringNullableFilter<"Sessions"> | string | null
-  userAgent?: Prisma.StringNullableFilter<"Sessions"> | string | null
   replacedBy?: Prisma.StringNullableFilter<"Sessions"> | string | null
   revoked?: Prisma.BoolFilter<"Sessions"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Sessions"> | Date | string
@@ -628,12 +621,12 @@ export type SessionsScalarWhereInput = {
 export type SessionsCreateManyUserInput = {
   id?: string
   refreshToken: string
+  userAgent?: string | null
   ipAddress?: string | null
   city?: string | null
   country?: string | null
   countryRegion?: string | null
   region?: string | null
-  userAgent?: string | null
   replacedBy?: string | null
   revoked?: boolean
   createdAt?: Date | string
@@ -643,12 +636,12 @@ export type SessionsCreateManyUserInput = {
 export type SessionsUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   refreshToken?: Prisma.StringFieldUpdateOperationsInput | string
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replacedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -658,12 +651,12 @@ export type SessionsUpdateWithoutUserInput = {
 export type SessionsUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   refreshToken?: Prisma.StringFieldUpdateOperationsInput | string
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replacedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -673,12 +666,12 @@ export type SessionsUncheckedUpdateWithoutUserInput = {
 export type SessionsUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   refreshToken?: Prisma.StringFieldUpdateOperationsInput | string
+  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ipAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  userAgent?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replacedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -691,12 +684,12 @@ export type SessionsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   id?: boolean
   userId?: boolean
   refreshToken?: boolean
+  userAgent?: boolean
   ipAddress?: boolean
   city?: boolean
   country?: boolean
   countryRegion?: boolean
   region?: boolean
-  userAgent?: boolean
   replacedBy?: boolean
   revoked?: boolean
   createdAt?: boolean
@@ -708,12 +701,12 @@ export type SessionsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   id?: boolean
   userId?: boolean
   refreshToken?: boolean
+  userAgent?: boolean
   ipAddress?: boolean
   city?: boolean
   country?: boolean
   countryRegion?: boolean
   region?: boolean
-  userAgent?: boolean
   replacedBy?: boolean
   revoked?: boolean
   createdAt?: boolean
@@ -725,12 +718,12 @@ export type SessionsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   id?: boolean
   userId?: boolean
   refreshToken?: boolean
+  userAgent?: boolean
   ipAddress?: boolean
   city?: boolean
   country?: boolean
   countryRegion?: boolean
   region?: boolean
-  userAgent?: boolean
   replacedBy?: boolean
   revoked?: boolean
   createdAt?: boolean
@@ -742,19 +735,19 @@ export type SessionsSelectScalar = {
   id?: boolean
   userId?: boolean
   refreshToken?: boolean
+  userAgent?: boolean
   ipAddress?: boolean
   city?: boolean
   country?: boolean
   countryRegion?: boolean
   region?: boolean
-  userAgent?: boolean
   replacedBy?: boolean
   revoked?: boolean
   createdAt?: boolean
   expiresAt?: boolean
 }
 
-export type SessionsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "refreshToken" | "ipAddress" | "city" | "country" | "countryRegion" | "region" | "userAgent" | "replacedBy" | "revoked" | "createdAt" | "expiresAt", ExtArgs["result"]["sessions"]>
+export type SessionsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "refreshToken" | "userAgent" | "ipAddress" | "city" | "country" | "countryRegion" | "region" | "replacedBy" | "revoked" | "createdAt" | "expiresAt", ExtArgs["result"]["sessions"]>
 export type SessionsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -774,12 +767,12 @@ export type $SessionsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     id: string
     userId: string
     refreshToken: string
+    userAgent: string | null
     ipAddress: string | null
     city: string | null
     country: string | null
     countryRegion: string | null
     region: string | null
-    userAgent: string | null
     replacedBy: string | null
     revoked: boolean
     createdAt: Date
@@ -1211,12 +1204,12 @@ export interface SessionsFieldRefs {
   readonly id: Prisma.FieldRef<"Sessions", 'String'>
   readonly userId: Prisma.FieldRef<"Sessions", 'String'>
   readonly refreshToken: Prisma.FieldRef<"Sessions", 'String'>
+  readonly userAgent: Prisma.FieldRef<"Sessions", 'String'>
   readonly ipAddress: Prisma.FieldRef<"Sessions", 'String'>
   readonly city: Prisma.FieldRef<"Sessions", 'String'>
   readonly country: Prisma.FieldRef<"Sessions", 'String'>
   readonly countryRegion: Prisma.FieldRef<"Sessions", 'String'>
   readonly region: Prisma.FieldRef<"Sessions", 'String'>
-  readonly userAgent: Prisma.FieldRef<"Sessions", 'String'>
   readonly replacedBy: Prisma.FieldRef<"Sessions", 'String'>
   readonly revoked: Prisma.FieldRef<"Sessions", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Sessions", 'DateTime'>
