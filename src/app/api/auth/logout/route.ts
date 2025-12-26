@@ -1,7 +1,7 @@
-import requiredReAuth from "@/features/auth/guard/required-reauth";
+import { AppError } from "@/errors/app-error";
+import requiredRefreshToken from "@/features/auth/guard/required-refresh-token";
 import { deleteSession } from "@/features/auth/lib/sessions";
 import {
-  AppError,
   errorResponse,
   internalServerError,
   sendSuccess,
@@ -10,9 +10,9 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
-    const { sessionid } = await requiredReAuth(req);
+    const { sessionId } = await requiredRefreshToken(req);
 
-    await prisma.sessions.update({ where: { id: sessionid }, data: { revoked: true } });
+    await prisma.sessions.update({ where: { id: sessionId }, data: { revoked: true } });
     const response = sendSuccess(null, "Logout successfully");
     await deleteSession();
 
