@@ -1,6 +1,6 @@
-import requiredAuth from "@/features/auth/guard/require-auth";
+import { AppError } from "@/errors/app-error";
+import requiredAccessToken from "@/features/auth/guard/required-access-token";
 import {
-  AppError,
   errorResponse,
   internalServerError,
   sendSuccess,
@@ -12,7 +12,7 @@ type Params = RouteContext<"/api/auth/sessions/[sessionId]">;
 export async function POST(req: Request, { params }: Params) {
   try {
     const { sessionId } = await params;
-    await requiredAuth(req);
+    await requiredAccessToken(req);
 
     // Revoke refresh token
     await prisma.sessions.update({
