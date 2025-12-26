@@ -1,16 +1,16 @@
+import { AppError } from "@/errors/app-error";
+import { AuthInvalidCredentials } from "@/errors/auth-error";
 import {
-  getSessionId,
+  createSession,
   setAuthCookies,
-  upsertRefreshToken,
   validateLoginForm,
   validateUser,
 } from "@/features/auth/helper/login-helper";
 import { signAccessToken, signRefreshToken } from "@/features/auth/lib/sessions";
 import {
-  badRequest,
+  errorResponse,
+  internalServerError,
   sendSuccess,
-  serverError,
-  unauthorized,
 } from "@/helper/response-helper";
 import { getClientInfo } from "@/lib/client-info";
 import { getClientLocation } from "@/lib/client-location";
@@ -19,50 +19,49 @@ import { v4 as uuidv4 } from "uuid";
 export async function POST(req: Request) {
   try {
     const { ip, userAgent } = getClientInfo(req);
-    const { city, country, countryRegion, region } = getClientLocation(req);
+    const location = getClientLocation(req);
 
-    // Validate login form
+    // validate input
     const parsed = await validateLoginForm(req);
+
     if (!parsed.success) {
-      return badRequest("Please check your input", parsed.error.flatten().fieldErrors);
+      const errors = parsed.error.flatten().fieldErrors;
+      throw new AuthInvalidCredentials(errors);
     }
 
     const { email, password } = parsed.data;
 
-    // Validate user
+    // validate user
     const user = await validateUser(email, password);
+
     if (!user) {
-      return unauthorized("Please check your input", {
+      throw new AuthInvalidCredentials({
         email: ["Invalid email or password"],
         password: ["Invalid email or password"],
       });
     }
 
-    // Generate session & tokens
-    const resultgetSessionId = await getSessionId({ ip, userAgent, userId: user.id });
-    const sessionId = resultgetSessionId ? resultgetSessionId : uuidv4();
-
+    // create session
+    const sessionId = uuidv4();
     const accessToken = await signAccessToken({ userId: user.id, sessionId });
     const refreshToken = await signRefreshToken({ sessionId });
 
-    await upsertRefreshToken({
+    await createSession({
       sessionId,
-      refreshToken,
       userId: user.id,
+      refreshToken,
       ip,
-      city,
-      country,
-      countryRegion,
-      region,
       userAgent,
+      ...location,
     });
 
-    const userData = { userId: user.id, name: user.name, email: user.email };
+    const userData = { id: user.id, email: user.email, name: user.name };
     const response = sendSuccess(userData, "Login successfully");
+
     setAuthCookies(response, accessToken, refreshToken);
     return response;
   } catch (error) {
-    console.error("Login Error:", error);
-    return serverError(error);
+    if (error instanceof AppError) return errorResponse(error);
+    return internalServerError(error);
   }
 }
