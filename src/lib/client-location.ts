@@ -1,3 +1,4 @@
+import { geolocation } from "@vercel/functions";
 import "server-only";
 
 const toNumberOrNull = (value?: string | null): number | null => {
@@ -7,29 +8,27 @@ const toNumberOrNull = (value?: string | null): number | null => {
 };
 
 const toStringOrNull = (value?: string | null): string | null => {
-  if (!value) return null;
-  return value;
+  return value ?? null;
 };
 
-// TODO: implement https://ipwho.is/
 const getClientLocation = (req: Request) => {
-  const countryRegion = req.headers.get("x-vercel-ip-continent");
+  const { region } = geolocation(req);
+  const continent = req.headers.get("x-vercel-ip-continent");
   const country = req.headers.get("x-vercel-ip-country");
-  const region = req.headers.get("x-vercel-ip-country-region");
+  const countryRegion = req.headers.get("x-vercel-ip-country-region");
   const city = req.headers.get("x-vercel-ip-city");
   const latitude = req.headers.get("x-vercel-ip-latitude");
   const longitude = req.headers.get("x-vercel-ip-longitude");
 
-  const location = {
-    city: toStringOrNull(city),
+  return {
+    continent: toStringOrNull(continent),
     country: toStringOrNull(country),
     countryRegion: toStringOrNull(countryRegion),
-    region: toStringOrNull(region),
+    city: toStringOrNull(city),
     latitude: toNumberOrNull(latitude),
     longitude: toNumberOrNull(longitude),
+    region: toStringOrNull(region),
   };
-
-  return location;
 };
 
 export { getClientLocation };

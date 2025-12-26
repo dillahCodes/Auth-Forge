@@ -22,13 +22,16 @@ model Sessions {
 
   userAgent String?
 
-  ipAddress     String?
-  city          String?
+  ipAddress String?
+
+  continent     String?
   country       String?
   countryRegion String?
+  city          String?
   region        String?
-  latitude      Float?
-  longitude     Float?
+
+  latitude  Float?
+  longitude Float?
 
   replacedBy String?
   revoked    Boolean  @default(false)
