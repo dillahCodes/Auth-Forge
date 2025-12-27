@@ -1,6 +1,6 @@
 import axios from "axios";
 import axiosRetry, { IAxiosRetryConfig } from "axios-retry";
-import { handleInterceptorsError } from "./interceptors";
+import { handleInterceptorsError, handleRequestInterceptors } from "./interceptors";
 import { retryCondition } from "./retry";
 
 // DOC: for fetching data in Frontend (MAIN INSTANCE)
@@ -31,6 +31,8 @@ const axiosRetryConfig: IAxiosRetryConfig = {
  * - Axios Interceptors handle side effects during request/response lifecycles.
  * - Axios Retry handles retrying failed HTTP requests based on defined conditions.
  */
+axiosInstance.interceptors.request.use(handleRequestInterceptors);
+axiosRetryInstance.interceptors.request.use(handleRequestInterceptors);
 axiosInstance.interceptors.response.use((response) => response, handleInterceptorsError);
 axiosRetryInstance.interceptors.response.use((response) => response, handleInterceptorsError);
 axiosRetry(axiosInstance, axiosRetryConfig);
