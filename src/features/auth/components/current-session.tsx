@@ -1,6 +1,6 @@
 import { Activity } from "react";
 import { Session } from "../types/sessions";
-import { getCountryName, getCountryRegionName } from "@/lib/client-location";
+import { getCountryName, getCountryRegionName } from "@/lib/iso-country-region";
 
 export default function CurrentSession({
   currentSession,

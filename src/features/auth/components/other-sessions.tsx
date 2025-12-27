@@ -4,7 +4,7 @@ import { Activity } from "react";
 import { Session } from "../types/sessions";
 import { useRevokeSession } from "../hooks/use-revoke-session";
 import { useState } from "react";
-import { getCountryName, getCountryRegionName } from "@/lib/client-location";
+import { getCountryName, getCountryRegionName } from "@/lib/iso-country-region";
 
 interface OtherSessionsProps {
   otherSessions: Session[] | undefined;
