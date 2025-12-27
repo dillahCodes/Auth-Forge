@@ -13,8 +13,14 @@ export default function CurrentSession({
         <div className="text-sm border border-white p-2 rounded-sm">
           <p className="font-semibold">{currentSession?.device}</p>
           <p>
-            <span>{currentSession?.location.city || "Unknown City"}</span>,{" "}
-            <span>{currentSession?.location.country || "Unknown Country"}</span>
+            <span>
+              {decodeURIComponent(currentSession?.location?.city || "") || "Unknown City"}
+            </span>
+            ,{" "}
+            <span>
+              {decodeURIComponent(currentSession?.location?.country || "") ||
+                "Unknown Country"}
+            </span>
           </p>
           <p className="text-xs text-gray-500">
             Login at {new Date(currentSession?.loggedInAt || 0).toLocaleString()}
