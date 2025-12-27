@@ -46,8 +46,8 @@ export default function OtherSessions({ isLoading, otherSessions }: OtherSession
 
           const decodeCty = decodeURIComponent(city || "");
           const isoCountryRegion = getCountryRegionName(
-            countryRegion || "",
-            country || ""
+            country || "",
+            countryRegion || ""
           );
           const isoCountry = getCountryName(country || "");
 

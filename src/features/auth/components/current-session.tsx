@@ -11,7 +11,7 @@ export default function CurrentSession({
   const { city, country, countryRegion } = location || {};
 
   const decodeCty = decodeURIComponent(city || "");
-  const isoCountryRegion = getCountryRegionName(countryRegion || "", country || "");
+  const isoCountryRegion = getCountryRegionName(country || "", countryRegion || "");
   const isoCountry = getCountryName(country || "");
 
   return (
