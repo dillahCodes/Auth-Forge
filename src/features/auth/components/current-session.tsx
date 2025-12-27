@@ -1,6 +1,6 @@
 import { Activity } from "react";
 import { Session } from "../types/sessions";
-import { getCountryName, getCountryRegionName } from "@/lib/iso-country-region";
+import iso3166 from "iso-3166-2";
 
 export default function CurrentSession({
   currentSession,
@@ -11,8 +11,8 @@ export default function CurrentSession({
   const { city, country, countryRegion } = location || {};
 
   const decodeCty = decodeURIComponent(city || "");
-  const isoCountryRegion = getCountryRegionName(country || "", countryRegion || "");
-  const isoCountry = getCountryName(country || "");
+  const isoCountry = iso3166.country(country || "")?.name;
+  const isoCountryRegion = iso3166.subdivision(country || "", countryRegion || "")?.name;
 
   return (
     <Activity name="Current Session" mode={currentSession ? "visible" : "hidden"}>

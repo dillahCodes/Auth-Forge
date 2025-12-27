@@ -1,10 +1,9 @@
 "use client";
 
-import { Activity } from "react";
-import { Session } from "../types/sessions";
+import iso3166 from "iso-3166-2";
+import { Activity, useState } from "react";
 import { useRevokeSession } from "../hooks/use-revoke-session";
-import { useState } from "react";
-import { getCountryName, getCountryRegionName } from "@/lib/iso-country-region";
+import { Session } from "../types/sessions";
 
 interface OtherSessionsProps {
   otherSessions: Session[] | undefined;
@@ -45,11 +44,8 @@ export default function OtherSessions({ isLoading, otherSessions }: OtherSession
           const { city, country, countryRegion } = location || {};
 
           const decodeCty = decodeURIComponent(city || "");
-          const isoCountryRegion = getCountryRegionName(
-            country || "",
-            countryRegion || ""
-          );
-          const isoCountry = getCountryName(country || "");
+          const isoCountry = iso3166.country(country || "")?.name;
+          const isoCountryRegion = iso3166.subdivision(country || "", countryRegion || "")?.name;
 
           return (
             <li
