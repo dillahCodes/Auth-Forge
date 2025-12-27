@@ -1,14 +1,33 @@
-export const getCountryName = (countryCode: string) => {
-  const countryName = new Intl.DisplayNames(["id"], {
-    type: "region",
-  }).of(countryCode);
-  return countryName || countryCode;
+export const getCountryName = (countryCode?: string, locale: string = "id") => {
+  if (!countryCode) return null;
+
+  try {
+    return (
+      new Intl.DisplayNames([locale], {
+        type: "region",
+      }).of(countryCode) ?? countryCode
+    );
+  } catch {
+    return countryCode;
+  }
 };
 
-export const getCountryRegionName = (countryCode: string, countryRegionCode: string) => {
+export const getCountryRegionName = (
+  countryCode?: string,
+  countryRegionCode?: string,
+  locale: string = "id"
+) => {
   if (!countryCode || !countryRegionCode) return null;
   const isoCode = `${countryCode}-${countryRegionCode}`;
-  return new Intl.DisplayNames(["id"], {
-    type: "region",
-  }).of(isoCode);
+
+  const ISO_REGION_REGEX = /^[A-Z]{2}-[A-Z0-9]{1,3}$/;
+  if (!ISO_REGION_REGEX.test(isoCode)) return null;
+
+  try {
+    return new Intl.DisplayNames([locale], {
+      type: "region",
+    }).of(isoCode);
+  } catch {
+    return null;
+  }
 };
