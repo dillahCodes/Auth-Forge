@@ -4,6 +4,7 @@ import { Activity } from "react";
 import { Session } from "../types/sessions";
 import { useRevokeSession } from "../hooks/use-revoke-session";
 import { useState } from "react";
+import { getCountryName, getCountryRegionName } from "@/lib/client-location";
 
 interface OtherSessionsProps {
   otherSessions: Session[] | undefined;
@@ -40,6 +41,15 @@ export default function OtherSessions({ isLoading, otherSessions }: OtherSession
       <ul className="flex flex-col gap-3">
         {otherSessions?.map((session) => {
           const isThisRevoking = revokingSessionId === session.id;
+          const { location } = session || {};
+          const { city, country, countryRegion } = location || {};
+
+          const decodeCty = decodeURIComponent(city || "");
+          const isoCountryRegion = getCountryRegionName(
+            countryRegion || "",
+            country || ""
+          );
+          const isoCountry = getCountryName(country || "");
 
           return (
             <li
@@ -49,14 +59,9 @@ export default function OtherSessions({ isLoading, otherSessions }: OtherSession
               <div className="text-sm">
                 <p className="font-semibold">{session.device}</p>
                 <p>
-                  <span>
-                    {decodeURIComponent(session.location.city || "") || "Unknown City"}
-                  </span>
-                  ,{" "}
-                  <span>
-                    {decodeURIComponent(session.location.country || "") ||
-                      "Unknown Country"}
-                  </span>
+                  <span>{decodeCty || "Unknown City"}</span>,{" "}
+                  <span>{isoCountryRegion || "Unknown Country Region"}</span>,{" "}
+                  <span>{isoCountry || "Unknown Country"}</span>
                 </p>
                 <p className="text-xs text-gray-500">
                   Login at {new Date(session.loggedInAt).toLocaleString()}

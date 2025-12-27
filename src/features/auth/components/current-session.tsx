@@ -1,11 +1,19 @@
 import { Activity } from "react";
 import { Session } from "../types/sessions";
+import { getCountryName, getCountryRegionName } from "@/lib/client-location";
 
 export default function CurrentSession({
   currentSession,
 }: {
   currentSession: Session | undefined;
 }) {
+  const { location } = currentSession || {};
+  const { city, country, countryRegion } = location || {};
+
+  const decodeCty = decodeURIComponent(city || "");
+  const isoCountryRegion = getCountryRegionName(countryRegion || "", country || "");
+  const isoCountry = getCountryName(country || "");
+
   return (
     <Activity name="Current Session" mode={currentSession ? "visible" : "hidden"}>
       <section className="border p-3 rounded-md">
@@ -13,17 +21,13 @@ export default function CurrentSession({
         <div className="text-sm border border-white p-2 rounded-sm">
           <p className="font-semibold">{currentSession?.device}</p>
           <p>
-            <span>
-              {decodeURIComponent(currentSession?.location?.city || "") || "Unknown City"}
-            </span>
-            ,{" "}
-            <span>
-              {decodeURIComponent(currentSession?.location?.country || "") ||
-                "Unknown Country"}
-            </span>
+            <span>{decodeCty || "Unknown City"}</span>,{" "}
+            <span>{isoCountryRegion || "Unknown Country Region"}</span>,{" "}
+            <span>{isoCountry || "Unknown Country"}</span>
           </p>
           <p className="text-xs text-gray-500">
-            Login at {new Date(currentSession?.loggedInAt || 0).toLocaleString()}
+            {decodeURIComponent(currentSession?.location?.country || "") ||
+              "Unknown Country"}
           </p>
         </div>
       </section>
