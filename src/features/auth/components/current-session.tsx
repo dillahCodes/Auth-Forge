@@ -25,10 +25,6 @@ export default function CurrentSession({
             <span>{isoCountryRegion || "Unknown Country Region"}</span>,{" "}
             <span>{isoCountry || "Unknown Country"}</span>
           </p>
-          <p className="text-xs text-gray-500">
-            {decodeURIComponent(currentSession?.location?.country || "") ||
-              "Unknown Country"}
-          </p>
         </div>
       </section>
     </Activity>
