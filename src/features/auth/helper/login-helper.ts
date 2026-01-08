@@ -1,4 +1,3 @@
-import "server-only";
 import {
   ACCESS_TOKEN_EXPIRES_SECONDS,
   REFRESH_TOKEN_EXPIRES_SECONDS,
@@ -8,20 +7,24 @@ import { expiresInMiliseconds } from "@/helper/expires-in-miliseconds";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import { NextResponse } from "next/server";
+import "server-only";
 
 interface CreateSession {
   sessionId: string;
   userId: string;
   refreshToken: string;
-  ip: string | null;
-  city: string | null;
-  country: string | null;
-  countryRegion: string | null;
-  region: string | null;
-  continent: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  userAgent: string;
+
+  ip?: string | null;
+  userAgent?: string | null;
+  asn?: number | null;
+  isp?: string | null;
+
+  continent?: string | null;
+  country?: string | null;
+  countryRegion?: string | null;
+  city?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 // DOC: validate login form
@@ -47,11 +50,12 @@ export async function createSession({
   city,
   country,
   countryRegion,
-  region,
   continent,
   userAgent,
   latitude,
   longitude,
+  asn,
+  isp,
 }: CreateSession) {
   const expiresAt = expiresInMiliseconds(REFRESH_TOKEN_EXPIRES_SECONDS);
 
@@ -66,10 +70,11 @@ export async function createSession({
       city,
       country,
       countryRegion,
-      region,
       latitude,
       longitude,
       continent,
+      asn,
+      isp,
     },
   });
 }

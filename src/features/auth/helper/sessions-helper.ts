@@ -1,5 +1,6 @@
-import "server-only";
 import { parseDevice } from "@/lib/parse-device";
+import { prisma } from "@/lib/prisma";
+import "server-only";
 
 interface Sessions {
   id: string;
@@ -9,7 +10,6 @@ interface Sessions {
   city: string | null;
   country: string | null;
   countryRegion: string | null;
-  region: string | null;
   userAgent: string | null;
   replacedBy: string | null;
   revoked: boolean;
@@ -17,17 +17,16 @@ interface Sessions {
   expiresAt: Date;
 }
 
-const sessionsMapping = (data: Sessions[], currentSessionId: string) => {
+export const sessionsMapping = (data: Sessions[], currentSessionId: string) => {
   const response = {
     currentSessionId,
     sessions: data.map((session) => ({
       id: session.id,
       device: parseDevice(session.userAgent),
       location: {
-        city: session.city,
         country: session.country,
         countryRegion: session.countryRegion,
-        region: session.region,
+        city: session.city,
       },
       isCurrent: session.id === currentSessionId,
       loggedInAt: session.createdAt,
@@ -38,4 +37,17 @@ const sessionsMapping = (data: Sessions[], currentSessionId: string) => {
   return response;
 };
 
-export { sessionsMapping };
+export const getSessionbySessionid = async (sessionId: string) => {
+  const session = await prisma.sessions.findUnique({
+    where: { id: sessionId },
+    select: { id: true, userId: true, revoked: true, replacedBy: true },
+  });
+  return session;
+};
+
+export const deleteAllSessionByUserId = async (userId: string) => {
+  await prisma.sessions.updateMany({
+    where: { userId },
+    data: { revoked: true, deletedAt: new Date() },
+  });
+};
