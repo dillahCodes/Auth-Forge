@@ -28,15 +28,18 @@ model Sessions {
   country       String?
   countryRegion String?
   city          String?
-  region        String?
 
   latitude  Float?
   longitude Float?
+
+  asn Int?
+  isp String?
 
   replacedBy String?
   revoked    Boolean  @default(false)
   createdAt  DateTime @default(now())
   expiresAt  DateTime
+  deletedAt  DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

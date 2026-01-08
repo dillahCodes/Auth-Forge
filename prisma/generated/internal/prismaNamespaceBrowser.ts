@@ -91,13 +91,15 @@ export const SessionsScalarFieldEnum = {
   country: 'country',
   countryRegion: 'countryRegion',
   city: 'city',
-  region: 'region',
   latitude: 'latitude',
   longitude: 'longitude',
+  asn: 'asn',
+  isp: 'isp',
   replacedBy: 'replacedBy',
   revoked: 'revoked',
   createdAt: 'createdAt',
-  expiresAt: 'expiresAt'
+  expiresAt: 'expiresAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type SessionsScalarFieldEnum = (typeof SessionsScalarFieldEnum)[keyof typeof SessionsScalarFieldEnum]

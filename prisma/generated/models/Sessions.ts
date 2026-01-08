@@ -29,11 +29,13 @@ export type AggregateSessions = {
 export type SessionsAvgAggregateOutputType = {
   latitude: number | null
   longitude: number | null
+  asn: number | null
 }
 
 export type SessionsSumAggregateOutputType = {
   latitude: number | null
   longitude: number | null
+  asn: number | null
 }
 
 export type SessionsMinAggregateOutputType = {
@@ -46,13 +48,15 @@ export type SessionsMinAggregateOutputType = {
   country: string | null
   countryRegion: string | null
   city: string | null
-  region: string | null
   latitude: number | null
   longitude: number | null
+  asn: number | null
+  isp: string | null
   replacedBy: string | null
   revoked: boolean | null
   createdAt: Date | null
   expiresAt: Date | null
+  deletedAt: Date | null
 }
 
 export type SessionsMaxAggregateOutputType = {
@@ -65,13 +69,15 @@ export type SessionsMaxAggregateOutputType = {
   country: string | null
   countryRegion: string | null
   city: string | null
-  region: string | null
   latitude: number | null
   longitude: number | null
+  asn: number | null
+  isp: string | null
   replacedBy: string | null
   revoked: boolean | null
   createdAt: Date | null
   expiresAt: Date | null
+  deletedAt: Date | null
 }
 
 export type SessionsCountAggregateOutputType = {
@@ -84,13 +90,15 @@ export type SessionsCountAggregateOutputType = {
   country: number
   countryRegion: number
   city: number
-  region: number
   latitude: number
   longitude: number
+  asn: number
+  isp: number
   replacedBy: number
   revoked: number
   createdAt: number
   expiresAt: number
+  deletedAt: number
   _all: number
 }
 
@@ -98,11 +106,13 @@ export type SessionsCountAggregateOutputType = {
 export type SessionsAvgAggregateInputType = {
   latitude?: true
   longitude?: true
+  asn?: true
 }
 
 export type SessionsSumAggregateInputType = {
   latitude?: true
   longitude?: true
+  asn?: true
 }
 
 export type SessionsMinAggregateInputType = {
@@ -115,13 +125,15 @@ export type SessionsMinAggregateInputType = {
   country?: true
   countryRegion?: true
   city?: true
-  region?: true
   latitude?: true
   longitude?: true
+  asn?: true
+  isp?: true
   replacedBy?: true
   revoked?: true
   createdAt?: true
   expiresAt?: true
+  deletedAt?: true
 }
 
 export type SessionsMaxAggregateInputType = {
@@ -134,13 +146,15 @@ export type SessionsMaxAggregateInputType = {
   country?: true
   countryRegion?: true
   city?: true
-  region?: true
   latitude?: true
   longitude?: true
+  asn?: true
+  isp?: true
   replacedBy?: true
   revoked?: true
   createdAt?: true
   expiresAt?: true
+  deletedAt?: true
 }
 
 export type SessionsCountAggregateInputType = {
@@ -153,13 +167,15 @@ export type SessionsCountAggregateInputType = {
   country?: true
   countryRegion?: true
   city?: true
-  region?: true
   latitude?: true
   longitude?: true
+  asn?: true
+  isp?: true
   replacedBy?: true
   revoked?: true
   createdAt?: true
   expiresAt?: true
+  deletedAt?: true
   _all?: true
 }
 
@@ -259,13 +275,15 @@ export type SessionsGroupByOutputType = {
   country: string | null
   countryRegion: string | null
   city: string | null
-  region: string | null
   latitude: number | null
   longitude: number | null
+  asn: number | null
+  isp: string | null
   replacedBy: string | null
   revoked: boolean
   createdAt: Date
   expiresAt: Date
+  deletedAt: Date | null
   _count: SessionsCountAggregateOutputType | null
   _avg: SessionsAvgAggregateOutputType | null
   _sum: SessionsSumAggregateOutputType | null
@@ -301,13 +319,15 @@ export type SessionsWhereInput = {
   country?: Prisma.StringNullableFilter<"Sessions"> | string | null
   countryRegion?: Prisma.StringNullableFilter<"Sessions"> | string | null
   city?: Prisma.StringNullableFilter<"Sessions"> | string | null
-  region?: Prisma.StringNullableFilter<"Sessions"> | string | null
   latitude?: Prisma.FloatNullableFilter<"Sessions"> | number | null
   longitude?: Prisma.FloatNullableFilter<"Sessions"> | number | null
+  asn?: Prisma.IntNullableFilter<"Sessions"> | number | null
+  isp?: Prisma.StringNullableFilter<"Sessions"> | string | null
   replacedBy?: Prisma.StringNullableFilter<"Sessions"> | string | null
   revoked?: Prisma.BoolFilter<"Sessions"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Sessions"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"Sessions"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Sessions"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -321,13 +341,15 @@ export type SessionsOrderByWithRelationInput = {
   country?: Prisma.SortOrderInput | Prisma.SortOrder
   countryRegion?: Prisma.SortOrderInput | Prisma.SortOrder
   city?: Prisma.SortOrderInput | Prisma.SortOrder
-  region?: Prisma.SortOrderInput | Prisma.SortOrder
   latitude?: Prisma.SortOrderInput | Prisma.SortOrder
   longitude?: Prisma.SortOrderInput | Prisma.SortOrder
+  asn?: Prisma.SortOrderInput | Prisma.SortOrder
+  isp?: Prisma.SortOrderInput | Prisma.SortOrder
   replacedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   revoked?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -344,13 +366,15 @@ export type SessionsWhereUniqueInput = Prisma.AtLeast<{
   country?: Prisma.StringNullableFilter<"Sessions"> | string | null
   countryRegion?: Prisma.StringNullableFilter<"Sessions"> | string | null
   city?: Prisma.StringNullableFilter<"Sessions"> | string | null
-  region?: Prisma.StringNullableFilter<"Sessions"> | string | null
   latitude?: Prisma.FloatNullableFilter<"Sessions"> | number | null
   longitude?: Prisma.FloatNullableFilter<"Sessions"> | number | null
+  asn?: Prisma.IntNullableFilter<"Sessions"> | number | null
+  isp?: Prisma.StringNullableFilter<"Sessions"> | string | null
   replacedBy?: Prisma.StringNullableFilter<"Sessions"> | string | null
   revoked?: Prisma.BoolFilter<"Sessions"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Sessions"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"Sessions"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Sessions"> | Date | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "refreshToken">
 
@@ -364,13 +388,15 @@ export type SessionsOrderByWithAggregationInput = {
   country?: Prisma.SortOrderInput | Prisma.SortOrder
   countryRegion?: Prisma.SortOrderInput | Prisma.SortOrder
   city?: Prisma.SortOrderInput | Prisma.SortOrder
-  region?: Prisma.SortOrderInput | Prisma.SortOrder
   latitude?: Prisma.SortOrderInput | Prisma.SortOrder
   longitude?: Prisma.SortOrderInput | Prisma.SortOrder
+  asn?: Prisma.SortOrderInput | Prisma.SortOrder
+  isp?: Prisma.SortOrderInput | Prisma.SortOrder
   replacedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   revoked?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.SessionsCountOrderByAggregateInput
   _avg?: Prisma.SessionsAvgOrderByAggregateInput
   _max?: Prisma.SessionsMaxOrderByAggregateInput
@@ -391,13 +417,15 @@ export type SessionsScalarWhereWithAggregatesInput = {
   country?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   countryRegion?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   city?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
-  region?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   latitude?: Prisma.FloatNullableWithAggregatesFilter<"Sessions"> | number | null
   longitude?: Prisma.FloatNullableWithAggregatesFilter<"Sessions"> | number | null
+  asn?: Prisma.IntNullableWithAggregatesFilter<"Sessions"> | number | null
+  isp?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   replacedBy?: Prisma.StringNullableWithAggregatesFilter<"Sessions"> | string | null
   revoked?: Prisma.BoolWithAggregatesFilter<"Sessions"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Sessions"> | Date | string
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"Sessions"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Sessions"> | Date | string | null
 }
 
 export type SessionsCreateInput = {
@@ -409,13 +437,15 @@ export type SessionsCreateInput = {
   country?: string | null
   countryRegion?: string | null
   city?: string | null
-  region?: string | null
   latitude?: number | null
   longitude?: number | null
+  asn?: number | null
+  isp?: string | null
   replacedBy?: string | null
   revoked?: boolean
   createdAt?: Date | string
   expiresAt: Date | string
+  deletedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutSessionsInput
 }
 
@@ -429,13 +459,15 @@ export type SessionsUncheckedCreateInput = {
   country?: string | null
   countryRegion?: string | null
   city?: string | null
-  region?: string | null
   latitude?: number | null
   longitude?: number | null
+  asn?: number | null
+  isp?: string | null
   replacedBy?: string | null
   revoked?: boolean
   createdAt?: Date | string
   expiresAt: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type SessionsUpdateInput = {
@@ -447,13 +479,15 @@ export type SessionsUpdateInput = {
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  asn?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replacedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   user?: Prisma.UserUpdateOneRequiredWithoutSessionsNestedInput
 }
 
@@ -467,13 +501,15 @@ export type SessionsUncheckedUpdateInput = {
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  asn?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replacedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type SessionsCreateManyInput = {
@@ -486,13 +522,15 @@ export type SessionsCreateManyInput = {
   country?: string | null
   countryRegion?: string | null
   city?: string | null
-  region?: string | null
   latitude?: number | null
   longitude?: number | null
+  asn?: number | null
+  isp?: string | null
   replacedBy?: string | null
   revoked?: boolean
   createdAt?: Date | string
   expiresAt: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type SessionsUpdateManyMutationInput = {
@@ -504,13 +542,15 @@ export type SessionsUpdateManyMutationInput = {
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  asn?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replacedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type SessionsUncheckedUpdateManyInput = {
@@ -523,13 +563,15 @@ export type SessionsUncheckedUpdateManyInput = {
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  asn?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replacedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type SessionsListRelationFilter = {
@@ -552,18 +594,21 @@ export type SessionsCountOrderByAggregateInput = {
   country?: Prisma.SortOrder
   countryRegion?: Prisma.SortOrder
   city?: Prisma.SortOrder
-  region?: Prisma.SortOrder
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
+  asn?: Prisma.SortOrder
+  isp?: Prisma.SortOrder
   replacedBy?: Prisma.SortOrder
   revoked?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type SessionsAvgOrderByAggregateInput = {
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
+  asn?: Prisma.SortOrder
 }
 
 export type SessionsMaxOrderByAggregateInput = {
@@ -576,13 +621,15 @@ export type SessionsMaxOrderByAggregateInput = {
   country?: Prisma.SortOrder
   countryRegion?: Prisma.SortOrder
   city?: Prisma.SortOrder
-  region?: Prisma.SortOrder
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
+  asn?: Prisma.SortOrder
+  isp?: Prisma.SortOrder
   replacedBy?: Prisma.SortOrder
   revoked?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type SessionsMinOrderByAggregateInput = {
@@ -595,18 +642,21 @@ export type SessionsMinOrderByAggregateInput = {
   country?: Prisma.SortOrder
   countryRegion?: Prisma.SortOrder
   city?: Prisma.SortOrder
-  region?: Prisma.SortOrder
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
+  asn?: Prisma.SortOrder
+  isp?: Prisma.SortOrder
   replacedBy?: Prisma.SortOrder
   revoked?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
 }
 
 export type SessionsSumOrderByAggregateInput = {
   latitude?: Prisma.SortOrder
   longitude?: Prisma.SortOrder
+  asn?: Prisma.SortOrder
 }
 
 export type SessionsCreateNestedManyWithoutUserInput = {
@@ -659,12 +709,24 @@ export type NullableFloatFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
 }
 
 export type SessionsCreateWithoutUserInput = {
@@ -676,13 +738,15 @@ export type SessionsCreateWithoutUserInput = {
   country?: string | null
   countryRegion?: string | null
   city?: string | null
-  region?: string | null
   latitude?: number | null
   longitude?: number | null
+  asn?: number | null
+  isp?: string | null
   replacedBy?: string | null
   revoked?: boolean
   createdAt?: Date | string
   expiresAt: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type SessionsUncheckedCreateWithoutUserInput = {
@@ -694,13 +758,15 @@ export type SessionsUncheckedCreateWithoutUserInput = {
   country?: string | null
   countryRegion?: string | null
   city?: string | null
-  region?: string | null
   latitude?: number | null
   longitude?: number | null
+  asn?: number | null
+  isp?: string | null
   replacedBy?: string | null
   revoked?: boolean
   createdAt?: Date | string
   expiresAt: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type SessionsCreateOrConnectWithoutUserInput = {
@@ -742,13 +808,15 @@ export type SessionsScalarWhereInput = {
   country?: Prisma.StringNullableFilter<"Sessions"> | string | null
   countryRegion?: Prisma.StringNullableFilter<"Sessions"> | string | null
   city?: Prisma.StringNullableFilter<"Sessions"> | string | null
-  region?: Prisma.StringNullableFilter<"Sessions"> | string | null
   latitude?: Prisma.FloatNullableFilter<"Sessions"> | number | null
   longitude?: Prisma.FloatNullableFilter<"Sessions"> | number | null
+  asn?: Prisma.IntNullableFilter<"Sessions"> | number | null
+  isp?: Prisma.StringNullableFilter<"Sessions"> | string | null
   replacedBy?: Prisma.StringNullableFilter<"Sessions"> | string | null
   revoked?: Prisma.BoolFilter<"Sessions"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Sessions"> | Date | string
   expiresAt?: Prisma.DateTimeFilter<"Sessions"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Sessions"> | Date | string | null
 }
 
 export type SessionsCreateManyUserInput = {
@@ -760,13 +828,15 @@ export type SessionsCreateManyUserInput = {
   country?: string | null
   countryRegion?: string | null
   city?: string | null
-  region?: string | null
   latitude?: number | null
   longitude?: number | null
+  asn?: number | null
+  isp?: string | null
   replacedBy?: string | null
   revoked?: boolean
   createdAt?: Date | string
   expiresAt: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type SessionsUpdateWithoutUserInput = {
@@ -778,13 +848,15 @@ export type SessionsUpdateWithoutUserInput = {
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  asn?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replacedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type SessionsUncheckedUpdateWithoutUserInput = {
@@ -796,13 +868,15 @@ export type SessionsUncheckedUpdateWithoutUserInput = {
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  asn?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replacedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type SessionsUncheckedUpdateManyWithoutUserInput = {
@@ -814,13 +888,15 @@ export type SessionsUncheckedUpdateManyWithoutUserInput = {
   country?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   countryRegion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   city?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   latitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   longitude?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  asn?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   replacedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   revoked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -835,13 +911,15 @@ export type SessionsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   country?: boolean
   countryRegion?: boolean
   city?: boolean
-  region?: boolean
   latitude?: boolean
   longitude?: boolean
+  asn?: boolean
+  isp?: boolean
   replacedBy?: boolean
   revoked?: boolean
   createdAt?: boolean
   expiresAt?: boolean
+  deletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sessions"]>
 
@@ -855,13 +933,15 @@ export type SessionsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   country?: boolean
   countryRegion?: boolean
   city?: boolean
-  region?: boolean
   latitude?: boolean
   longitude?: boolean
+  asn?: boolean
+  isp?: boolean
   replacedBy?: boolean
   revoked?: boolean
   createdAt?: boolean
   expiresAt?: boolean
+  deletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sessions"]>
 
@@ -875,13 +955,15 @@ export type SessionsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   country?: boolean
   countryRegion?: boolean
   city?: boolean
-  region?: boolean
   latitude?: boolean
   longitude?: boolean
+  asn?: boolean
+  isp?: boolean
   replacedBy?: boolean
   revoked?: boolean
   createdAt?: boolean
   expiresAt?: boolean
+  deletedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sessions"]>
 
@@ -895,16 +977,18 @@ export type SessionsSelectScalar = {
   country?: boolean
   countryRegion?: boolean
   city?: boolean
-  region?: boolean
   latitude?: boolean
   longitude?: boolean
+  asn?: boolean
+  isp?: boolean
   replacedBy?: boolean
   revoked?: boolean
   createdAt?: boolean
   expiresAt?: boolean
+  deletedAt?: boolean
 }
 
-export type SessionsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "refreshToken" | "userAgent" | "ipAddress" | "continent" | "country" | "countryRegion" | "city" | "region" | "latitude" | "longitude" | "replacedBy" | "revoked" | "createdAt" | "expiresAt", ExtArgs["result"]["sessions"]>
+export type SessionsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "refreshToken" | "userAgent" | "ipAddress" | "continent" | "country" | "countryRegion" | "city" | "latitude" | "longitude" | "asn" | "isp" | "replacedBy" | "revoked" | "createdAt" | "expiresAt" | "deletedAt", ExtArgs["result"]["sessions"]>
 export type SessionsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -930,13 +1014,15 @@ export type $SessionsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     country: string | null
     countryRegion: string | null
     city: string | null
-    region: string | null
     latitude: number | null
     longitude: number | null
+    asn: number | null
+    isp: string | null
     replacedBy: string | null
     revoked: boolean
     createdAt: Date
     expiresAt: Date
+    deletedAt: Date | null
   }, ExtArgs["result"]["sessions"]>
   composites: {}
 }
@@ -1370,13 +1456,15 @@ export interface SessionsFieldRefs {
   readonly country: Prisma.FieldRef<"Sessions", 'String'>
   readonly countryRegion: Prisma.FieldRef<"Sessions", 'String'>
   readonly city: Prisma.FieldRef<"Sessions", 'String'>
-  readonly region: Prisma.FieldRef<"Sessions", 'String'>
   readonly latitude: Prisma.FieldRef<"Sessions", 'Float'>
   readonly longitude: Prisma.FieldRef<"Sessions", 'Float'>
+  readonly asn: Prisma.FieldRef<"Sessions", 'Int'>
+  readonly isp: Prisma.FieldRef<"Sessions", 'String'>
   readonly replacedBy: Prisma.FieldRef<"Sessions", 'String'>
   readonly revoked: Prisma.FieldRef<"Sessions", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Sessions", 'DateTime'>
   readonly expiresAt: Prisma.FieldRef<"Sessions", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"Sessions", 'DateTime'>
 }
     
 
