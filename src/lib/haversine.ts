@@ -5,6 +5,7 @@ interface Haversine {
   lon2: number;
 }
 
+// DOC: visit doc folder for more info
 export function haversine({ lat1, lat2, lon1, lon2 }: Haversine) {
   const earthRadius = 6371; // in km
 
