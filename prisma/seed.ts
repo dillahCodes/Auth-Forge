@@ -17,7 +17,7 @@ async function main() {
     });
   }
 
-  console.log("Seeded users successfully");
+  console.info("Seeded users successfully");
 }
 
 main()
