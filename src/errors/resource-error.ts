@@ -26,3 +26,9 @@ export class ResourceParamsInvalid extends AppError {
     );
   }
 }
+
+export class ToManyRequests extends AppError {
+  constructor(message = "Too many requests", errors?: Record<string, string[]>) {
+    super(message, HttpStatusCode.TOO_MANY_REQUESTS, ErrorCode.TOO_MANY_REQUESTS, errors);
+  }
+}
