@@ -18,6 +18,8 @@ export enum HttpStatusCode {
 
   INTERNAL_SERVER_ERROR = 500,
   SERVICE_UNAVAILABLE = 503,
+
+  TOO_MANY_REQUESTS = 429,
 }
 
 export enum ErrorCode {
@@ -40,4 +42,5 @@ export enum ErrorCode {
 
   /*  SYSTEM  */
   INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR",
+  TOO_MANY_REQUESTS = "TO_MANY_REQUESTS",
 }
