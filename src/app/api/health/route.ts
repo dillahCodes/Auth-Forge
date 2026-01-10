@@ -7,32 +7,23 @@ import {
 
 export async function GET(_req: Request) {
   try {
-    // BE SEND CHALLENGE
-    // const nonce = crypto.randomBytes(16).toString("hex");
-    // const difficulty = 4;
-
-    // FE SOLVE PROOF
-    // const proof = POW.solve(nonce, difficulty);
-
-    // BE VERIFY PROOF
-    // const valid = POW.verify(nonce, proof, difficulty);
-
-    // console.log({
-    //   nonce,
-    //   proof,
-    //   difficulty: "0".repeat(difficulty),
-    //   valid: sha256(nonce + proof),
-    // });
-
     // const clientInfo = getClientInfo(req);
-    // const ipLimit = await rateLimiterFixedWindow({
-    //   key: `rl:health:ip:${clientInfo.ip}`,
+
+    // const resultRateLimiter = await rateLimiterFixedWindow({
+    //   key: `ip:${clientInfo.ip}:ua:${clientInfo.userAgent}`,
     //   limit: 5,
-    //   windowSeconds: 60,
+    //   windowSeconds: 3,
     // });
-    // if (!ipLimit.isAllowed) {
-    //   throw new ToManyRequests(undefined);
-    // }
+
+    // if (!resultRateLimiter.isAllowed) throw new ToManyRequests();
+
+    // const resultRateLimiter = await rateLimiterTokenBucket({
+    //   key: `ip:${clientInfo.ip}:ua:${clientInfo.userAgent}`,
+    //   bucketCapacity: 10,
+    //   refillRatePerSecond: 1,
+    // });
+
+    // if (!resultRateLimiter.isAllowed) throw new ToManyRequests();
 
     return sendSuccess(null, "OK");
   } catch (error) {
