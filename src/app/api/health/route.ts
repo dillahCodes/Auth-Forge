@@ -4,57 +4,26 @@ import {
   internalServerError,
   sendSuccess,
 } from "@/helper/response-helper";
-import crypto from "crypto";
-import { sha256 } from "js-sha256";
-
-export const POW = {
-  solve: (nonce: string, difficulty: number) => {
-    const target = "0".repeat(difficulty);
-    let counter = 0;
-
-    while (true) {
-      const hash = sha256(nonce + counter);
-      if (hash.startsWith(target)) return counter.toString();
-      counter++;
-    }
-  },
-
-  verify: (nonce: string, proof: string, difficulty: number) => {
-    const target = "0".repeat(difficulty);
-    const result = sha256(nonce + proof);
-    const isValid = result.startsWith(target);
-    return isValid;
-  },
-};
 
 export async function GET(_req: Request) {
   try {
-    // BE SEND CHALLENGE
-    // const nonce = crypto.randomBytes(16).toString("hex");
-    // const difficulty = 4;
-
-    // FE SOLVE PROOF
-    // const proof = POW.solve(nonce, difficulty);
-
-    // BE VERIFY PROOF
-    // const valid = POW.verify(nonce, proof, difficulty);
-
-    // console.log({
-    //   nonce,
-    //   proof,
-    //   difficulty: "0".repeat(difficulty),
-    //   valid: sha256(nonce + proof),
-    // });
-
     // const clientInfo = getClientInfo(req);
-    // const ipLimit = await rateLimiterFixedWindow({
-    //   key: `rl:health:ip:${clientInfo.ip}`,
+
+    // const resultRateLimiter = await rateLimiterFixedWindow({
+    //   key: `ip:${clientInfo.ip}:ua:${clientInfo.userAgent}`,
     //   limit: 5,
-    //   windowSeconds: 60,
+    //   windowSeconds: 3,
     // });
-    // if (!ipLimit.isAllowed) {
-    //   throw new ToManyRequests(undefined);
-    // }
+
+    // if (!resultRateLimiter.isAllowed) throw new ToManyRequests();
+
+    // const resultRateLimiter = await rateLimiterTokenBucket({
+    //   key: `ip:${clientInfo.ip}:ua:${clientInfo.userAgent}`,
+    //   bucketCapacity: 10,
+    //   refillRatePerSecond: 1,
+    // });
+
+    // if (!resultRateLimiter.isAllowed) throw new ToManyRequests();
 
     return sendSuccess(null, "OK");
   } catch (error) {
