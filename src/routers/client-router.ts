@@ -1,7 +1,7 @@
 export enum RouterUrls {
   LOGIN = "/login",
   REGISTER = "/register",
-  DASHBOARD = "/dashboard",
+  PROFILE = "/profile",
   SESSION_REVOKED = "/session-revoked",
   UNAUTHORIZED = "/unauthorized",
 }
