@@ -21,28 +21,26 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-fit flex-col gap-4 w-full max-w-md p-4">
-        <h1 className="font-bold text-3xl">Dashboard</h1>
+    <main className="flex flex-col gap-6 w-full max-w-xl">
+      <h1 className="font-bold text-3xl">Profile</h1>
 
-        <UserInfo />
-        <CurrentSession currentSession={currentSession} />
-        <OtherSessions isLoading={isLoading} otherSessions={otherSessions} />
+      <UserInfo />
+      <CurrentSession isLoading={isLoading} currentSession={currentSession} />
+      <OtherSessions isLoading={isLoading} otherSessions={otherSessions} />
 
-        {/* LOGOUT ALL */}
-        <Activity
-          name="Logout All Devices"
-          mode={otherSessions && otherSessions.length ? "visible" : "hidden"}
+      {/* LOGOUT ALL */}
+      <Activity
+        name="Logout All Devices"
+        mode={otherSessions && otherSessions.length ? "visible" : "hidden"}
+      >
+        <button
+          onClick={handleRevokeAll}
+          disabled={isRevokeAllPending}
+          className="w-full  py-2 mt-3 cursor-pointer border-2 border-dark text-dark-2 font-bold bg-danger hover:opacity-50 transition-all duration-300 disabled:opacity-50"
         >
-          <button
-            onClick={handleRevokeAll}
-            disabled={isRevokeAllPending}
-            className="w-full rounded-md cursor-pointer py-2 font-bold bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
-          >
-            {isRevokeAllPending ? "Logging out..." : "Logout All"}
-          </button>
-        </Activity>
-      </main>
-    </div>
+          {isRevokeAllPending ? "Logging out..." : "Logout All"}
+        </button>
+      </Activity>
+    </main>
   );
 }
