@@ -61,8 +61,8 @@ export default async function middleware(req: NextRequest) {
   const decryptResult = await decrypt<RefreshTokenPayload>(refreshToken);
   const refreshTokenValid = decryptResult.valid;
 
-  // const rateLimitResult = await handleRateLimiting(req);
-  // if (rateLimitResult) return rateLimitResult;
+  const rateLimitResult = await handleRateLimiting(req);
+  if (rateLimitResult) return rateLimitResult;
 
   const authRoutingResult = await handleAuthRouting(req, refreshTokenValid);
   if (authRoutingResult) return authRoutingResult;
