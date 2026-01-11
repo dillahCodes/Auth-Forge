@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+/* === TAILWIND TOKEN BINDING === */
+@theme {
+  /* ===== BRAND / STATUS COLORS (BKN) ===== */
+  --color-warning: #fbb92e;
+  --color-danger: #de1d5e;
+  --color-success: #77ce94;
+  --color-info: #269dd8;
+
+  /* ===== PRIMARY BACKGROUND ===== */
+  --color-primary-bg-200: #f8f7f7;
+  --color-primary-bg-300: #f2f0f0;
+
+  /* ===== DARK THEME SCALE ===== */
+  --color-dark-2: #f9f9f9;
+  --color-dark-3: #e5e7eb;
+  --color-dark-4: #d1d5db;
+  --color-dark-5: #9ca3af;
+  --color-dark-6: #6b7280;
+  --color-dark-7: #4b5563;
+  --color-dark-8: #374151;
+  --color-dark-9: #1f2a37;
+  --color-dark: #111928;
+
+  /* ===== SHADOW ===== */
+  --shadow-strong: 5px 5px 0px 2px;
+  --shadow-strong-medium: 3px 3px 0px 2px;
+  --shadow-strong-weak: 1px 1px 0px 2px;
+
+  /* ===== FONTS ===== */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* === GLOBAL STYLES === */
+body {
+  font-family: var(--font-sans), system-ui, sans-serif;
+}

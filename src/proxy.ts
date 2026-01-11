@@ -5,7 +5,7 @@ import { getClientInfo } from "./lib/client-info";
 import { rateLimiterTokenBucket } from "./lib/redis/rate-limiter-token-bucket";
 import { HttpStatusCode } from "./types/response";
 
-const protectedRoutes = [RouterUrls.DASHBOARD];
+const protectedRoutes = [RouterUrls.PROFILE];
 const authRoutes = [RouterUrls.LOGIN, RouterUrls.REGISTER];
 
 // DOC: Handle redirect logic for login/register vs dashboard (auth routing)
@@ -18,7 +18,7 @@ async function handleAuthRouting(
   if (!authRoutes.includes(path)) return null;
   if (!refreshTokenValid) return null;
 
-  const dashboardUrl = new URL(RouterUrls.DASHBOARD, req.url);
+  const dashboardUrl = new URL(RouterUrls.PROFILE, req.url);
   return NextResponse.redirect(dashboardUrl);
 }
 

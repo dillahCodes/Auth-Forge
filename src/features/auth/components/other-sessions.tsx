@@ -22,13 +22,11 @@ export default function OtherSessions({ isLoading, otherSessions }: OtherSession
     });
   };
 
-  return (
-    <section className="border p-3 rounded-md">
-      <h2 className="font-bold mb-2">Logins on Other Devices</h2>
+  if (isLoading) return <OtherSessionsLoading />;
 
-      <Activity name="Other Sessions loading" mode={isLoading ? "visible" : "hidden"}>
-        <p>Loading sessions...</p>
-      </Activity>
+  return (
+    <section className="border-2 shadow-strong p-3">
+      <h2 className="font-bold mb-2">Logins on Other Devices</h2>
 
       <Activity
         name="Other Sessions Empty"
@@ -45,29 +43,42 @@ export default function OtherSessions({ isLoading, otherSessions }: OtherSession
 
           const decodeCty = decodeURIComponent(city || "");
           const isoCountry = iso3166.country(country || "")?.name;
-          const isoCountryRegion = iso3166.subdivision(country || "", countryRegion || "")?.name;
+          const isoCountryRegion = iso3166.subdivision(
+            country || "",
+            countryRegion || ""
+          )?.name;
 
           return (
-            <li
-              key={session.id}
-              className="flex justify-between items-center border p-2 rounded"
-            >
-              <div className="text-sm">
-                <p className="font-semibold">{session.device}</p>
-                <p>
-                  <span>{decodeCty || "Unknown City"}</span>,{" "}
-                  <span>{isoCountryRegion || "Unknown Country Region"}</span>,{" "}
-                  <span>{isoCountry || "Unknown Country"}</span>
-                </p>
-                <p className="text-xs text-gray-500">
-                  Login at {new Date(session.loggedInAt).toLocaleString()}
-                </p>
+            <li key={session.id} className="flex justify-between items-center gap-3">
+              <div className="flex items-center gap-3">
+                <span className="w-6 h-6 bg-info rounded-full border-2 border-dark" />
+                <div className="text-sm">
+                  <p className="font-semibold line-clamp-1">{session.device}</p>
+                  <p className="line-clamp-1">
+                    <Activity
+                      name="Current Session"
+                      mode={decodeCty ? "visible" : "hidden"}
+                    >
+                      <span>{decodeCty || "Unknown City"}</span>,{" "}
+                    </Activity>
+                    <Activity
+                      name="Current Session"
+                      mode={isoCountryRegion ? "visible" : "hidden"}
+                    >
+                      <span>{isoCountryRegion || "Unknown Country Region"}</span>,{" "}
+                    </Activity>
+                    <span>{isoCountry || "Unknown Country"}</span>
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(session.loggedInAt).toLocaleString()}
+                  </p>
+                </div>
               </div>
 
               <button
                 onClick={() => handleRevoke(session.id)}
                 disabled={isThisRevoking}
-                className="text-sm px-3 py-1 cursor-pointer rounded bg-red-500 text-white hover:bg-red-600 disabled:opacity-50"
+                className="text-xs cursor-pointer border-2 px-4 py-1 border-dark text-dark-2 font-bold bg-danger hover:opacity-50 transition-all duration-300 disabled:opacity-50"
               >
                 {isThisRevoking ? "Logging out..." : "Logout"}
               </button>
@@ -76,5 +87,15 @@ export default function OtherSessions({ isLoading, otherSessions }: OtherSession
         })}
       </ul>
     </section>
+  );
+}
+
+export function OtherSessionsLoading() {
+  return (
+    <div className="border-2 border-dark shadow-strong p-3 space-y-2 w-full">
+      <div className="h-6 bg-dark/20 border-2 border-dark"></div>
+      <div className="h-6 bg-dark/20 border-2 border-dark"></div>
+      <div className="h-6 bg-dark/20 border-2 border-dark"></div>
+    </div>
   );
 }
