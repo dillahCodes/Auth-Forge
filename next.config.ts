@@ -23,6 +23,10 @@ const nextConfig: NextConfig = {
           key: "Access-Control-Allow-Headers",
           value: process.env.ACCESS_CONTROL_ALLOW_HEADERS!,
         },
+        {
+          key: "Content-Security-Policy",
+          value: process.env.CONTENT_SECURITY_POLICY!,
+        },
       ],
     },
   ],
