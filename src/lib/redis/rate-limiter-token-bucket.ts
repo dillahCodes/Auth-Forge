@@ -57,7 +57,7 @@ export async function rateLimiterTokenBucket({
   const currentTimmeMs = new Date().getTime();
   const tokenUsedPerRequest = 1;
 
-  const rateLimiterKey = `rateLimiter:${key}`;
+  const rateLimiterKey = `limiter:${key}`;
   const keyLastRefill = `${rateLimiterKey}:lastRefill`;
 
   const ttlSeconds = Math.ceil(bucketCapacity / refillRatePerSecond) * 2;

@@ -47,8 +47,10 @@ export async function rateLimiterFixedWindow({
 }: RateLimiterFixedWindowOptions): Promise<RateLimiterFixedWindowResult> {
   const redis = await getRedis();
 
+  const rateLimiterKey = `limiter:${key}`;
+
   const rawResult = await redis.eval(LUA_FIXED_WINDOW_SCRIPT, {
-    keys: [key],
+    keys: [rateLimiterKey],
     arguments: [limit.toString(), windowSeconds.toString()],
   });
 
