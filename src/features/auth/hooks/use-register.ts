@@ -1,6 +1,6 @@
 "use client";
 
-import { axiosInstance } from "@/lib/axios";
+import { axiosInstance } from "@/lib/axios/axios";
 import { useMutation } from "@tanstack/react-query";
 
 export function useRegister() {

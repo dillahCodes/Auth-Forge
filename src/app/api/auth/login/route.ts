@@ -1,58 +1,39 @@
 import { AppError } from "@/errors/app-error";
-import { AuthInvalidCredentials } from "@/errors/auth-error";
-import { ResourceNotFound } from "@/errors/resource-error";
+import { createSession } from "@/features/auth/database/login-database";
 import {
-  createSession,
   setAuthCookies,
+  signAccessToken,
+  signRefreshToken,
+} from "@/features/auth/lib/sessions";
+import {
+  validateCredentials,
   validateLoginForm,
-  validateUser,
-} from "@/features/auth/helper/login-helper";
-import { signAccessToken, signRefreshToken } from "@/features/auth/lib/sessions";
+} from "@/features/auth/validation/login-validation";
 import {
   errorResponse,
   internalServerError,
   sendSuccess,
 } from "@/helper/response-helper";
 import { getClientInfo } from "@/lib/client-info";
-import { formatGeoLocation, whoisGeoLocation } from "@/lib/whois";
+import { geoVercel } from "@/lib/geolocation/geo-vercel";
 import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: Request) {
   try {
-    const clientInfo = getClientInfo(req);
-
-    // validate input
+    //DOC: validate input
     const parsed = await validateLoginForm(req);
 
-    if (!parsed.success) {
-      const errors = parsed.error.flatten().fieldErrors;
-      throw new AuthInvalidCredentials(errors);
-    }
-
+    // DOC: credentials
     const { email, password } = parsed.data;
 
-    // validate user
-    const user = await validateUser(email, password);
+    //DOC: validate credentials
+    const user = await validateCredentials(email, password);
 
-    if (!user) {
-      throw new AuthInvalidCredentials({
-        email: ["Invalid email or password"],
-        password: ["Invalid email or password"],
-      });
-    }
+    // DOC: get client info and geo location
+    const clientInfo = getClientInfo(req);
+    const geolocation = geoVercel(req, clientInfo.ip as string);
 
-    // get client geo location
-    const geo = await whoisGeoLocation(clientInfo.ip);
-    const formattedGeo = formatGeoLocation(geo);
-
-    if (!formattedGeo) {
-      throw new ResourceNotFound("Geo location not found", {
-        email: ["geo location not found"],
-        password: ["geo location not found"],
-      });
-    }
-
-    // create session
+    // Doc: create session
     const sessionId = uuidv4();
     const accessToken = await signAccessToken({ userId: user.id, sessionId });
     const refreshToken = await signRefreshToken({ sessionId });
@@ -62,8 +43,9 @@ export async function POST(req: Request) {
       userId: user.id,
       refreshToken,
       ...clientInfo,
-      ...formattedGeo,
+      ...geolocation,
     });
+
     // const resultCreateSession = await createSession({
     //   sessionId,
     //   userId: user.id,
@@ -81,7 +63,7 @@ export async function POST(req: Request) {
     // set cookies and response
     const userData = { id: user.id, email: user.email, name: user.name };
     const response = sendSuccess(userData, "Login successfully");
-    setAuthCookies(response, accessToken, refreshToken);
+    setAuthCookies({ response, accessToken, refreshToken });
 
     return response;
   } catch (error) {

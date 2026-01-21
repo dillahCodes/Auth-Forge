@@ -1,14 +1,9 @@
 import { AuthTokenExpired } from "@/errors/auth-error";
 import { decrypt, getCookie, type AccessTokenPayload } from "../lib/sessions";
 
-type RequiredAccessTokenResult = {
-  userId: string;
-  sessionId: string;
-};
-
 export default async function requiredAccessToken(
   req: Request
-): Promise<RequiredAccessTokenResult> {
+): Promise<AccessTokenPayload> {
   // Check if the access token is present
   const accessToken = getCookie(req, "access_token");
   if (!accessToken) throw new AuthTokenExpired();
@@ -17,6 +12,6 @@ export default async function requiredAccessToken(
   const result = await decrypt<AccessTokenPayload>(accessToken);
   if (!result.valid) throw new AuthTokenExpired();
 
-  const { userId, sessionId } = result.payload;
-  return { userId, sessionId };
+  const { userId, sessionId, permissions, verifiedAt } = result.payload;
+  return { userId, sessionId, permissions, verifiedAt };
 }
