@@ -8,11 +8,12 @@ datasource db {
 }
 
 model User {
-  id       String     @id @default(uuid())
-  email    String     @unique
-  name     String?
-  password String
-  sessions Sessions[]
+  id         String     @id @default(uuid())
+  email      String     @unique
+  name       String
+  password   String
+  verifiedAt DateTime?
+  sessions   Sessions[]
 }
 
 model Sessions {
@@ -36,8 +37,8 @@ model Sessions {
   isp String?
 
   replacedBy String?
-  revoked    Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  revoked    Boolean   @default(false)
+  createdAt  DateTime  @default(now())
   expiresAt  DateTime
   deletedAt  DateTime?
 
