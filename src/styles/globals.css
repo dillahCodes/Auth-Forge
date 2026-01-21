@@ -37,3 +37,13 @@
 body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
+
+/* === HIDE PASSWORD EYE ICON === */
+@layer utilities {
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear,
+  input[type="password"]::-webkit-textfield-decoration-container,
+  input[type="password"]::-webkit-textfield-decoration-container > * {
+    display: none !important;
+  }
+}
