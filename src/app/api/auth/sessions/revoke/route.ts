@@ -1,4 +1,5 @@
 import { AppError } from "@/errors/app-error";
+import { revokeAllSessionsByUserId } from "@/features/auth/database/sessions-database";
 import requiredAccessToken from "@/features/auth/guard/required-access-token";
 import { deleteSession } from "@/features/auth/lib/sessions";
 import {
@@ -6,17 +7,12 @@ import {
   internalServerError,
   sendSuccess,
 } from "@/helper/response-helper";
-import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
     const { userId } = await requiredAccessToken(req);
 
-    await prisma.sessions.updateMany({
-      where: { userId, revoked: false },
-      data: { revoked: true },
-    });
-
+    await revokeAllSessionsByUserId(userId);
     await deleteSession();
 
     return sendSuccess(null, "Revoke All Sessions successfully");

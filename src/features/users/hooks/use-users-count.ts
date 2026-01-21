@@ -1,14 +1,13 @@
-import { GetMe } from "@/features/users/types/user";
 import { axiosInstance } from "@/lib/axios/axios";
 import { ApiResponse } from "@/types/response";
 import { useQuery } from "@tanstack/react-query";
 
-export const useMe = () => {
+export const useUsersCount = () => {
   return useQuery({
-    queryKey: ["me"],
+    queryKey: ["users-count"],
     queryFn: async () => {
-      const res = await axiosInstance.get("/api/auth/me");
-      return res.data as ApiResponse<GetMe>;
+      const res = await axiosInstance.get("/api/users/count");
+      return res.data as ApiResponse<number>;
     },
   });
 };

@@ -1,21 +1,18 @@
 import { AppError } from "@/errors/app-error";
+import { getSessionsByUserId } from "@/features/auth/database/sessions-database";
 import requiredAccessToken from "@/features/auth/guard/required-access-token";
-import { sessionsMapping } from "@/features/auth/helper/sessions-helper";
+import { sessionsMapping } from "@/features/auth/mapping/session-mapping";
 import {
   errorResponse,
   internalServerError,
   sendSuccess,
 } from "@/helper/response-helper";
-import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
   try {
     const { sessionId, userId } = await requiredAccessToken(req);
 
-    const sessions = await prisma.sessions.findMany({
-      where: { userId, revoked: false },
-    });
-
+    const sessions = await getSessionsByUserId(userId);
     const mappedSessions = sessionsMapping(sessions, sessionId);
 
     const message = sessions.length

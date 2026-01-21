@@ -2,6 +2,7 @@ import "server-only";
 import { expiresInMiliseconds } from "@/helper/expires-in-miliseconds";
 import { errors, JWTPayload, jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
 export type DecryptResult<TPayload extends JWTPayload = JWTPayload> =
   | { valid: true; payload: TPayload }
@@ -19,18 +20,12 @@ export interface AccessTokenPayload extends JWTPayload {
 const SESSION_SECRET = process.env.SESSION_SECRET!;
 const SECRET = new TextEncoder().encode(SESSION_SECRET);
 
-// export const ACCESS_TOKEN_EXPIRES_SECONDS = 15 * 60; // 15 minutes
-export const ACCESS_TOKEN_EXPIRES_SECONDS = 1 * 60; // FOR DEBUGGING: 1 minute
+export const ACCESS_TOKEN_EXPIRES_SECONDS = 15 * 60; // 15 minutes
+// export const ACCESS_TOKEN_EXPIRES_SECONDS = 1 * 60; // FOR DEBUGGING: 1 minute
 export const REFRESH_TOKEN_EXPIRES_SECONDS = 60 * 60 * 24 * 7; // 7 days
 // export const REFRESH_TOKEN_EXPIRES_SECONDS = 2 * 60; // FOR DEBUGGING: 2 minutes
 
-export async function signAccessToken({
-  userId,
-  sessionId,
-}: {
-  userId: string;
-  sessionId: string;
-}) {
+export async function signAccessToken({ userId, sessionId }: AccessTokenPayload) {
   return new SignJWT({ userId, sessionId })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -38,7 +33,7 @@ export async function signAccessToken({
     .sign(SECRET);
 }
 
-export async function signRefreshToken({ sessionId }: { sessionId: string }) {
+export async function signRefreshToken({ sessionId }: RefreshTokenPayload) {
   return new SignJWT({ sessionId })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -72,5 +67,34 @@ export async function decrypt<TPayload extends JWTPayload = JWTPayload>(
   } catch (error) {
     if (error instanceof errors.JWTExpired) return { valid: false, reason: "expired" };
     return { valid: false, reason: "invalid" };
+  }
+}
+
+interface SetAuthCookies {
+  response: NextResponse;
+  accessToken?: string;
+  refreshToken?: string;
+}
+
+// DOC: set auth cookies in client browser
+export function setAuthCookies({ response, accessToken, refreshToken }: SetAuthCookies) {
+  if (accessToken) {
+    response.cookies.set("access_token", accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: ACCESS_TOKEN_EXPIRES_SECONDS,
+    });
+  }
+
+  if (refreshToken) {
+    response.cookies.set("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: REFRESH_TOKEN_EXPIRES_SECONDS,
+    });
   }
 }

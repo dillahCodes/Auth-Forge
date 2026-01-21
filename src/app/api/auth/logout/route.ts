@@ -1,4 +1,5 @@
 import { AppError } from "@/errors/app-error";
+import { revokeSessionBySessionId } from "@/features/auth/database/logout-database";
 import requiredRefreshToken from "@/features/auth/guard/required-refresh-token";
 import { deleteSession } from "@/features/auth/lib/sessions";
 import {
@@ -6,13 +7,12 @@ import {
   internalServerError,
   sendSuccess,
 } from "@/helper/response-helper";
-import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
     const { sessionId } = await requiredRefreshToken(req);
 
-    await prisma.sessions.update({ where: { id: sessionId }, data: { revoked: true } });
+    await revokeSessionBySessionId(sessionId);
     const response = sendSuccess(null, "Logout successfully");
     await deleteSession();
 

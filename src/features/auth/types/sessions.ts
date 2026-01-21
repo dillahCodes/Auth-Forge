@@ -3,6 +3,13 @@ export interface GetSessions {
   sessions: Session[];
 }
 
+export type GetSessionsCount = SessionCount[];
+
+export interface SessionCount {
+  _count: number;
+  revoked: boolean;
+}
+
 export interface Session {
   id: string;
   device: string;

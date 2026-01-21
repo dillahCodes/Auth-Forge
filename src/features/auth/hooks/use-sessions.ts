@@ -1,4 +1,4 @@
-import { axiosInstance } from "@/lib/axios";
+import { axiosInstance } from "@/lib/axios/axios";
 import { ApiResponse } from "@/types/response";
 import { useQuery } from "@tanstack/react-query";
 import { GetSessions } from "../types/sessions";

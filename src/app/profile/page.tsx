@@ -5,10 +5,11 @@ import OtherSessions from "@/features/auth/components/other-sessions";
 import UserInfo from "@/features/auth/components/user-info";
 import { useRevokeSessions } from "@/features/auth/hooks/use-revoke-sessions";
 import { useSessions } from "@/features/auth/hooks/use-sessions";
+import { ClientRouters } from "@/routers/client-router";
 import { useRouter } from "next/navigation";
 import { Activity } from "react";
 
-export default function Dashboard() {
+export default function Profile() {
   const router = useRouter();
   const { data: sessionData, isLoading } = useSessions();
   const { mutate: revokeAll, isPending: isRevokeAllPending } = useRevokeSessions();
@@ -17,11 +18,11 @@ export default function Dashboard() {
   const otherSessions = sessionData?.data?.sessions.filter((s) => !s.isCurrent);
 
   const handleRevokeAll = () => {
-    revokeAll(undefined, { onSuccess: () => router.push("/login") });
+    revokeAll(undefined, { onSuccess: () => router.push(ClientRouters.LOGIN) });
   };
 
   return (
-    <main className="flex flex-col gap-6 w-full max-w-xl">
+    <section className="flex flex-col gap-6 w-full max-w-xl">
       <h1 className="font-bold text-3xl">Profile</h1>
 
       <UserInfo />
@@ -41,6 +42,6 @@ export default function Dashboard() {
           {isRevokeAllPending ? "Logging out..." : "Logout All"}
         </button>
       </Activity>
-    </main>
+    </section>
   );
 }
