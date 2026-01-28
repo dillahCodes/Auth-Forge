@@ -15,12 +15,12 @@ const SESSION_SECRET = process.env.SESSION_SECRET!;
 const SECRET = new TextEncoder().encode(SESSION_SECRET);
 
 // DOC: for production
-// export const ACCESS_TOKEN_EXPIRES_SECONDS = 15 * 60;
-// export const REFRESH_TOKEN_EXPIRES_SECONDS = 60 * 60 * 24 * 7;
+export const ACCESS_TOKEN_EXPIRES_SECONDS = 15 * 60;
+export const REFRESH_TOKEN_EXPIRES_SECONDS = 60 * 60 * 24 * 7;
 
 // DOC: for development
-export const ACCESS_TOKEN_EXPIRES_SECONDS = 1 * 60;
-export const REFRESH_TOKEN_EXPIRES_SECONDS = 10 * 60;
+// export const ACCESS_TOKEN_EXPIRES_SECONDS = 1 * 60;
+// export const REFRESH_TOKEN_EXPIRES_SECONDS = 10 * 60;
 
 export const TokenService = {
   // DOC: Sign access token
