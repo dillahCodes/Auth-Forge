@@ -1,11 +1,7 @@
-import { AppError } from "@/errors/app-error";
-import {
-  errorResponse,
-  internalServerError,
-  sendSuccess,
-} from "@/helper/response-helper";
-import { getClientInfo } from "@/lib/client-info";
-import { geoVercel } from "@/lib/geolocation/geo-vercel";
+import { AppError } from "@/shared/errors/app-error";
+import { errorResponse, internalServerError, sendSuccess } from "@/shared/utils/response-helper";
+import { getClientInfo } from "@/shared/lib/client-info";
+import { geoVercel } from "@/shared/lib/geolocation/geo-vercel";
 
 export async function GET(req: Request) {
   try {

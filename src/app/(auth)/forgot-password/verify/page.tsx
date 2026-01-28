@@ -1,15 +1,15 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form/form";
-import { FormHeader } from "@/components/ui/form/form-header";
-import { InputPassword } from "@/components/ui/input/input-password";
-import { InputText } from "@/components/ui/input/input-text";
-import { MessageBox } from "@/components/ui/messagebox";
+import { Button } from "@/shared/components/ui/button";
+import { Form } from "@/shared/components/ui/form/form";
+import { FormHeader } from "@/shared/components/ui/form/form-header";
+import { InputPassword } from "@/shared/components/ui/input/input-password";
+import { InputText } from "@/shared/components/ui/input/input-text";
+import { MessageBox } from "@/shared/components/ui/messagebox";
 import { useForgotPasswordVerify } from "@/features/auth/hooks/use-forgot-password-verify";
-import { forgotPasswordSchema } from "@/features/auth/schemas/forgot-password-schema";
-import { getFieldError } from "@/helper/response-helper";
-import { ApiResponse } from "@/types/response";
+import { forgotPasswordSchema } from "@/features/auth/schemas/forgot-password.schema";
+import { getFieldError } from "@/shared/utils/response-helper";
+import { ApiResponse } from "@/shared/types/response";
 import { AxiosError } from "axios";
 import { useSearchParams } from "next/navigation";
 import { Activity, useEffect, useMemo } from "react";
@@ -57,26 +57,22 @@ export default function ForgotPasswordVerifyPage() {
   }, [data, status, axiosSendForgotPasswordError]);
 
   useEffect(() => {
+    if (!message) return;
+
     const timeOutId = setTimeout(() => {
       reset();
     }, 5000);
 
     return () => clearTimeout(timeOutId);
-  }, [reset]);
+  }, [reset, message]);
 
   return (
     <section className="flex flex-col gap-6 w-full max-w-md">
       <Form onSubmit={handleSubmit}>
-        <FormHeader
-          icon={RiRotateLockFill}
-          title="Change Password"
-          description="Enter your new password to continue"
-        />
+        <FormHeader icon={RiRotateLockFill} title="Change Password" description="Enter your new password to continue" />
 
         <Activity mode={message ? "visible" : "hidden"}>
-          <MessageBox type={message?.type as "success" | "error"}>
-            {message?.message}
-          </MessageBox>
+          <MessageBox type={message?.type as "success" | "error"}>{message?.message}</MessageBox>
         </Activity>
 
         <InputText
@@ -108,10 +104,7 @@ export default function ForgotPasswordVerifyPage() {
             placeholder: "New password...",
             name: "password",
           }}
-          errorMessage={
-            axiosSendForgotPasswordError &&
-            getFieldError(axiosSendForgotPasswordError, "password")
-          }
+          errorMessage={axiosSendForgotPasswordError && getFieldError(axiosSendForgotPasswordError, "password")}
         />
 
         <InputPassword
@@ -121,17 +114,9 @@ export default function ForgotPasswordVerifyPage() {
             placeholder: "Confirm password...",
             name: "confirmPassword",
           }}
-          errorMessage={
-            axiosSendForgotPasswordError &&
-            getFieldError(axiosSendForgotPasswordError, "confirmPassword")
-          }
+          errorMessage={axiosSendForgotPasswordError && getFieldError(axiosSendForgotPasswordError, "confirmPassword")}
         />
-        <Button
-          variant="info"
-          type="submit"
-          className="font-semibold"
-          disabled={status === "pending"}
-        >
+        <Button variant="info" type="submit" className="font-semibold" disabled={status === "pending"}>
           {status === "pending" ? "Loading..." : "Change Password"}
         </Button>
       </Form>

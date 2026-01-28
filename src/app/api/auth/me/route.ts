@@ -1,19 +1,5 @@
-import { AppError } from "@/errors/app-error";
-import { getUserByUserId } from "@/features/auth/database/login-database";
-import requiredAccessToken from "@/features/auth/guard/required-access-token";
-import {
-  errorResponse,
-  internalServerError,
-  sendSuccess,
-} from "@/helper/response-helper";
+import { MeController } from "@/features/auth/controllers/me.controller";
 
 export async function GET(req: Request) {
-  try {
-    const { userId } = await requiredAccessToken(req);
-    const user = await getUserByUserId(userId);
-    return sendSuccess(user, "Get my user data successfully");
-  } catch (error) {
-    if (error instanceof AppError) return errorResponse(error);
-    return internalServerError(error);
-  }
+  return await MeController.getMe(req);
 }

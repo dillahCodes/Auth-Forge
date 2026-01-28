@@ -1,25 +1,5 @@
-import { AppError } from "@/errors/app-error";
-import requiredAccessToken from "@/features/auth/guard/required-access-token";
-import {
-  errorResponse,
-  internalServerError,
-  sendSuccess,
-} from "@/helper/response-helper";
-import { prisma } from "@/lib/prisma";
+import { SessionsController } from "@/features/auth/controllers/sessions.controller";
 
 export async function GET(req: Request) {
-  try {
-    const { userId } = await requiredAccessToken(req);
-
-    const sessions = await prisma.sessions.groupBy({
-      by: ["revoked"],
-      _count: true,
-      where: { userId },
-    });
-
-    return sendSuccess(sessions, "Get sessions count successfully");
-  } catch (error) {
-    if (error instanceof AppError) return errorResponse(error);
-    return internalServerError(error);
-  }
+  return await SessionsController.count(req);
 }

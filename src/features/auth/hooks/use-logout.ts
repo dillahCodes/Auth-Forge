@@ -1,7 +1,7 @@
 "use client";
 
-import { axiosInstance } from "@/lib/axios/axios";
 import { ClientRouters } from "@/routers/client-router";
+import { axiosInstance } from "@/shared/lib/axios/axios";
 import { useMutation } from "@tanstack/react-query";
 
 export function useLogout() {

@@ -24,3 +24,26 @@ export const forgotPasswordSchema = z
     message: "Passwords do not match",
     path: ["confirmPassword", "password"],
   });
+
+export type ForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>;
+export type ForgotPasswordEmailSchema = z.infer<typeof forgotPasswordEmailSchema>;
+
+interface ValidateForgotPasswordForm {
+  input: unknown;
+  forEndpoint: "send" | "verify";
+}
+
+export async function validateForgotPasswordForm({
+  forEndpoint,
+  input,
+}: ValidateForgotPasswordForm) {
+  const schema = { send: forgotPasswordEmailSchema, verify: forgotPasswordSchema };
+  const result = schema[forEndpoint].safeParse(input);
+
+  if (!result.success) {
+    const errors = result.error.flatten().fieldErrors;
+    return { isError: true, errors, data: null };
+  }
+
+  return { isError: false, data: result.data, errors: null };
+}

@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form/form";
-import { FormHeader } from "@/components/ui/form/form-header";
-import { MessageBox } from "@/components/ui/messagebox";
+import { Button } from "@/shared/components/ui/button";
+import { Form } from "@/shared/components/ui/form/form";
+import { FormHeader } from "@/shared/components/ui/form/form-header";
+import { MessageBox } from "@/shared/components/ui/messagebox";
 import { useEmailSendVerify } from "@/features/auth/hooks/use-email-send-verify";
 import { useEmailVerify } from "@/features/auth/hooks/use-email-verify";
 import { useOtp } from "@/features/auth/hooks/use-otp";
-import { useCountdown } from "@/hooks/use-countdown";
-import { ApiResponse } from "@/types/response";
+import { useCountdown } from "@/shared/hooks/use-countdown";
+import { ApiResponse } from "@/shared/types/response";
 import { AxiosError } from "axios";
 import { Activity, useEffect, useMemo } from "react";
 import { LuMailCheck } from "react-icons/lu";
@@ -25,8 +25,7 @@ export default function VerifyEmailPage() {
     timeoutSeconds: 0,
   });
 
-  const { otpLength, handleOtpInputChange, handleKeyDown, handlePaste, inputsRef } =
-    useOtp({ otpLength: 6 });
+  const { otpLength, handleOtpInputChange, handleKeyDown, handlePaste, inputsRef } = useOtp({ otpLength: 6 });
 
   const {
     mutate: reqVerify,
@@ -119,9 +118,7 @@ export default function VerifyEmailPage() {
         />
 
         <Activity mode={message ? "visible" : "hidden"}>
-          <MessageBox type={message?.type as "success" | "error"}>
-            {message?.message}
-          </MessageBox>
+          <MessageBox type={message?.type as "success" | "error"}>{message?.message}</MessageBox>
         </Activity>
 
         <div className="w-full grid grid-cols-6 gap-3">
@@ -156,12 +153,7 @@ export default function VerifyEmailPage() {
           </Button>
         </div>
 
-        <Button
-          variant="info"
-          type="submit"
-          className="font-semibold"
-          disabled={isVerifyPending || isReqPending}
-        >
+        <Button variant="info" type="submit" className="font-semibold" disabled={isVerifyPending || isReqPending}>
           {isVerifyPending ? "Verifying..." : "Verify Email"}
         </Button>
       </Form>

@@ -1,6 +1,6 @@
 "use client";
 
-import { axiosInstance } from "@/lib/axios/axios";
+import { axiosInstance } from "@/shared/lib/axios/axios";
 import { ClientRouters } from "@/routers/client-router";
 import { useMutation } from "@tanstack/react-query";
 

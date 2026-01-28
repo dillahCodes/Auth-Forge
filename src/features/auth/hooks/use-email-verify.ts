@@ -1,6 +1,6 @@
 "use client";
-import { axiosInstance } from "@/lib/axios/axios";
-import { ApiResponse } from "@/types/response";
+import { axiosInstance } from "@/shared/lib/axios/axios";
+import { ApiResponse } from "@/shared/types/response";
 import { useMutation } from "@tanstack/react-query";
 
 export function useEmailVerify() {

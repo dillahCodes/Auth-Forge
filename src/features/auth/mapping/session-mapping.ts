@@ -1,4 +1,4 @@
-import { parseDevice } from "@/lib/parse-device";
+import { parseDevice } from "@/shared/utils/parse-device";
 
 interface Sessions {
   id: string;
