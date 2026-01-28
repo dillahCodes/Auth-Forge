@@ -1,4 +1,4 @@
-import { ErrorCode, HttpStatusCode } from "@/types/response";
+import { ErrorCode, HttpStatusCode } from "@/shared/types/response";
 
 export class AppError extends Error {
   readonly status: HttpStatusCode;

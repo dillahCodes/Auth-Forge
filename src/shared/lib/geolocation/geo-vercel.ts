@@ -1,6 +1,18 @@
 import { geoMaxmind } from "./geo-maxmind";
 
-export const geoVercel = (req: Request, ip: string) => {
+export interface Geolocation {
+  ipAddress: string;
+  continent: string | null;
+  country: string | null;
+  countryRegion: string | null;
+  city: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  asn: number | null;
+  isp: string | null;
+}
+
+export const geoVercel = (req: Request, ip: string): Geolocation => {
   const maxmind = geoMaxmind(ip);
   const headers = req.headers;
 

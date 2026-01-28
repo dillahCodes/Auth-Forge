@@ -1,4 +1,4 @@
-import { ApiResponse, ErrorCode } from "@/types/response";
+import { ApiResponse, ErrorCode } from "@/shared/types/response";
 import { AxiosError } from "axios";
 import { handleSessionRevoked } from "./session-revoked";
 import { handleUnauthorized } from "./unauthorized";

@@ -30,13 +30,7 @@ const axiosRetryConfig: IAxiosRetryConfig = {
  * DOC:
  * - Axios Interceptors handle side effects during request/response lifecycles.
  */
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  handleInterceptorsResponError
-);
-axiosRetryInstance.interceptors.response.use(
-  (response) => response,
-  handleInterceptorsResponError
-);
+axiosInstance.interceptors.response.use((response) => response, handleInterceptorsResponError);
+axiosRetryInstance.interceptors.response.use((response) => response, handleInterceptorsResponError);
 
 axiosRetry(axiosInstance, axiosRetryConfig);

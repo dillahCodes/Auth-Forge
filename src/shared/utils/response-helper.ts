@@ -1,5 +1,5 @@
-import { AppError } from "@/errors/app-error";
-import { ApiResponse, ErrorCode } from "@/types/response";
+import { AppError } from "@/shared/errors/app-error";
+import { ApiResponse, ErrorCode } from "@/shared/types/response";
 import { AxiosError } from "axios";
 import { NextResponse } from "next/server";
 
@@ -31,19 +31,10 @@ export function internalServerError(error: unknown): NextResponse<ApiResponse<nu
   );
 }
 
-export function sendSuccess<T>(
-  data: T,
-  message: string = "Success"
-): NextResponse<ApiResponse<T>> {
-  return NextResponse.json(
-    { isSuccess: true, message, data, errors: null, messageCode: null },
-    { status: 200 }
-  );
+export function sendSuccess<T>(data: T, message: string = "Success"): NextResponse<ApiResponse<T>> {
+  return NextResponse.json({ isSuccess: true, message, data, errors: null, messageCode: null }, { status: 200 });
 }
 
-export function getFieldError(
-  error: AxiosError<ApiResponse>,
-  field: string
-): string | undefined {
+export function getFieldError(error: AxiosError<ApiResponse>, field: string): string | undefined {
   return error.response?.data?.errors?.[field]?.[0];
 }

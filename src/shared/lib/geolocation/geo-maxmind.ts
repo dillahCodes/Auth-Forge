@@ -2,7 +2,14 @@ import { Reader } from "@maxmind/geoip2-node";
 import fs from "fs";
 import path from "path";
 
-const base = path.join(process.cwd(), "src", "lib", "geolocation", "maxmind-db");
+const base = path.join(
+  process.cwd(),
+  "src",
+  "shared",
+  "lib",
+  "geolocation",
+  "maxmind-db"
+);
 
 const readers = {
   country: Reader.openBuffer(fs.readFileSync(path.join(base, "GeoLite2-Country.mmdb"))),

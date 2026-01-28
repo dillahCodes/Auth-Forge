@@ -1,6 +1,6 @@
 import { getRedis } from "./redis";
 
-interface RateLimiterFixedWindowOptions {
+export interface RateLimiterFixedWindowOptions {
   key: string;
   limit: number;
   windowSeconds: number;

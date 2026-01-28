@@ -1,4 +1,4 @@
-import { ApiResponse, ErrorCode } from "@/types/response";
+import { ApiResponse, ErrorCode } from "@/shared/types/response";
 import { AxiosError } from "axios";
 import { refreshSession } from "./refresh-session";
 

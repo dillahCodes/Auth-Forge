@@ -1,9 +1,14 @@
 import { getRedis } from "./redis";
 
-interface RateLimitTokenBucket {
+export interface RateLimitTokenBucketOptions {
   key: string;
   bucketCapacity: number;
   refillRatePerSecond: number;
+}
+
+interface RateLimiterTokenBucketResult {
+  isAllowed: boolean;
+  tokenRemaining: number;
 }
 
 const LUA_TOKEN_BUCKET_SCRIPT = `
@@ -52,7 +57,7 @@ export async function rateLimiterTokenBucket({
   key,
   bucketCapacity,
   refillRatePerSecond,
-}: RateLimitTokenBucket) {
+}: RateLimitTokenBucketOptions): Promise<RateLimiterTokenBucketResult> {
   const redis = await getRedis();
   const currentTimmeMs = new Date().getTime();
   const tokenUsedPerRequest = 1;
