@@ -1,5 +1,5 @@
-import { axiosInstance } from "@/lib/axios";
-import { ApiResponse } from "@/types/response";
+import { axiosInstance } from "@/shared/lib/axios/axios";
+import { ApiResponse } from "@/shared/types/response";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useRevokeSession = () => {

@@ -1,5 +1,8 @@
+import { Activity } from "react";
 import { useLogout } from "../hooks/use-logout";
 import { useMe } from "../hooks/use-me";
+import Link from "next/link";
+import { ClientRouters } from "@/routers/client-router";
 
 export default function UserInfo() {
   const { data: userData, isLoading } = useMe();
@@ -11,7 +14,26 @@ export default function UserInfo() {
     <section className="border-2 shadow-strong p-3 ">
       <h2 className="font-bold mb-4">User Info</h2>
       <p>Name: {userData?.data?.name}</p>
-      <p>Email: {userData?.data?.email}</p>
+      <div className="flex items-center gap-1">
+        <p>Email: {userData?.data?.email}</p>
+        <Activity
+          name="Email Verified"
+          mode={userData?.data?.verifiedAt ? "visible" : "hidden"}
+        >
+          <p className="text-sm text-gray-500">(Email verified)</p>
+        </Activity>
+        <Activity
+          name="Email Verified"
+          mode={!userData?.data?.verifiedAt ? "visible" : "hidden"}
+        >
+          <Link
+            href={`${ClientRouters.VERIFY_EMAIL}?redirect=${window.location.href}`}
+            className="text-sm text-blue-500 underline cursor-pointer"
+          >
+            (verify email)
+          </Link>
+        </Activity>
+      </div>
       <button
         onClick={() => logout()}
         disabled={isPending}

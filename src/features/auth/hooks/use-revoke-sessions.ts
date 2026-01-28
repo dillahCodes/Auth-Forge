@@ -1,5 +1,5 @@
-import { axiosInstance } from "@/lib/axios";
-import { ApiResponse } from "@/types/response";
+import { axiosInstance } from "@/shared/lib/axios/axios";
+import { ApiResponse } from "@/shared/types/response";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useRevokeSessions = () => {
@@ -12,8 +12,7 @@ export const useRevokeSessions = () => {
     },
 
     onSuccess: () => {
-      queryClient.removeQueries({ queryKey: ["sessions"] });
-      queryClient.removeQueries({ queryKey: ["me"] });
+      queryClient.invalidateQueries({ queryKey: ["sessions"] });
     },
   });
 };

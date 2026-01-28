@@ -1,79 +1,93 @@
 "use client";
 
+import { Button } from "@/shared/components/ui/button";
+import { Form } from "@/shared/components/ui/form/form";
+import { FormHeader } from "@/shared/components/ui/form/form-header";
+import { InputEmail } from "@/shared/components/ui/input/input-email";
+import { InputPassword } from "@/shared/components/ui/input/input-password";
 import { useLogin } from "@/features/auth/hooks/use-login";
-import { getFieldError } from "@/helper/response-helper";
-import { ApiResponse } from "@/types/response";
+import { getFieldError } from "@/shared/utils/response-helper";
+import { ApiResponse } from "@/shared/types/response";
 import { AxiosError } from "axios";
 import Link from "next/link";
+import { FaRegUserCircle } from "react-icons/fa";
+import { Activity, useEffect, useMemo } from "react";
+import { MessageBox } from "@/shared/components/ui/messagebox";
+
+interface MessageBoxType {
+  condition: boolean;
+  message: string;
+  type: "success" | "error";
+}
 
 export default function Login() {
-  const { mutate: login, isPending, error } = useLogin();
+  const { mutate: login, isPending, error, data, status, reset } = useLogin();
   const axiosError = error as AxiosError<ApiResponse>;
+
+  const message = useMemo(() => {
+    const conditions: MessageBoxType[] = [
+      {
+        condition: status === "success",
+        message: data?.message as string,
+        type: "success",
+      },
+      {
+        condition: status === "error",
+        message: axiosError?.response?.data.message as string,
+        type: "error",
+      },
+    ];
+
+    const match = conditions.find((i) => Boolean(i.condition));
+    return match || null;
+  }, [data, status, axiosError]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     login(new FormData(e.currentTarget));
   };
 
+  useEffect(() => {
+    if (!message) return;
+
+    const timeOutId = setTimeout(() => {
+      reset();
+    }, 5000);
+
+    return () => clearTimeout(timeOutId);
+  }, [reset, message]);
+
   return (
-    <main className="flex flex-col gap-6 w-full max-w-md">
-      <h1 className="text-center font-semibold text-2xl">Login</h1>
+    <section className="flex flex-col gap-6 w-full max-w-md">
+      <Form onSubmit={handleSubmit}>
+        <FormHeader icon={FaRegUserCircle} title="Welcome Back" description="Login to continue where you left off" />
 
-      <form
-        onSubmit={handleSubmit}
-        className="shadow-strong border-2 p-6 flex flex-col gap-4"
-      >
-        {/* Email */}
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium" htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            className=" border-2 cursor-pointer px-3 py-2 text-sm"
-          />
-          {axiosError && (
-            <p className="text-red-500 text-xs">{getFieldError(axiosError, "email")}</p>
-          )}
-        </div>
+        <Activity mode={message ? "visible" : "hidden"}>
+          <MessageBox type={message?.type as "success" | "error"}>{message?.message}</MessageBox>
+        </Activity>
 
-        {/* Password */}
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium" htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            className=" border-2 cursor-pointer px-3 py-2 text-sm"
-          />
-          {axiosError && (
-            <p className="text-red-500 text-xs">
-              {getFieldError(axiosError, "password")}
-            </p>
-          )}
-        </div>
+        <InputEmail
+          errorMessage={axiosError && getFieldError(axiosError, "email")}
+          inputProps={{ id: "email", name: "email", placeholder: "Email" }}
+        />
+        <InputPassword
+          errorMessage={axiosError && getFieldError(axiosError, "password")}
+          inputProps={{ name: "password", id: "password", placeholder: "Password" }}
+        />
 
         <div className="flex justify-between text-xs">
           <Link href="/register" className="underline">
             Register
           </Link>
           <Link href="/forgot-password" className="underline">
-            Reset Password
+            Forgot Password
           </Link>
         </div>
 
-        <button
-          type="submit"
-          disabled={isPending}
-          className="w-full font-semibold py-2 border-2 border-dark bg-info text-dark-2 cursor-pointer bg-primary disabled:opacity-50"
-        >
+        <Button variant="info" type="submit" className="font-semibold">
           {isPending ? "Logging in..." : "Login"}
-        </button>
-      </form>
-    </main>
+        </Button>
+      </Form>
+    </section>
   );
 }

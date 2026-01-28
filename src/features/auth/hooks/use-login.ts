@@ -1,7 +1,7 @@
 "use client";
 
-import { axiosInstance } from "@/lib/axios";
-import { RouterUrls } from "@/routers/client-router";
+import { axiosInstance } from "@/shared/lib/axios/axios";
+import { ClientRouters } from "@/routers/client-router";
 import { useMutation } from "@tanstack/react-query";
 
 export function useLogin() {
@@ -13,7 +13,7 @@ export function useLogin() {
       return res.data;
     },
     onSuccess: () => {
-      window.location.href = RouterUrls.PROFILE;
+      window.location.href = ClientRouters.DASHBOARD;
     },
   });
 

@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/shared/lib/prisma";
 import bcrypt from "bcrypt";
 
 async function main() {
@@ -6,6 +6,7 @@ async function main() {
     { email: "admin@example.com", name: "Admin", password: "admin123" },
     { email: "user1@example.com", name: "User One", password: "user1123" },
     { email: "user2@example.com", name: "User Two", password: "user2123" },
+    { email: "adenedi81@gmail.com", name: "dillahcodes", password: "12345678" },
   ];
 
   for (const u of users) {

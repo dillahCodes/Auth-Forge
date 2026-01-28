@@ -1,76 +1,91 @@
 "use client";
 
+import { Button } from "@/shared/components/ui/button";
+import { Form } from "@/shared/components/ui/form/form";
+import { FormHeader } from "@/shared/components/ui/form/form-header";
+import { InputEmail } from "@/shared/components/ui/input/input-email";
+import { InputPassword } from "@/shared/components/ui/input/input-password";
+import { InputText } from "@/shared/components/ui/input/input-text";
 import { useRegister } from "@/features/auth/hooks/use-register";
-import { getFieldError } from "@/helper/response-helper";
-import { ApiResponse } from "@/types/response";
+import { getFieldError } from "@/shared/utils/response-helper";
+import { ApiResponse } from "@/shared/types/response";
 import { AxiosError } from "axios";
-import { useFormStatus } from "react-dom";
+import { LuIdCard } from "react-icons/lu";
+import { Activity, useEffect, useMemo } from "react";
+import { MessageBox } from "@/shared/components/ui/messagebox";
+
+interface MessageBoxType {
+  condition: boolean;
+  message: string;
+  type: "success" | "error";
+}
 
 export default function Register() {
-  const { mutate: register, error } = useRegister();
+  const { mutate: register, error, isPending, data, status, reset } = useRegister();
   const axiosError = error as AxiosError<ApiResponse>;
+
+  const message = useMemo(() => {
+    const conditions: MessageBoxType[] = [
+      {
+        condition: status === "success",
+        message: data?.message as string,
+        type: "success",
+      },
+      {
+        condition: status === "error",
+        message: axiosError?.response?.data.message as string,
+        type: "error",
+      },
+    ];
+
+    const match = conditions.find((i) => Boolean(i.condition));
+    return match || null;
+  }, [data, status, axiosError]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     register(new FormData(e.currentTarget));
   };
 
+  useEffect(() => {
+    if (!message) return;
+
+    const timeOutId = setTimeout(() => {
+      reset();
+    }, 5000);
+
+    return () => clearTimeout(timeOutId);
+  }, [reset, message]);
+
   return (
     <main className="flex flex-col gap-6 w-full max-w-md">
-      <h1 className="font-semibold text-3xl text-center">Register</h1>
+      <Form onSubmit={handleSubmit}>
+        <FormHeader icon={LuIdCard} title="Create Account" description="Enter your details to get started" />
 
-      <form
-        onSubmit={handleSubmit}
-        className="border-2  p-6 shadow-strong flex flex-col gap-4"
-      >
-        <Field name="name" label="Name" error={axiosError} />
-        <Field name="email" label="Email" error={axiosError} />
-        <Field name="password" label="Password" type="password" error={axiosError} />
-        <SubmitButton />
-      </form>
+        <Activity mode={message ? "visible" : "hidden"}>
+          <MessageBox type={message?.type as "success" | "error"}>{message?.message}</MessageBox>
+        </Activity>
+
+        <InputText
+          labelIcon={LuIdCard}
+          errorMessage={axiosError && getFieldError(axiosError, "name")}
+          labelProps={{ htmlFor: "name" }}
+          inputProps={{ id: "name", name: "name", placeholder: "Name" }}
+        />
+        <InputEmail
+          labelProps={{ htmlFor: "email" }}
+          errorMessage={axiosError && getFieldError(axiosError, "email")}
+          inputProps={{ id: "email", name: "email", placeholder: "Email" }}
+        />
+        <InputPassword
+          errorMessage={axiosError && getFieldError(axiosError, "password")}
+          labelProps={{ htmlFor: "password" }}
+          inputProps={{ id: "password", name: "password", placeholder: "Password" }}
+        />
+        <Button variant="info" className="font-semibold">
+          {isPending ? "Registering..." : "Register"}
+        </Button>
+      </Form>
     </main>
-  );
-}
-
-function Field({
-  name,
-  label,
-  type = "text",
-  error,
-}: {
-  name: string;
-  label: string;
-  type?: string;
-  error?: AxiosError<ApiResponse>;
-}) {
-  const axiosError = error as AxiosError<ApiResponse>;
-  return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={name} className="text-sm">
-        {label}
-      </label>
-      <input
-        id={name}
-        name={name}
-        type={type}
-        className=" border-2 cursor-pointer px-3 py-2 text-sm"
-      />
-      {axiosError && (
-        <p className="text-red-500 text-xs">{getFieldError(axiosError, name)}</p>
-      )}
-    </div>
-  );
-}
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="w-full font-semibold py-2 border-2 border-dark bg-info text-dark-2 cursor-pointer bg-primary disabled:opacity-50"
-    >
-      {pending ? "Registering..." : "Register"}
-    </button>
   );
 }
