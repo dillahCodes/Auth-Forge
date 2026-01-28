@@ -1,6 +1,6 @@
-import { getClientInfo } from "@/lib/client-info";
-import { rateLimiterTokenBucket } from "@/lib/redis/rate-limiter-token-bucket";
-import { HttpStatusCode } from "@/types/response";
+import { getClientInfo } from "@/shared/lib/client-info";
+import { rateLimiterTokenBucket } from "@/shared/lib/redis/rate-limiter-token-bucket";
+import { HttpStatusCode } from "@/shared/types/response";
 import { NextRequest, NextResponse } from "next/server";
 
 // DOC: Handle rate limiting for non-auth routes
