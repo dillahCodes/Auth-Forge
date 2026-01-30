@@ -1,9 +1,16 @@
-import { AuthTokenExpired } from "@/shared/errors/auth-error";
+import { AuthRequiredEmailVerification, AuthTokenExpired } from "@/shared/errors/auth-error";
 import { AccessTokenPayload, TokenService } from "../services/token.service";
 import { CookieHttp } from "./cookie.http";
 
+interface RequiredAccessTokenOptions {
+  requireEmailVerification?: boolean;
+}
+
 export const AccessTokenHttp = {
-  async requiredAccessToken(req: Request): Promise<AccessTokenPayload> {
+  async requiredAccessToken(
+    req: Request,
+    { requireEmailVerification = true }: RequiredAccessTokenOptions = {}
+  ): Promise<AccessTokenPayload> {
     // DOC: get access token from cookie
     const accessToken = CookieHttp.getCookie(req, "access_token");
     if (!accessToken) throw new AuthTokenExpired();
@@ -13,6 +20,9 @@ export const AccessTokenHttp = {
     if (!result.valid) throw new AuthTokenExpired();
 
     const { userId, sessionId, permissions, verifiedAt } = result.payload;
+
+    // DOC: check if email is verified
+    if (!verifiedAt && requireEmailVerification) throw new AuthRequiredEmailVerification();
 
     return {
       userId,

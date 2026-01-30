@@ -22,7 +22,7 @@ interface MessageBoxType {
 export default function VerifyEmailPage() {
   const { isCountdownDone, remaining, setCountDownvalue } = useCountdown({
     key: "email-verify-countdown",
-    timeoutSeconds: 0,
+    timeoutSeconds: 120,
   });
 
   const { otpLength, handleOtpInputChange, handleKeyDown, handlePaste, inputsRef } = useOtp({ otpLength: 6 });

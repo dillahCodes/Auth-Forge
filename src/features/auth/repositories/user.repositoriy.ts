@@ -46,7 +46,7 @@ export const UserRepository = {
     return prisma.user.update({
       where: { id: userId },
       data: { verifiedAt },
-      select: { id: true, name: true, email: true },
+      select: { id: true, name: true, email: true, verifiedAt: true },
     });
   },
 

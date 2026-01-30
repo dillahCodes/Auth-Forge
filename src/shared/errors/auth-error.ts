@@ -7,6 +7,12 @@ export class AuthInvalidCredentials extends AppError {
   }
 }
 
+export class AuthRequiredEmailVerification extends AppError {
+  constructor(message = "Please verify your email first") {
+    super(message, HttpStatusCode.UNAUTHORIZED, ErrorCode.AUTH_REQUIRED_EMAIL_VERIFICATION);
+  }
+}
+
 export class ValidationFailed extends AppError {
   constructor(errors: Record<string, string[]>, message = "Validation failed, please check your input") {
     super(message, HttpStatusCode.UNPROCESSABLE_ENTITY, ErrorCode.VALIDATION_FAILED, errors);
