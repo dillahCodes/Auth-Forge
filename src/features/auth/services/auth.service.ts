@@ -38,7 +38,7 @@ export const AuthService = {
 
     // DOC: create session and tokens
     const sessionId = uuidv4();
-    const accessToken = await signAccessToken({ userId: user.id, sessionId });
+    const accessToken = await signAccessToken({ userId: user.id, sessionId, verifiedAt: user.verifiedAt });
     const refreshToken = await signRefreshToken({ sessionId });
 
     // DOC: store session and tokens in database

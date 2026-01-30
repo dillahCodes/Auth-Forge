@@ -5,6 +5,7 @@ import { prisma } from "@/shared/lib/prisma";
 import { v4 as uuidv4 } from "uuid";
 import { SessionRepository } from "../repositories/session.repository";
 import { TokenService } from "./token.service";
+import { UserRepository } from "../repositories/user.repositoriy";
 
 interface RefreshTokenPayload {
   clientInfo: ClientInfo;
@@ -47,9 +48,14 @@ export const SessionService = {
   async refreshToken(params: RefreshTokenPayload) {
     const { clientInfo, geolocation, sessionId, userId } = params;
 
+    const user = await UserRepository.getById(userId);
+    if (!user) throw new AuthUnauthorized();
+
+    const { verifiedAt } = user;
+
     // DOC: generate new token
     const newSessionId = uuidv4();
-    const newAccessToken = await TokenService.signAccessToken({ userId, sessionId: newSessionId });
+    const newAccessToken = await TokenService.signAccessToken({ userId, sessionId: newSessionId, verifiedAt });
     const newRefreshToken = await TokenService.signRefreshToken({ sessionId: newSessionId });
     const newTokenPayload = { sessionId: newSessionId, refreshToken: newRefreshToken };
 

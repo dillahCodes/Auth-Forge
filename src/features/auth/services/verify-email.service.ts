@@ -3,6 +3,7 @@ import { OtpRepository } from "../repositories/otp.repository";
 import { UserRepository } from "../repositories/user.repositoriy";
 import { RateLimiterService } from "./rate-limit.service";
 import { EmailService } from "./email.service";
+import { TokenService } from "./token.service";
 
 export const VerifyEmailService = {
   send: async (userId: string) => {
@@ -32,7 +33,7 @@ export const VerifyEmailService = {
     await EmailService.sendVerifyEmail(payload);
   },
 
-  verify: async (userId: string, inputOtp: string) => {
+  verify: async (userId: string, inputOtp: string, sessionId: string) => {
     // DOC: implement rate limiter
     const redisVerifyKey = `otp:email|type:verify|uid:${userId}`;
     const cfgLimiter = { key: redisVerifyKey, limit: 5, windowSeconds: 60 * 10 };
@@ -52,11 +53,14 @@ export const VerifyEmailService = {
       throw new ResourceUnprocessableEntity("OTP invalid or expired, please try again");
     }
 
-    // DOC: update user
-    await UserRepository.updateVerifiedAt(userId, new Date());
+    // DOC: update user and give new access token
+    const result = await UserRepository.updateVerifiedAt(userId, new Date());
+    const newAccessToken = await TokenService.signAccessToken({ userId, sessionId, verifiedAt: result.verifiedAt });
 
     // DOC: Cleanup redis keys
     await OtpRepository.deleteOtp(redisVerifyKey);
     await OtpRepository.deleteOtp(redisSendOtpKey);
+
+    return { accessToken: newAccessToken };
   },
 };
