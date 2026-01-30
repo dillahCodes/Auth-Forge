@@ -183,6 +183,7 @@ export type UserWhereInput = {
   password?: Prisma.StringFilter<"User"> | string
   verifiedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   sessions?: Prisma.SessionsListRelationFilter
+  emailChangeAuditLogs?: Prisma.EmailChangeAuditLogListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -192,6 +193,7 @@ export type UserOrderByWithRelationInput = {
   password?: Prisma.SortOrder
   verifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   sessions?: Prisma.SessionsOrderByRelationAggregateInput
+  emailChangeAuditLogs?: Prisma.EmailChangeAuditLogOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -204,6 +206,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   password?: Prisma.StringFilter<"User"> | string
   verifiedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   sessions?: Prisma.SessionsListRelationFilter
+  emailChangeAuditLogs?: Prisma.EmailChangeAuditLogListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -235,6 +238,7 @@ export type UserCreateInput = {
   password: string
   verifiedAt?: Date | string | null
   sessions?: Prisma.SessionsCreateNestedManyWithoutUserInput
+  emailChangeAuditLogs?: Prisma.EmailChangeAuditLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -244,6 +248,7 @@ export type UserUncheckedCreateInput = {
   password: string
   verifiedAt?: Date | string | null
   sessions?: Prisma.SessionsUncheckedCreateNestedManyWithoutUserInput
+  emailChangeAuditLogs?: Prisma.EmailChangeAuditLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -253,6 +258,7 @@ export type UserUpdateInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessions?: Prisma.SessionsUpdateManyWithoutUserNestedInput
+  emailChangeAuditLogs?: Prisma.EmailChangeAuditLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -262,6 +268,7 @@ export type UserUncheckedUpdateInput = {
   password?: Prisma.StringFieldUpdateOperationsInput | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sessions?: Prisma.SessionsUncheckedUpdateManyWithoutUserNestedInput
+  emailChangeAuditLogs?: Prisma.EmailChangeAuditLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -339,12 +346,27 @@ export type UserUpdateOneRequiredWithoutSessionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSessionsInput, Prisma.UserUpdateWithoutSessionsInput>, Prisma.UserUncheckedUpdateWithoutSessionsInput>
 }
 
+export type UserCreateNestedOneWithoutEmailChangeAuditLogsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutEmailChangeAuditLogsInput, Prisma.UserUncheckedCreateWithoutEmailChangeAuditLogsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEmailChangeAuditLogsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutEmailChangeAuditLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutEmailChangeAuditLogsInput, Prisma.UserUncheckedCreateWithoutEmailChangeAuditLogsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutEmailChangeAuditLogsInput
+  upsert?: Prisma.UserUpsertWithoutEmailChangeAuditLogsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutEmailChangeAuditLogsInput, Prisma.UserUpdateWithoutEmailChangeAuditLogsInput>, Prisma.UserUncheckedUpdateWithoutEmailChangeAuditLogsInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id?: string
   email: string
   name: string
   password: string
   verifiedAt?: Date | string | null
+  emailChangeAuditLogs?: Prisma.EmailChangeAuditLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -353,6 +375,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   name: string
   password: string
   verifiedAt?: Date | string | null
+  emailChangeAuditLogs?: Prisma.EmailChangeAuditLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -377,6 +400,7 @@ export type UserUpdateWithoutSessionsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailChangeAuditLogs?: Prisma.EmailChangeAuditLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -385,6 +409,59 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.StringFieldUpdateOperationsInput | string
   verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  emailChangeAuditLogs?: Prisma.EmailChangeAuditLogUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutEmailChangeAuditLogsInput = {
+  id?: string
+  email: string
+  name: string
+  password: string
+  verifiedAt?: Date | string | null
+  sessions?: Prisma.SessionsCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutEmailChangeAuditLogsInput = {
+  id?: string
+  email: string
+  name: string
+  password: string
+  verifiedAt?: Date | string | null
+  sessions?: Prisma.SessionsUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutEmailChangeAuditLogsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutEmailChangeAuditLogsInput, Prisma.UserUncheckedCreateWithoutEmailChangeAuditLogsInput>
+}
+
+export type UserUpsertWithoutEmailChangeAuditLogsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutEmailChangeAuditLogsInput, Prisma.UserUncheckedUpdateWithoutEmailChangeAuditLogsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutEmailChangeAuditLogsInput, Prisma.UserUncheckedCreateWithoutEmailChangeAuditLogsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutEmailChangeAuditLogsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutEmailChangeAuditLogsInput, Prisma.UserUncheckedUpdateWithoutEmailChangeAuditLogsInput>
+}
+
+export type UserUpdateWithoutEmailChangeAuditLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionsUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutEmailChangeAuditLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  verifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sessions?: Prisma.SessionsUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -394,10 +471,12 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
 
 export type UserCountOutputType = {
   sessions: number
+  emailChangeAuditLogs: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
+  emailChangeAuditLogs?: boolean | UserCountOutputTypeCountEmailChangeAuditLogsArgs
 }
 
 /**
@@ -417,6 +496,13 @@ export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.SessionsWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountEmailChangeAuditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.EmailChangeAuditLogWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -425,6 +511,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   password?: boolean
   verifiedAt?: boolean
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  emailChangeAuditLogs?: boolean | Prisma.User$emailChangeAuditLogsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -455,6 +542,7 @@ export type UserSelectScalar = {
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "password" | "verifiedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  emailChangeAuditLogs?: boolean | Prisma.User$emailChangeAuditLogsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -464,6 +552,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "User"
   objects: {
     sessions: Prisma.$SessionsPayload<ExtArgs>[]
+    emailChangeAuditLogs: Prisma.$EmailChangeAuditLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -866,6 +955,7 @@ readonly fields: UserFieldRefs;
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  emailChangeAuditLogs<T extends Prisma.User$emailChangeAuditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$emailChangeAuditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmailChangeAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1309,6 +1399,30 @@ export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.SessionsScalarFieldEnum | Prisma.SessionsScalarFieldEnum[]
+}
+
+/**
+ * User.emailChangeAuditLogs
+ */
+export type User$emailChangeAuditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EmailChangeAuditLog
+   */
+  select?: Prisma.EmailChangeAuditLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the EmailChangeAuditLog
+   */
+  omit?: Prisma.EmailChangeAuditLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmailChangeAuditLogInclude<ExtArgs> | null
+  where?: Prisma.EmailChangeAuditLogWhereInput
+  orderBy?: Prisma.EmailChangeAuditLogOrderByWithRelationInput | Prisma.EmailChangeAuditLogOrderByWithRelationInput[]
+  cursor?: Prisma.EmailChangeAuditLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.EmailChangeAuditLogScalarFieldEnum | Prisma.EmailChangeAuditLogScalarFieldEnum[]
 }
 
 /**

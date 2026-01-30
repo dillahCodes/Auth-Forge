@@ -8,12 +8,13 @@ datasource db {
 }
 
 model User {
-  id         String     @id @default(uuid())
-  email      String     @unique
-  name       String
-  password   String
-  verifiedAt DateTime?
-  sessions   Sessions[]
+  id                   String                @id @default(uuid())
+  email                String                @unique
+  name                 String
+  password             String
+  verifiedAt           DateTime?
+  sessions             Sessions[]
+  emailChangeAuditLogs EmailChangeAuditLog[]
 }
 
 model Sessions {
@@ -42,7 +43,41 @@ model Sessions {
   expiresAt  DateTime
   deletedAt  DateTime?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailChangeAuditLogs EmailChangeAuditLog[]
 
   @@index([userId])
+}
+
+model EmailChangeAuditLog {
+  id String @id @default(uuid())
+
+  userId    String
+  sessionId String?
+
+  oldEmail String
+  newEmail String
+
+  userAgent String?
+
+  ipAddress String?
+
+  continent     String?
+  country       String?
+  countryRegion String?
+  city          String?
+
+  latitude  Float?
+  longitude Float?
+
+  asn Int?
+  isp String?
+
+  createdAt DateTime @default(now())
+
+  sessions Sessions? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionId])
 }

@@ -385,7 +385,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   User: 'User',
-  Sessions: 'Sessions'
+  Sessions: 'Sessions',
+  EmailChangeAuditLog: 'EmailChangeAuditLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -401,7 +402,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "sessions"
+    modelProps: "user" | "sessions" | "emailChangeAuditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -553,6 +554,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EmailChangeAuditLog: {
+      payload: Prisma.$EmailChangeAuditLogPayload<ExtArgs>
+      fields: Prisma.EmailChangeAuditLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EmailChangeAuditLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailChangeAuditLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EmailChangeAuditLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailChangeAuditLogPayload>
+        }
+        findFirst: {
+          args: Prisma.EmailChangeAuditLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailChangeAuditLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EmailChangeAuditLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailChangeAuditLogPayload>
+        }
+        findMany: {
+          args: Prisma.EmailChangeAuditLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailChangeAuditLogPayload>[]
+        }
+        create: {
+          args: Prisma.EmailChangeAuditLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailChangeAuditLogPayload>
+        }
+        createMany: {
+          args: Prisma.EmailChangeAuditLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EmailChangeAuditLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailChangeAuditLogPayload>[]
+        }
+        delete: {
+          args: Prisma.EmailChangeAuditLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailChangeAuditLogPayload>
+        }
+        update: {
+          args: Prisma.EmailChangeAuditLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailChangeAuditLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.EmailChangeAuditLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EmailChangeAuditLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EmailChangeAuditLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailChangeAuditLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.EmailChangeAuditLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailChangeAuditLogPayload>
+        }
+        aggregate: {
+          args: Prisma.EmailChangeAuditLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEmailChangeAuditLog>
+        }
+        groupBy: {
+          args: Prisma.EmailChangeAuditLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmailChangeAuditLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EmailChangeAuditLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmailChangeAuditLogCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -625,6 +700,28 @@ export const SessionsScalarFieldEnum = {
 } as const
 
 export type SessionsScalarFieldEnum = (typeof SessionsScalarFieldEnum)[keyof typeof SessionsScalarFieldEnum]
+
+
+export const EmailChangeAuditLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  sessionId: 'sessionId',
+  oldEmail: 'oldEmail',
+  newEmail: 'newEmail',
+  userAgent: 'userAgent',
+  ipAddress: 'ipAddress',
+  continent: 'continent',
+  country: 'country',
+  countryRegion: 'countryRegion',
+  city: 'city',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  asn: 'asn',
+  isp: 'isp',
+  createdAt: 'createdAt'
+} as const
+
+export type EmailChangeAuditLogScalarFieldEnum = (typeof EmailChangeAuditLogScalarFieldEnum)[keyof typeof EmailChangeAuditLogScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -816,6 +913,7 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   sessions?: Prisma.SessionsOmit
+  emailChangeAuditLog?: Prisma.EmailChangeAuditLogOmit
 }
 
 /* Types for Logging */

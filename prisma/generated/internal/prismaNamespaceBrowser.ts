@@ -52,7 +52,8 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
-  Sessions: 'Sessions'
+  Sessions: 'Sessions',
+  EmailChangeAuditLog: 'EmailChangeAuditLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -104,6 +105,28 @@ export const SessionsScalarFieldEnum = {
 } as const
 
 export type SessionsScalarFieldEnum = (typeof SessionsScalarFieldEnum)[keyof typeof SessionsScalarFieldEnum]
+
+
+export const EmailChangeAuditLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  sessionId: 'sessionId',
+  oldEmail: 'oldEmail',
+  newEmail: 'newEmail',
+  userAgent: 'userAgent',
+  ipAddress: 'ipAddress',
+  continent: 'continent',
+  country: 'country',
+  countryRegion: 'countryRegion',
+  city: 'city',
+  latitude: 'latitude',
+  longitude: 'longitude',
+  asn: 'asn',
+  isp: 'isp',
+  createdAt: 'createdAt'
+} as const
+
+export type EmailChangeAuditLogScalarFieldEnum = (typeof EmailChangeAuditLogScalarFieldEnum)[keyof typeof EmailChangeAuditLogScalarFieldEnum]
 
 
 export const SortOrder = {
