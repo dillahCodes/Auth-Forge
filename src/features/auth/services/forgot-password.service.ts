@@ -1,9 +1,9 @@
-import { ResourceUnprocessableEntity } from "@/shared/errors/resource-error";
 import { ClientRouters } from "@/routers/client-router";
+import { ResourceUnprocessableEntity } from "@/shared/errors/resource-error";
 import bcrypt from "bcrypt";
-import { OtpRepository } from "../repositories/otp.repository";
 import { SessionRepository } from "../repositories/session.repository";
 import { UserRepository } from "../repositories/user.repositoriy";
+import { VerificationTokenRepository } from "../repositories/verification-token.respository";
 import { ForgotPasswordSchema } from "../schemas/forgot-password.schema";
 import { EmailService } from "./email.service";
 import { RateLimiterService } from "./rate-limit.service";
@@ -13,7 +13,7 @@ interface SendForgotPasswordEmailParams {
   email: string;
 }
 
-interface VerifyForgotPasswordOtpParams {
+interface VerifyForgotPasswordTokenParams {
   vercelTlsFingerprint: string | null;
   input: ForgotPasswordSchema;
 }
@@ -21,11 +21,11 @@ interface VerifyForgotPasswordOtpParams {
 export const ForgotPasswordService = {
   // DOC: Send forgot password email
   async send({ email, vercelTlsFingerprint }: SendForgotPasswordEmailParams) {
-    let otp = null;
+    let token: string | null = null;
 
     // DOC: Implement Rate Limit
-    const redisSendOtpLimiterKey = `otp:forgot-password|type:send|fg:${vercelTlsFingerprint}`;
-    const cfgLimiter = { key: redisSendOtpLimiterKey, limit: 3, windowSeconds: 60 * 15 };
+    const redisSendTokenLimiterKey = `token:forgot-password|type:send|fg:${vercelTlsFingerprint}`;
+    const cfgLimiter = { key: redisSendTokenLimiterKey, limit: 3, windowSeconds: 60 * 15 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
     // DOC: Check if user exists, return if not found
@@ -34,62 +34,57 @@ export const ForgotPasswordService = {
 
     const { name } = userData;
 
-    // DOC: Get existing OTP if found Delete and regenerate
-    const redisSendOtpKey = `otp:forgot-password|type:send|email:${email}`;
-    const { existingOtp } = await OtpRepository.getExistingOtp(redisSendOtpKey);
-    if (existingOtp) await OtpRepository.deleteOtp(redisSendOtpKey);
+    // DOC: Get existing token if found, delete and regenerate
+    const redisSendTokenKey = `token:forgot-password|type:send|email:${email}`;
+    const { existingToken } = await VerificationTokenRepository.getExistingToken(redisSendTokenKey);
 
-    otp = OtpRepository.generateOtp(6);
+    if (existingToken) await VerificationTokenRepository.deleteToken(redisSendTokenKey);
 
-    // DOC: Store new OTP
-    const cfg = { key: redisSendOtpKey, otp, ttlSeconds: 15 * 60 };
-    await OtpRepository.storeOtp(cfg);
+    token = VerificationTokenRepository.generateToken();
+
+    // DOC: Store new token
+    const cfg = { key: redisSendTokenKey, token, ttlSeconds: 15 * 60 };
+    await VerificationTokenRepository.storeToken(cfg);
 
     // DOC: Generate reset password url and send email
-    const url = this.generateUrlForgotPassword(email, otp);
+    const url = this.generateUrlForgotPassword(email, token);
     await EmailService.sendResetPasswordEmail({ email, url, name });
   },
 
-  // DOC: Verify OTP for forgot password
-  async verify({ input, vercelTlsFingerprint }: VerifyForgotPasswordOtpParams) {
+  // DOC: Verify token for forgot password
+  async verify({ input, vercelTlsFingerprint }: VerifyForgotPasswordTokenParams) {
     const { email, password, token } = input;
 
     // DOC: Apply rate limit
-    const redisVerifyLimiterKey = `otp:forgot-password|type:verify|fg:${vercelTlsFingerprint}`;
+    const redisVerifyLimiterKey = `token:forgot-password|type:verify|fg:${vercelTlsFingerprint}`;
     const cfgLimiter = { key: redisVerifyLimiterKey, limit: 5, windowSeconds: 60 * 10 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    // DOC: Get existing OTP and validate
-    const redisSendOtpKey = `otp:forgot-password|type:send|email:${email}`;
-    const { existingOtp } = await OtpRepository.getExistingOtp(redisSendOtpKey);
+    // DOC: Get existing token and validate
+    const redisSendTokenKey = `token:forgot-password|type:send|email:${email}`;
+    const { existingToken } = await VerificationTokenRepository.getExistingToken(redisSendTokenKey);
+    if (!existingToken) throw new ResourceUnprocessableEntity("Token invalid or expired, please try again");
 
-    if (!existingOtp) {
-      throw new ResourceUnprocessableEntity("OTP invalid or expired, please try again");
-    }
+    const isSame = VerificationTokenRepository.isTokenSame(existingToken, token);
+    if (!isSame) throw new ResourceUnprocessableEntity("Token invalid or expired, please try again");
 
-    const isSame = OtpRepository.isOtpSame(existingOtp, token);
-
-    if (!isSame) {
-      throw new ResourceUnprocessableEntity("OTP invalid or expired, please try again");
-    }
-
-    // DOC: validate user
+    // DOC: Validate user
     const user = await UserRepository.getByEmail(email);
     if (!user) throw new ResourceUnprocessableEntity("User not found");
 
-    // DOC: hash password, update and revoke all sessions
+    // DOC: Hash password, update and revoke all sessions
     const hashedPassword = await bcrypt.hash(password, 10);
     await UserRepository.updatePassword(user.email, hashedPassword);
     await SessionRepository.revokeSessionsByUserId(user.id);
 
     // DOC: Cleanup redis keys
-    await OtpRepository.deleteOtp(redisSendOtpKey);
-    await OtpRepository.deleteOtp(redisVerifyLimiterKey);
+    await VerificationTokenRepository.deleteToken(redisSendTokenKey);
+    await VerificationTokenRepository.deleteToken(redisVerifyLimiterKey);
   },
 
   // DOC: Generate URL for forgot password
-  generateUrlForgotPassword(email: string, otp: string) {
+  generateUrlForgotPassword(email: string, token: string) {
     const baseUrl = process.env.BASE_URL;
-    return `${baseUrl}${ClientRouters.FORGOT_PASSWORD_VERIFY}?email=${email}&token=${otp}`;
+    return `${baseUrl}${ClientRouters.FORGOT_PASSWORD_VERIFY}?email=${email}&token=${token}`;
   },
 };

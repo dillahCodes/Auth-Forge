@@ -6,19 +6,10 @@ export const forgotPasswordEmailSchema = z.object({
 
 export const forgotPasswordSchema = z
   .object({
-    token: z
-      .string()
-      .trim()
-      .regex(/^\d{6}$/, { message: "Token must be a 6-digit numeric code" }),
+    token: z.uuid(),
     email: z.email({ message: "Invalid email address" }).trim(),
-    password: z
-      .string()
-      .min(8, { message: "Password must be at least 8 characters long" })
-      .trim(),
-    confirmPassword: z
-      .string()
-      .min(8, { message: "Password must be at least 8 characters long" })
-      .trim(),
+    password: z.string().min(8, { message: "Password must be at least 8 characters long" }).trim(),
+    confirmPassword: z.string().min(8, { message: "Password must be at least 8 characters long" }).trim(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -33,10 +24,7 @@ interface ValidateForgotPasswordForm {
   forEndpoint: "send" | "verify";
 }
 
-export async function validateForgotPasswordForm({
-  forEndpoint,
-  input,
-}: ValidateForgotPasswordForm) {
+export async function validateForgotPasswordForm({ forEndpoint, input }: ValidateForgotPasswordForm) {
   const schema = { send: forgotPasswordEmailSchema, verify: forgotPasswordSchema };
   const result = schema[forEndpoint].safeParse(input);
 
