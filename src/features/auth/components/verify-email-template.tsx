@@ -79,7 +79,7 @@ export function VerifyEmailTemplate({ name, otp }: { name: string; otp: string }
                 color: "#222",
               }}
             >
-              This code expires in <strong>5 minutes</strong>.
+              This code expires in <strong>15 minutes</strong>.
             </Text>
           </Section>
 
