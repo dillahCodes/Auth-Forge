@@ -11,7 +11,7 @@ export const VerifyEmailService = {
 
     // DOC: implement rate limiter
     const redisSendOtpKey = `otp:email|type:send|uid:${userId}`;
-    const cfgLimiter = { key: redisSendOtpKey, limit: 3, windowSeconds: 60 * 15 };
+    const cfgLimiter = { key: redisSendOtpKey, limit: 3, windowSeconds: 60 * 30 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
     // DOC: get existing otp

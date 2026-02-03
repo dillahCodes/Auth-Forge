@@ -25,7 +25,7 @@ export const ForgotPasswordService = {
 
     // DOC: Implement Rate Limit
     const redisSendOtpLimiterKey = `otp:forgot-password|type:send|fg:${vercelTlsFingerprint}`;
-    const cfgLimiter = { key: redisSendOtpLimiterKey, limit: 3, windowSeconds: 60 * 15 };
+    const cfgLimiter = { key: redisSendOtpLimiterKey, limit: 3, windowSeconds: 60 * 30 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
     // DOC: Check if user exists, return if not found
