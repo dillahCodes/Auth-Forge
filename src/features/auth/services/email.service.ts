@@ -1,8 +1,9 @@
 import "server-only";
 import { ServiceUnavailable } from "@/shared/errors/resource-error";
 import { Resend } from "resend";
-import { VerifyEmailTemplate } from "../components/verify-email-template";
-import { VerifyResetPasswordTemplate } from "../components/verify-reset-password-tamplate";
+import { VerifyEmailTemplate } from "../components/template/verify-email.template";
+import { PasswordResetVerifyTemplate } from "../components/template/password-reset-verify.template";
+import { ForgotPasswordRevertTemplate } from "../components/template/password-change-revert.template";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -24,10 +25,16 @@ interface SendResetPasswordEmailParams {
   url: string;
 }
 
+interface SendPasswordResetEmailRevertParams {
+  name: string;
+  email: string;
+  url: string;
+}
+
 // DOC: low-level email sender (private helper)
 async function sendEmail({ to, subject, react }: SendEmailParams) {
   const { error } = await resend.emails.send({
-    from: `noreply <noreply@${process.env.RESEND_DOMAIN}>`,
+    from: `noreply <no-reply@${process.env.RESEND_DOMAIN}>`,
     to: [to],
     subject,
     react,
@@ -41,7 +48,7 @@ export const EmailService = {
   async sendVerifyEmail({ name, email, otp }: SendVerifyEmailParams) {
     return sendEmail({
       to: email,
-      subject: "Email Verification Code",
+      subject: "AuthForge Email Verification Code",
       react: VerifyEmailTemplate({ name, otp }),
     });
   },
@@ -50,8 +57,18 @@ export const EmailService = {
   async sendResetPasswordEmail({ name, email, url }: SendResetPasswordEmailParams) {
     return sendEmail({
       to: email,
-      subject: "Reset Password",
-      react: VerifyResetPasswordTemplate({ name, url }),
+      subject: "AuthForge Reset Password Request",
+      react: PasswordResetVerifyTemplate({ name, url }),
+    });
+  },
+
+  // DOC: Send password reset email revert, triggered when password has been reset,
+  //      from the password reset page or from the forgot password page
+  async sendPasswordResetEmailRevert({ email, name, url }: SendPasswordResetEmailRevertParams) {
+    return sendEmail({
+      to: email,
+      subject: "AuthForge Password Reset",
+      react: ForgotPasswordRevertTemplate({ name, url }),
     });
   },
 };
