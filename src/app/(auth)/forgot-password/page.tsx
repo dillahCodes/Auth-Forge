@@ -10,6 +10,7 @@ import { ApiResponse } from "@/shared/types/response";
 import { AxiosError } from "axios";
 import { Activity, useEffect, useMemo } from "react";
 import { TbLockPassword } from "react-icons/tb";
+import { getFieldError } from "@/shared/utils/response-helper";
 
 interface MessageBoxType {
   condition: boolean;
@@ -74,12 +75,8 @@ export default function ForgotPassword() {
         </Activity>
 
         <InputEmail
-          inputProps={{
-            id: "email",
-            name: "email",
-            placeholder: "Enter your email address...",
-            required: true,
-          }}
+          errorMessage={axiosSendForgotPasswordError && getFieldError(axiosSendForgotPasswordError, "email")}
+          inputProps={{ id: "email", name: "email", placeholder: "Enter your email address...", required: true }}
         />
 
         <Button variant="info" type="submit" disabled={status === "pending"} className="font-semibold">

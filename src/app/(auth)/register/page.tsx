@@ -82,6 +82,11 @@ export default function Register() {
           labelProps={{ htmlFor: "password" }}
           inputProps={{ id: "password", name: "password", placeholder: "Password" }}
         />
+        <InputPassword
+          errorMessage={axiosError && getFieldError(axiosError, "confirmPassword")}
+          labelProps={{ htmlFor: "confirmPassword" }}
+          inputProps={{ id: "confirmPassword", name: "confirmPassword", placeholder: "Confirm Password" }}
+        />
         <Button variant="info" className="font-semibold">
           {isPending ? "Registering..." : "Register"}
         </Button>
