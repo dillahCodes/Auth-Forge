@@ -25,8 +25,8 @@ export const ForgotPasswordService = {
     let token: string | null = null;
 
     // DOC: Implement Rate Limit
-    const redisSendTokenLimiterKey = `token:forgot-password|type:send|fg:${vercelTlsFingerprint}`;
-    const cfgLimiter = { key: redisSendTokenLimiterKey, limit: 3, windowSeconds: 60 * 15 };
+    const redisSendOtpLimiterKey = `otp:forgot-password|type:send|fg:${vercelTlsFingerprint}`;
+    const cfgLimiter = { key: redisSendOtpLimiterKey, limit: 3, windowSeconds: 60 * 30 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
     const userData = await UserRepository.getByEmail(email);

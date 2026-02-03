@@ -23,7 +23,7 @@ export const AuthService = {
 
     // DOC: Implement Rate Limit
     const redisLoginLimiterKey = `login|fg:${context.clientInfo.vercelTlsFingerprint}`;
-    const cfgLimiter = { key: redisLoginLimiterKey, limit: 5, windowSeconds: 60 * 5 };
+    const cfgLimiter = { key: redisLoginLimiterKey, limit: 5, windowSeconds: 60 * 15 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
     // DOC: find user by email
@@ -63,7 +63,7 @@ export const AuthService = {
   async register(input: RegisterSchema, vercelTlsFingerprint: string | null) {
     // DOC: Implement Rate Limit
     const redisRegisterLimiterKey = `register|fg:${vercelTlsFingerprint}`;
-    const cfgLimiter = { key: redisRegisterLimiterKey, limit: 5, windowSeconds: 60 * 5 };
+    const cfgLimiter = { key: redisRegisterLimiterKey, limit: 5, windowSeconds: 60 * 30 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
     // DOC: check if email already exists
