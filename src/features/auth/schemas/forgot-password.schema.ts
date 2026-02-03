@@ -1,7 +1,8 @@
+import { refineEmail } from "@/shared/utils/refine-email";
 import z from "zod";
 
 export const forgotPasswordEmailSchema = z.object({
-  email: z.email({ message: "Invalid email address" }).trim(),
+  email: z.email({ message: "Invalid email address" }).trim().refine(refineEmail, { message: "Invalid email domain" }),
 });
 
 export const forgotPasswordSchema = z
