@@ -7,6 +7,7 @@ import { VerificationTokenRepository } from "../repositories/verification-token.
 import { ForgotPasswordSchema } from "../schemas/forgot-password.schema";
 import { EmailService } from "./email.service";
 import { RateLimiterService } from "./rate-limit.service";
+import { RevertAccountService } from "./revert-account.service";
 
 interface SendForgotPasswordEmailParams {
   vercelTlsFingerprint: string | null;
@@ -28,7 +29,6 @@ export const ForgotPasswordService = {
     const cfgLimiter = { key: redisSendTokenLimiterKey, limit: 3, windowSeconds: 60 * 15 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    // DOC: Check if user exists, return if not found
     const userData = await UserRepository.getByEmail(email);
     if (!userData) return;
 
@@ -68,7 +68,6 @@ export const ForgotPasswordService = {
     const isSame = VerificationTokenRepository.isTokenSame(existingToken, token);
     if (!isSame) throw new ResourceUnprocessableEntity("Token invalid or expired, please try again");
 
-    // DOC: Validate user
     const user = await UserRepository.getByEmail(email);
     if (!user) throw new ResourceUnprocessableEntity("User not found");
 
@@ -80,11 +79,14 @@ export const ForgotPasswordService = {
     // DOC: Cleanup redis keys
     await VerificationTokenRepository.deleteToken(redisSendTokenKey);
     await VerificationTokenRepository.deleteToken(redisVerifyLimiterKey);
+
+    await RevertAccountService.send({ email, vercelTlsFingerprint });
   },
 
   // DOC: Generate URL for forgot password
   generateUrlForgotPassword(email: string, token: string) {
     const baseUrl = process.env.BASE_URL;
-    return `${baseUrl}${ClientRouters.FORGOT_PASSWORD_VERIFY}?email=${email}&token=${token}`;
+    const url = `${baseUrl}${ClientRouters.FORGOT_PASSWORD_VERIFY}?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
+    return url;
   },
 };

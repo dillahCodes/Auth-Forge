@@ -4,6 +4,8 @@ export enum ClientRouters {
   FORGOT_PASSWORD = "/forgot-password",
   FORGOT_PASSWORD_VERIFY = "/forgot-password/verify",
 
+  REVERT_ACCOUNT = "/revert-account",
+
   PROFILE = "/profile",
   DASHBOARD = "/dashboard",
 
@@ -13,11 +15,7 @@ export enum ClientRouters {
   VERIFY_EMAIL = "/verify-email",
 }
 
-export const ClientPrivateRoutes = [
-  ClientRouters.DASHBOARD,
-  ClientRouters.PROFILE,
-  ClientRouters.VERIFY_EMAIL,
-];
+export const ClientPrivateRoutes = [ClientRouters.DASHBOARD, ClientRouters.PROFILE, ClientRouters.VERIFY_EMAIL];
 
 export const AuthRoutes = [
   ClientRouters.LOGIN,

@@ -1,20 +1,6 @@
-import {
-  Html,
-  Body,
-  Container,
-  Text,
-  Section,
-  Heading,
-  Link,
-} from "@react-email/components";
+import { Html, Body, Container, Text, Section, Heading, Link } from "@react-email/components";
 
-export function VerifyResetPasswordTemplate({
-  name,
-  url,
-}: {
-  name: string;
-  url: string;
-}) {
+export function PasswordResetVerifyTemplate({ name, url }: { name: string; url: string }) {
   return (
     <Html>
       <Body
