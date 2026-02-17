@@ -3,11 +3,12 @@
 import { axiosInstance } from "@/shared/lib/axios/axios";
 import { ClientRouters } from "@/routers/client-router";
 import { useMutation } from "@tanstack/react-query";
+import { ApiRouters } from "@/routers/api-router";
 
 export function useLogin() {
   const mutation = useMutation({
     mutationFn: async (payload: FormData) => {
-      const res = await axiosInstance.post("/api/auth/login", payload, {
+      const res = await axiosInstance.post(ApiRouters.LOGIN, payload, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data;
