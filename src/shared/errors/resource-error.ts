@@ -12,8 +12,21 @@ export class TooManyRequests extends AppError {
     super(message, HttpStatusCode.TOO_MANY_REQUESTS, ErrorCode.TOO_MANY_REQUESTS, errors);
   }
 }
+
 export class ServiceUnavailable extends AppError {
   constructor(message = "Service unavailable", errors?: Record<string, string[]>) {
     super(message, HttpStatusCode.SERVICE_UNAVAILABLE, ErrorCode.SERVICE_UNAVAILABLE, errors);
+  }
+}
+
+export class NotFound extends AppError {
+  constructor(message = "Not found", errors?: Record<string, string[]>) {
+    super(message, HttpStatusCode.NOT_FOUND, ErrorCode.RECOURCE_NOT_FOUND, errors);
+  }
+}
+
+export class ResourceConflict extends AppError {
+  constructor(message = "Resource conflict", errors?: Record<string, string[]>) {
+    super(message, HttpStatusCode.CONFLICT, ErrorCode.CONFLICT, errors);
   }
 }
