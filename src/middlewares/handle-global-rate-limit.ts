@@ -4,11 +4,12 @@ import { HttpStatusCode } from "@/shared/types/response";
 import { NextRequest, NextResponse } from "next/server";
 
 // DOC: Handle rate limiting for non-auth routes
-export async function handleGlobalRateLimit(
-  req: NextRequest
-): Promise<NextResponse | null> {
+export async function handleGlobalRateLimit(req: NextRequest): Promise<NextResponse | null> {
   const { vercelTlsFingerprint } = getClientInfo(req);
   const path = req.nextUrl.pathname;
+  const isApiRoute = path.includes("api");
+
+  if (!isApiRoute) return null;
 
   const key = `path:${path}:fg:${vercelTlsFingerprint}`;
   const rateLimitConfig = { bucketCapacity: 15, refillRatePerSecond: 1, key };
