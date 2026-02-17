@@ -1,3 +1,4 @@
+import { ApiRouters } from "@/routers/api-router";
 import { axiosInstance } from "@/shared/lib/axios/axios";
 import { ApiResponse } from "@/shared/types/response";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -7,7 +8,7 @@ export const useRevokeSessions = () => {
 
   return useMutation({
     mutationFn: async () => {
-      const res = await axiosInstance.post("/api/auth/sessions/revoke");
+      const res = await axiosInstance.post(ApiRouters.SESSIONS_REVOKE);
       return res.data as ApiResponse<null>;
     },
 
