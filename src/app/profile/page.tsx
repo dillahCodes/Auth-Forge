@@ -1,8 +1,8 @@
 "use client";
 
-import CurrentSession from "@/features/auth/components/current-session";
-import OtherSessions from "@/features/auth/components/other-sessions";
-import UserInfo from "@/features/auth/components/user-info";
+import CurrentSession from "@/features/auth/components/profile/current-session";
+import OtherSessions from "@/features/auth/components/profile/other-sessions";
+import UserInfo from "@/features/auth/components/profile/user-info";
 import { useSessions } from "@/features/auth/hooks/use-sessions";
 
 export default function Profile() {
