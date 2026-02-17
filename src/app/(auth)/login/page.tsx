@@ -1,61 +1,31 @@
 "use client";
 
+import { useLogin } from "@/features/auth/hooks/use-login";
 import { Button } from "@/shared/components/ui/button";
 import { Form } from "@/shared/components/ui/form/form";
 import { FormHeader } from "@/shared/components/ui/form/form-header";
 import { InputEmail } from "@/shared/components/ui/input/input-email";
 import { InputPassword } from "@/shared/components/ui/input/input-password";
-import { useLogin } from "@/features/auth/hooks/use-login";
-import { getFieldError } from "@/shared/utils/response-helper";
+import { MessageBox } from "@/shared/components/ui/messagebox";
+import { BuildError, useBuildAxiosError } from "@/shared/hooks/use-build-axios-erros";
 import { ApiResponse } from "@/shared/types/response";
+import { getFieldError } from "@/shared/utils/response-helper";
 import { AxiosError } from "axios";
 import Link from "next/link";
+import { Activity } from "react";
 import { FaRegUserCircle } from "react-icons/fa";
-import { Activity, useEffect, useMemo } from "react";
-import { MessageBox } from "@/shared/components/ui/messagebox";
-
-interface MessageBoxType {
-  condition: boolean;
-  message: string;
-  type: "success" | "error";
-}
 
 export default function Login() {
   const { mutate: login, isPending, error, data, status, reset } = useLogin();
   const axiosError = error as AxiosError<ApiResponse>;
 
-  const message = useMemo(() => {
-    const conditions: MessageBoxType[] = [
-      {
-        condition: status === "success",
-        message: data?.message as string,
-        type: "success",
-      },
-      {
-        condition: status === "error",
-        message: axiosError?.response?.data.message as string,
-        type: "error",
-      },
-    ];
-
-    const match = conditions.find((i) => Boolean(i.condition));
-    return match || null;
-  }, [data, status, axiosError]);
+  const flows: BuildError[] = [{ data: data, error: axiosError, status }];
+  const message = useBuildAxiosError({ errors: flows, resetState: reset });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     login(new FormData(e.currentTarget));
   };
-
-  useEffect(() => {
-    if (!message) return;
-
-    const timeOutId = setTimeout(() => {
-      reset();
-    }, 5000);
-
-    return () => clearTimeout(timeOutId);
-  }, [reset, message]);
 
   return (
     <section className="flex flex-col gap-6 w-full max-w-md">
@@ -76,11 +46,11 @@ export default function Login() {
         />
 
         <div className="flex justify-between text-xs">
-          <Link href="/register" className="underline">
-            Register
-          </Link>
           <Link href="/forgot-password" className="underline">
             Forgot Password
+          </Link>
+          <Link href="/register" className="underline">
+            Register
           </Link>
         </div>
 
