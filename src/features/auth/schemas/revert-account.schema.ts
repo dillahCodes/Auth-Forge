@@ -1,10 +1,9 @@
 import z from "zod";
 
-export const forgotPasswordSchema = z
+const revertAccountSchema = z
   .object({
     token: z.uuid(),
     tokenId: z.uuid(),
-    email: z.email({ message: "Invalid email address" }).trim(),
     password: z.string().min(8, { message: "Password must be at least 8 characters long" }).trim(),
     confirmPassword: z.string().min(8, { message: "Password must be at least 8 characters long" }).trim(),
   })
@@ -13,10 +12,24 @@ export const forgotPasswordSchema = z
     path: ["confirmPassword", "password"],
   });
 
-export type RevertAccountSchema = z.infer<typeof forgotPasswordSchema>;
+export const revertAccountPasswordSchema = revertAccountSchema.safeExtend({
+  email: z.email({ message: "Invalid email address" }).trim(),
+});
 
-export async function validateRevertAccountForm({ input }: { input: unknown }) {
-  const result = forgotPasswordSchema.safeParse(input);
+export const revertAccountEmailSchema = revertAccountSchema;
+
+export type RevertAccountSchema = z.infer<typeof revertAccountSchema>;
+export type RevertAccountPasswordSchema = z.infer<typeof revertAccountPasswordSchema>;
+export type RevertAccountEmailSchema = z.infer<typeof revertAccountEmailSchema>;
+
+export interface ValidateRevertAccountForm {
+  input: unknown;
+  forEndpoint: "VERIFY_REVERT_PASSWORD" | "VERIFY_REVERT_EMAIL";
+}
+
+export async function validateRevertAccountForm({ forEndpoint, input }: ValidateRevertAccountForm) {
+  const schema = { VERIFY_REVERT_PASSWORD: revertAccountPasswordSchema, VERIFY_REVERT_EMAIL: revertAccountEmailSchema };
+  const result = schema[forEndpoint].safeParse(input);
 
   if (!result.success) {
     const errors = result.error.flatten().fieldErrors;
@@ -25,3 +38,14 @@ export async function validateRevertAccountForm({ input }: { input: unknown }) {
 
   return { isError: false, data: result.data, errors: null };
 }
+
+// export async function validateRevertAccountForm({ input }: { input: unknown }) {
+//   const result = revertAccountSchema.safeParse(input);
+
+//   if (!result.success) {
+//     const errors = result.error.flatten().fieldErrors;
+//     return { isError: true, errors, data: null };
+//   }
+
+//   return { isError: false, data: result.data, errors: null };
+// }

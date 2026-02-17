@@ -4,8 +4,8 @@ import { Geolocation } from "@/shared/lib/geolocation/geo-vercel";
 import { prisma } from "@/shared/lib/prisma";
 import { v4 as uuidv4 } from "uuid";
 import { SessionRepository } from "../repositories/session.repository";
-import { TokenService } from "./token.service";
 import { UserRepository } from "../repositories/user.repositoriy";
+import { TokenService } from "./token.service";
 
 interface RefreshTokenPayload {
   clientInfo: ClientInfo;
@@ -19,15 +19,26 @@ interface RevokeSessionBySessionIdPayload {
   userId: string;
 }
 
+interface RevokeAllByUserIdOptions {
+  exceptSessionId?: string;
+}
+
 type SessionId = string;
 type ReplacedBy = string | null;
 type SessionChainMap = Map<SessionId, ReplacedBy>;
 type CurrentSessionIdToBeRevoke = string | null;
 
 export const SessionService = {
+  // DOC: validate session before access token
+  async validateSessionForAccessToken(sessionId: string) {
+    const result = await SessionRepository.getAccessTokenRedis(sessionId);
+    if (!result) throw new AuthUnauthorized();
+    return { sessionId, accessToken: result };
+  },
+
   // DOC: validate session before refresh token
   async validateSessionForRefresh(sessionId: string) {
-    const session = await SessionRepository.findById(sessionId);
+    const session = await SessionRepository.findSessionById(sessionId);
     if (!session) throw new AuthUnauthorized();
 
     const isReplayAttackAttempt = (session.revoked || session.replacedBy) && !session.deletedAt;
@@ -35,6 +46,7 @@ export const SessionService = {
     // DOC: security decision, legit user and hacker will be force logout
     if (isReplayAttackAttempt) {
       await SessionRepository.softDeleteSessionChainByUserId(session.userId);
+      await SessionRepository.revokeAllAccessTokenByUserIdRedis(session.userId);
       throw new AuthSessionRevoked();
     }
 
@@ -57,18 +69,23 @@ export const SessionService = {
     const newSessionId = uuidv4();
     const newAccessToken = await TokenService.signAccessToken({ userId, sessionId: newSessionId, verifiedAt });
     const newRefreshToken = await TokenService.signRefreshToken({ sessionId: newSessionId });
-    const newTokenPayload = { sessionId: newSessionId, refreshToken: newRefreshToken };
+
+    // DOC: create new refresh and access token payload
+    const newAccessTokenPayload = { sessionId: newSessionId, accessToken: newAccessToken, userId };
+    const newRefreshTokenPayload = { sessionId: newSessionId, refreshToken: newRefreshToken, userId };
+    const newRefreshTokenWithInfoPayload = { ...clientInfo, ...geolocation, ...newRefreshTokenPayload };
 
     // DOC: token rotation and create new session
     await prisma.$transaction(async (transaction) => {
-      await SessionRepository.revokeById(sessionId, newSessionId, transaction);
-      await SessionRepository.create({ userId, ...newTokenPayload, ...clientInfo, ...geolocation }, transaction);
+      await SessionRepository.revokeSessionById(sessionId, { replacedBy: newSessionId, transaction });
+      await SessionRepository.storeSession(newRefreshTokenWithInfoPayload, { transaction });
     });
 
-    return {
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
-    };
+    // DOC: store new access token in redis and revoke old access token
+    await SessionRepository.revokeAccessTokenBySessionIdRedis(sessionId, userId);
+    await SessionRepository.storeAccessTokenRedis(newAccessTokenPayload);
+
+    return { accessToken: newAccessToken, refreshToken: newRefreshToken };
   },
 
   // DOC: Get active sessions by user id
@@ -84,15 +101,17 @@ export const SessionService = {
   },
 
   // DOC: Revoke all sessions by user id
-  async revokeAllByUserId(userId: string, options?: { exceptSessionId?: string }) {
+  async revokeAllByUserId(userId: string, options?: RevokeAllByUserIdOptions) {
     await SessionRepository.revokeSessionsByUserId(userId, options);
+    await SessionRepository.revokeAllAccessTokenByUserIdRedis(userId, options);
   },
 
   // DOC: revoke session by session id
   async revokeSessionChainBySessionid(params: RevokeSessionBySessionIdPayload) {
     const { sessionIdTobeRevoke, userId } = params;
 
-    const resultActiveSessionFind = await SessionRepository.findActiveSessionChainByUserId(userId, sessionIdTobeRevoke);
+    const sessionFindOptions = { startSessionId: sessionIdTobeRevoke };
+    const resultActiveSessionFind = await SessionRepository.findActiveSessionChainByUserId(userId, sessionFindOptions);
 
     // DOC: lookup map
     const sessionChainMap: SessionChainMap = new Map();
@@ -109,6 +128,8 @@ export const SessionService = {
       currentSessionIdToBeRevoke = sessionChainMap.get(currentSessionIdToBeRevoke) ?? null;
     }
 
+    // DOC: revoke sessions and access token
+    await SessionRepository.revokeAccessTokenBySessionIds(sessionsIdToBeRevoke, userId);
     await SessionRepository.revokeSessionChain(sessionsIdToBeRevoke);
   },
 };

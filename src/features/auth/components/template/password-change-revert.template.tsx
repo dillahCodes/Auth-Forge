@@ -1,6 +1,6 @@
 import { Html, Body, Container, Text, Section, Heading, Link } from "@react-email/components";
 
-export function ForgotPasswordRevertTemplate({ name, url }: { name: string; url: string }) {
+export function PasswordChangeRevertTemplate({ name, url }: { name: string; url: string }) {
   return (
     <Html>
       <Body

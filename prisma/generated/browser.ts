@@ -27,3 +27,8 @@ export type User = Prisma.UserModel
  * 
  */
 export type Sessions = Prisma.SessionsModel
+/**
+ * Model EmailChangeRequest
+ * 
+ */
+export type EmailChangeRequest = Prisma.EmailChangeRequestModel

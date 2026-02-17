@@ -1,30 +1,25 @@
 "use client";
 
-import { Button } from "@/shared/components/ui/button";
-import { Form } from "@/shared/components/ui/form/form";
-import { FormHeader } from "@/shared/components/ui/form/form-header";
-import { MessageBox } from "@/shared/components/ui/messagebox";
 import { useEmailSendVerify } from "@/features/auth/hooks/use-email-send-verify";
 import { useEmailVerify } from "@/features/auth/hooks/use-email-verify";
 import { useOtp } from "@/features/auth/hooks/use-otp";
+import { Button } from "@/shared/components/ui/button";
+import { Form } from "@/shared/components/ui/form/form";
+import { FormHeader } from "@/shared/components/ui/form/form-header";
+import { InputOtp } from "@/shared/components/ui/input/input-otp";
+import { MessageBox } from "@/shared/components/ui/messagebox";
+import { BuildError, useBuildAxiosError } from "@/shared/hooks/use-build-axios-erros";
 import { useCountdown } from "@/shared/hooks/use-countdown";
 import { ApiResponse } from "@/shared/types/response";
+import { getResendButtonText } from "@/shared/utils/get-resend-button-text";
 import { AxiosError } from "axios";
-import { Activity, useEffect, useMemo } from "react";
+import { Activity } from "react";
 import { LuMailCheck } from "react-icons/lu";
 
-interface MessageBoxType {
-  condition: boolean;
-  message: string;
-  type: "success" | "error";
-}
+const COUNTDOWN_CONFIG = { key: "email-verify-countdown", timeoutSeconds: 120 };
 
 export default function VerifyEmailPage() {
-  const { isCountdownDone, remaining, setCountDownvalue } = useCountdown({
-    key: "email-verify-countdown",
-    timeoutSeconds: 120,
-  });
-
+  const { internalState, startCountdown } = useCountdown(COUNTDOWN_CONFIG);
   const { otpLength, handleOtpInputChange, handleKeyDown, handlePaste, inputsRef } = useOtp({ otpLength: 6 });
 
   const {
@@ -48,6 +43,13 @@ export default function VerifyEmailPage() {
   const axiosReqError = reqError as AxiosError<ApiResponse>;
   const axiosVerifyError = verifyError as AxiosError<ApiResponse>;
 
+  const flows: BuildError[] = [
+    { status: reqStatus, data: reqData, error: axiosReqError },
+    { status: verifyStatus, data: verifyData, error: axiosVerifyError },
+  ];
+
+  const message = useBuildAxiosError({ errors: flows, resetState: [reqResetState, verifyResetState] });
+
   const handleVerifyEmail = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -58,55 +60,11 @@ export default function VerifyEmailPage() {
   const handleReqVerifyEmail = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     reqVerify();
-    setCountDownvalue(Date.now().toString());
+    startCountdown();
   };
 
-  const resendButtonText = useMemo(() => {
-    if (isReqPending) return "Sending...";
-    if (!isCountdownDone) return `Resend in ${remaining}s`;
-    return "Resend Code";
-  }, [isReqPending, isCountdownDone, remaining]);
-
-  const message = useMemo(() => {
-    const conditions: MessageBoxType[] = [
-      {
-        condition: reqStatus === "success",
-        message: reqData?.message as string,
-        type: "success",
-      },
-      {
-        condition: verifyStatus === "success",
-        message: verifyData?.message as string,
-        type: "success",
-      },
-      {
-        condition: reqStatus === "error",
-        message: axiosReqError?.response?.data.message as string,
-        type: "error",
-      },
-      {
-        condition: verifyStatus === "error",
-        message: axiosVerifyError?.response?.data.message as string,
-        type: "error",
-      },
-    ];
-
-    const match = conditions.find((i) => Boolean(i.condition));
-    return match || null;
-  }, [reqData, reqStatus, verifyData, verifyStatus, axiosReqError, axiosVerifyError]);
-
-  useEffect(() => {
-    if (!message) return;
-
-    const timeOutId = setTimeout(() => {
-      reqResetState();
-      verifyResetState();
-    }, 5000);
-
-    return () => {
-      clearTimeout(timeOutId);
-    };
-  }, [reqResetState, verifyResetState, message]);
+  const { isCountdownDone, remaining } = internalState;
+  const resendButtonText = getResendButtonText({ isReqPending, isCountdownDone, remaining });
 
   return (
     <section className="flex flex-col gap-6 w-full max-w-md">
@@ -121,25 +79,13 @@ export default function VerifyEmailPage() {
           <MessageBox type={message?.type as "success" | "error"}>{message?.message}</MessageBox>
         </Activity>
 
-        <div className="w-full grid grid-cols-6 gap-3">
-          {Array.from({ length: otpLength }).map((_, index) => (
-            <input
-              ref={(el) => {
-                inputsRef.current[index] = el!;
-              }}
-              name={index.toString()}
-              required
-              maxLength={1}
-              inputMode="numeric"
-              onPaste={handlePaste}
-              onChange={(e) => handleOtpInputChange(e, index)}
-              onKeyDown={(e) => handleKeyDown(e, index)}
-              type="text"
-              key={index}
-              className="border-2 border-black min-h-10 text-center aspect-square text-lg font-semibold"
-            />
-          ))}
-        </div>
+        <InputOtp
+          handleOtpInputChange={handleOtpInputChange}
+          handleKeyDown={handleKeyDown}
+          handlePaste={handlePaste}
+          inputsRef={inputsRef}
+          otpLength={otpLength}
+        />
 
         <div className="text-xs mt-1">
           <Button

@@ -8,7 +8,6 @@ import { SessionRepository } from "../repositories/session.repository";
 import { UserRepository } from "../repositories/user.repositoriy";
 import { LoginSchema } from "../schemas/login.schema";
 import { RegisterSchema } from "../schemas/register.schema";
-import { RateLimiterService } from "./rate-limit.service";
 import { TokenService } from "./token.service";
 
 interface LoginContext {
@@ -17,20 +16,12 @@ interface LoginContext {
 }
 
 export const AuthService = {
-  // DOC: Handle user login flow
   async login(input: LoginSchema, context: LoginContext) {
     const invalidCredentials = { email: ["Invalid email or password"], password: ["Invalid email or password"] };
 
-    // DOC: Implement Rate Limit
-    const redisLoginLimiterKey = `login|fg:${context.clientInfo.vercelTlsFingerprint}`;
-    const cfgLimiter = { key: redisLoginLimiterKey, limit: 5, windowSeconds: 60 * 15 };
-    await RateLimiterService.fixedWindow(cfgLimiter);
-
-    // DOC: find user by email
-    const user = await UserRepository.getByEmail(input.email, true);
+    const user = await UserRepository.getByEmail(input.email, { withPassword: true });
     if (!user) throw new AuthInvalidCredentials(invalidCredentials);
 
-    // DOC: validate password
     const valid = await bcrypt.compare(input.password, user.password);
     if (!valid) throw new AuthInvalidCredentials(invalidCredentials);
 
@@ -41,17 +32,13 @@ export const AuthService = {
     const accessToken = await signAccessToken({ userId: user.id, sessionId, verifiedAt: user.verifiedAt });
     const refreshToken = await signRefreshToken({ sessionId });
 
-    // DOC: store session and tokens in database
-    await SessionRepository.create({
-      sessionId,
-      userId: user.id,
-      refreshToken,
-      ...context.clientInfo,
-      ...context.geo,
-    });
+    // DOC: store refresh tokens in database
+    const payloadRefreshToken = { sessionId, refreshToken, userId: user.id, ...context.clientInfo, ...context.geo };
+    await SessionRepository.storeSession(payloadRefreshToken);
 
-    // DOC: delete login limiter
-    RateLimiterService.clearLimiter(redisLoginLimiterKey);
+    // DOC: store access token in redis database
+    const payloadAccessToken = { sessionId, accessToken, userId: user.id };
+    await SessionRepository.storeAccessTokenRedis(payloadAccessToken);
 
     return {
       user: { id: user.id, email: user.email, name: user.name },
@@ -59,28 +46,23 @@ export const AuthService = {
     };
   },
 
-  // DOC: handle register flow
-  async register(input: RegisterSchema, vercelTlsFingerprint: string | null) {
-    // DOC: Implement Rate Limit
-    const redisRegisterLimiterKey = `register|fg:${vercelTlsFingerprint}`;
-    const cfgLimiter = { key: redisRegisterLimiterKey, limit: 5, windowSeconds: 60 * 30 };
-    await RateLimiterService.fixedWindow(cfgLimiter);
+  async register(input: RegisterSchema) {
+    const { email, name, password } = input;
 
-    // DOC: check if email already exists
     const user = await UserRepository.getByEmail(input.email);
     if (user) throw new ValidationFailed({ email: ["Email already exists"] });
 
-    // DOC: hash password
-    const hashedPassword = await bcrypt.hash(input.password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const payload = { email, name, password: hashedPassword };
+    const newUser = await UserRepository.create(payload);
 
-    // DOC: create user
-    const newUser = await UserRepository.create({ email: input.email, name: input.name, password: hashedPassword });
     return newUser;
   },
 
   // DOC: handle logout flow
   async logout(sessionId: string) {
-    const res = await SessionRepository.revokeById(sessionId);
+    const res = await SessionRepository.revokeSessionById(sessionId);
+    await SessionRepository.revokeAccessTokenBySessionIdRedis(sessionId, res.userId);
     return res;
   },
 };

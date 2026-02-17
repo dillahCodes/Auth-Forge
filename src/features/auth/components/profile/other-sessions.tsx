@@ -3,9 +3,9 @@
 import { Button } from "@/shared/components/ui/button";
 import iso3166 from "iso-3166-2";
 import { Activity, useState } from "react";
-import { useRevokeSession } from "../hooks/use-revoke-session";
-import { useRevokeSessions } from "../hooks/use-revoke-sessions";
-import { Session } from "../types/sessions";
+import { useRevokeSession } from "../../hooks/use-revoke-session";
+import { useRevokeSessions } from "../../hooks/use-revoke-sessions";
+import { Session } from "../../types/sessions";
 
 interface OtherSessionsProps {
   otherSessions: Session[] | undefined;
@@ -37,7 +37,7 @@ export default function OtherSessions({ isLoading, otherSessions }: OtherSession
       <Activity name="Other Sessions Empty" mode={!isLoading && !otherSessions?.length ? "visible" : "hidden"}>
         <p className="text-sm text-gray-500">No other active sessions</p>
       </Activity>
-    
+
       {/* list session */}
       <ul className="flex flex-col gap-3">
         {otherSessions?.map((session) => {

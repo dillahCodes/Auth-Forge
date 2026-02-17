@@ -13,4 +13,7 @@ export enum ApiRouters {
 
   // USERS
   USERS_BYID = "/api/users/:userId",
+
+  // PROFILE
+  CHANGE_NAME = "/api/auth/change-profile/name",
 }

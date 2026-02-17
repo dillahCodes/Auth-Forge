@@ -1,8 +1,9 @@
 import { prisma } from "@/shared/lib/prisma";
+import { Prisma } from "../../../../prisma/generated/client";
 
 export const UserRepository = {
   // DOC: Find user by email
-  getByEmail(email: string, withPassword = false) {
+  getByEmail(email: string, { withPassword = false } = {}) {
     return prisma.user.findUnique({
       where: { email },
       select: {
@@ -16,17 +17,25 @@ export const UserRepository = {
   },
 
   // DOC: Find user by id
-  getById(userId: string) {
+  getById(userId: string, { withPassword = false } = {}) {
     return prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, email: true, verifiedAt: true },
+      select: { id: true, name: true, email: true, verifiedAt: true, password: withPassword },
     });
   },
 
   // DOC: Update user password (hashed)
-  updatePassword(email: string, hashedPassword: string) {
+  updatePassword(userId: string, hashedPassword: string, options?: { transaction?: Prisma.TransactionClient }) {
+    if (options?.transaction) {
+      return options.transaction.user.update({
+        where: { id: userId },
+        data: { password: hashedPassword },
+        select: { id: true, name: true, email: true },
+      });
+    }
+
     return prisma.user.update({
-      where: { email },
+      where: { id: userId },
       data: { password: hashedPassword },
       select: { id: true, name: true, email: true },
     });
@@ -42,8 +51,9 @@ export const UserRepository = {
   },
 
   // DOC: Update email verification date
-  updateVerifiedAt(userId: string, verifiedAt: Date) {
-    return prisma.user.update({
+  updateVerifiedAt(userId: string, verifiedAt: Date, options?: { transaction?: Prisma.TransactionClient }) {
+    const db = options?.transaction ?? prisma;
+    return db.user.update({
       where: { id: userId },
       data: { verifiedAt },
       select: { id: true, name: true, email: true, verifiedAt: true },
@@ -51,8 +61,9 @@ export const UserRepository = {
   },
 
   // DOC: Update user email
-  updateEmail(userId: string, email: string) {
-    return prisma.user.update({
+  updateEmail(userId: string, email: string, options?: { transaction?: Prisma.TransactionClient }) {
+    const db = options?.transaction ?? prisma;
+    return db.user.update({
       where: { id: userId },
       data: { email },
       select: { id: true, name: true, email: true },
