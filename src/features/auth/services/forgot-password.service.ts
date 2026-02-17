@@ -73,14 +73,15 @@ export const ForgotPasswordService = {
 
     // DOC: Hash password, update and revoke all sessions
     const hashedPassword = await bcrypt.hash(password, 10);
-    await UserRepository.updatePassword(user.email, hashedPassword);
+    await UserRepository.updatePassword(user.id, hashedPassword);
     await SessionRepository.revokeSessionsByUserId(user.id);
+    await SessionRepository.revokeAllAccessTokenByUserIdRedis(user.id);
 
     // DOC: Cleanup redis keys
     await VerificationTokenRepository.deleteToken(redisSendTokenKey);
     await VerificationTokenRepository.deleteToken(redisVerifyLimiterKey);
 
-    await RevertAccountService.send({ email, vercelTlsFingerprint });
+    await RevertAccountService.sendRevertAccountPasswordChange({ email, vercelTlsFingerprint });
   },
 
   // DOC: Generate URL for forgot password

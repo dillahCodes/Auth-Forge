@@ -1,44 +1,24 @@
 "use client";
 
+import { useForgotPasswordSend } from "@/features/auth/hooks/use-forgot-password-send";
 import { Button } from "@/shared/components/ui/button";
 import { Form } from "@/shared/components/ui/form/form";
 import { FormHeader } from "@/shared/components/ui/form/form-header";
 import { InputEmail } from "@/shared/components/ui/input/input-email";
 import { MessageBox } from "@/shared/components/ui/messagebox";
-import { useForgotPasswordSend } from "@/features/auth/hooks/use-forgot-password-send";
+import { BuildError, useBuildAxiosError } from "@/shared/hooks/use-build-axios-erros";
 import { ApiResponse } from "@/shared/types/response";
-import { AxiosError } from "axios";
-import { Activity, useEffect, useMemo } from "react";
-import { TbLockPassword } from "react-icons/tb";
 import { getFieldError } from "@/shared/utils/response-helper";
-
-interface MessageBoxType {
-  condition: boolean;
-  message: string;
-  type: "success" | "error";
-}
+import { AxiosError } from "axios";
+import { Activity } from "react";
+import { TbLockPassword } from "react-icons/tb";
 
 export default function ForgotPassword() {
   const { mutate, status, data, reset, error } = useForgotPasswordSend();
-  const axiosSendForgotPasswordError = error as AxiosError<ApiResponse>;
+  const axiosError = error as AxiosError<ApiResponse>;
 
-  const message = useMemo(() => {
-    const conditions: MessageBoxType[] = [
-      {
-        condition: status === "success",
-        message: data?.message as string,
-        type: "success",
-      },
-      {
-        condition: status === "error",
-        message: axiosSendForgotPasswordError?.response?.data.message as string,
-        type: "error",
-      },
-    ];
-
-    const match = conditions.find((i) => Boolean(i.condition));
-    return match || null;
-  }, [data, status, axiosSendForgotPasswordError]);
+  const flows: BuildError[] = [{ data: data, error: axiosError, status }];
+  const message = useBuildAxiosError({ errors: flows, resetState: reset });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -50,16 +30,6 @@ export default function ForgotPassword() {
     if (isEmpty) return;
     mutate({ email: emailPayload as string });
   };
-
-  useEffect(() => {
-    if (!message) return;
-
-    const timeOutId = setTimeout(() => {
-      reset();
-    }, 5000);
-
-    return () => clearTimeout(timeOutId);
-  }, [reset, message]);
 
   return (
     <section className="flex flex-col gap-6 w-full max-w-md">
@@ -75,7 +45,7 @@ export default function ForgotPassword() {
         </Activity>
 
         <InputEmail
-          errorMessage={axiosSendForgotPasswordError && getFieldError(axiosSendForgotPasswordError, "email")}
+          errorMessage={axiosError && getFieldError(axiosError, "email")}
           inputProps={{ id: "email", name: "email", placeholder: "Enter your email address...", required: true }}
         />
 
