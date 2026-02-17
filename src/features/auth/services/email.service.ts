@@ -1,9 +1,11 @@
-import "server-only";
 import { ServiceUnavailable } from "@/shared/errors/resource-error";
 import { Resend } from "resend";
-import { VerifyEmailTemplate } from "../components/template/verify-email.template";
+import "server-only";
+import { TwoFactorEmailTemplate } from "../components/template/2fa.template";
+import { PasswordChangeRevertTemplate } from "../components/template/password-change-revert.template";
 import { PasswordResetVerifyTemplate } from "../components/template/password-reset-verify.template";
-import { ForgotPasswordRevertTemplate } from "../components/template/password-change-revert.template";
+import { VerifyEmailTemplate } from "../components/template/verify-email.template";
+import { EmailChangeRevertTemplate } from "../components/template/email-change-revert.template";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -29,6 +31,20 @@ interface SendPasswordResetEmailRevertParams {
   name: string;
   email: string;
   url: string;
+}
+
+interface TwoFactorEmailTemplateProps {
+  email: string;
+  name: string;
+  otp: string;
+  location: string;
+}
+
+interface SendRevertAccountEmailParams {
+  name: string;
+  url: string;
+  email: string;
+  newEmail: string;
 }
 
 // DOC: low-level email sender (private helper)
@@ -67,8 +83,26 @@ export const EmailService = {
   async sendPasswordResetEmailRevert({ email, name, url }: SendPasswordResetEmailRevertParams) {
     return sendEmail({
       to: email,
-      subject: "AuthForge Password Reset",
-      react: ForgotPasswordRevertTemplate({ name, url }),
+      subject: "AuthForge Password Change",
+      react: PasswordChangeRevertTemplate({ name, url }),
+    });
+  },
+
+  // DOC: Send revert account email
+  async sendEmailChangeRevert({ name, url, email, newEmail }: SendRevertAccountEmailParams) {
+    return sendEmail({
+      to: email,
+      subject: "AuthForge Email Change",
+      react: EmailChangeRevertTemplate({ name, url, oldEmail: email, newEmail }),
+    });
+  },
+
+  // DOC: Send 2FA email
+  async sendTwoFactorEmail({ name, otp, location, email }: TwoFactorEmailTemplateProps) {
+    return sendEmail({
+      to: email,
+      subject: `AuthForge 2-Step Verification: ${name}`,
+      react: TwoFactorEmailTemplate({ username: name, otp, location }),
     });
   },
 };
