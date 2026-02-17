@@ -4,9 +4,11 @@ export enum ClientRouters {
   FORGOT_PASSWORD = "/forgot-password",
   FORGOT_PASSWORD_VERIFY = "/forgot-password/verify",
 
-  REVERT_ACCOUNT = "/revert-account",
+  REVERT_ACCOUNT_PASSWORD = "/revert-account/password-change",
+  REVERT_ACCOUNT_EMAIL = "/revert-account/email-change",
 
   PROFILE = "/profile",
+  EDIT_PROFILE = "/profile/edit",
   DASHBOARD = "/dashboard",
 
   SESSION_REVOKED = "/session-revoked",
