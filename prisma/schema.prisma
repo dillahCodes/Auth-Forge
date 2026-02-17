@@ -8,13 +8,13 @@ datasource db {
 }
 
 model User {
-  id                   String                @id @default(uuid())
-  email                String                @unique
-  name                 String
-  password             String
-  verifiedAt           DateTime?
-  sessions             Sessions[]
-  emailChangeAuditLogs EmailChangeAuditLog[]
+  id                 String               @id @default(uuid())
+  email              String               @unique
+  name               String
+  password           String
+  verifiedAt         DateTime?
+  sessions           Sessions[]
+  emailChangeRequest EmailChangeRequest[]
 }
 
 model Sessions {
@@ -43,41 +43,30 @@ model Sessions {
   expiresAt  DateTime
   deletedAt  DateTime?
 
-  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  emailChangeAuditLogs EmailChangeAuditLog[]
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
-model EmailChangeAuditLog {
+model EmailChangeRequest {
   id String @id @default(uuid())
 
-  userId    String
-  sessionId String?
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   oldEmail String
   newEmail String
 
-  userAgent String?
-
-  ipAddress String?
-
-  continent     String?
-  country       String?
-  countryRegion String?
-  city          String?
-
-  latitude  Float?
-  longitude Float?
-
-  asn Int?
-  isp String?
+  reqStatus ReqStatus @default(PENDING)
 
   createdAt DateTime @default(now())
 
-  sessions Sessions? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, createdAt])
+  @@index([reqStatus])
+}
 
-  @@index([userId])
-  @@index([sessionId])
+enum ReqStatus {
+  PENDING
+  COMPLETED
+  CANCELED
 }

@@ -10,5 +10,5 @@
  */
 export type * from './models/User'
 export type * from './models/Sessions'
-export type * from './models/EmailChangeAuditLog'
+export type * from './models/EmailChangeRequest'
 export type * from './commonInputTypes'
