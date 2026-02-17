@@ -5,10 +5,10 @@ import { ApiResponse } from "@/shared/types/response";
 import { useMutation } from "@tanstack/react-query";
 import { RevertAccountSchema } from "../schemas/revert-account.schema";
 
-export function useRevertAccount() {
+export function useRevertAccountEmailChange() {
   const mutation = useMutation({
     mutationFn: async (payload: RevertAccountSchema) => {
-      const res = await axiosInstance.post("/api/auth/revert-account", payload, {
+      const res = await axiosInstance.post("/api/auth/revert-account/email-change", payload, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data as ApiResponse<null>;

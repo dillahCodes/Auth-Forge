@@ -1,6 +1,14 @@
-import { Html, Body, Container, Text, Section, Heading, Link } from "@react-email/components";
+import { censorEmail } from "@/shared/utils/censor-email";
+import { Body, Container, Heading, Html, Link, Section, Text } from "@react-email/components";
 
-export function PasswordChangeRevertTemplate({ name, url }: { name: string; url: string }) {
+interface EmailChangeRevertTemplateProps {
+  name: string;
+  url: string;
+  oldEmail: string;
+  newEmail: string;
+}
+
+export function EmailChangeRevertTemplate({ name, url, oldEmail, newEmail }: EmailChangeRevertTemplateProps) {
   return (
     <Html>
       <Body
@@ -30,39 +38,53 @@ export function PasswordChangeRevertTemplate({ name, url }: { name: string; url:
             <Heading
               style={{
                 margin: "0 0 12px 0",
-                fontSize: "28px",
+                fontSize: "26px",
                 fontWeight: "800",
                 lineHeight: "1.2",
               }}
             >
-              Password Changed
+              Email Address Changed
             </Heading>
 
             <Text
               style={{
                 margin: "0 0 16px 0",
-                fontSize: "16px",
-                lineHeight: "1.5",
+                fontSize: "15px",
+                lineHeight: "1.6",
               }}
             >
-              Hi <strong>{name}</strong>, your account password was recently changed.
+              Dear <strong>{name}</strong>,
             </Text>
 
             <Text
               style={{
                 margin: "0 0 16px 0",
                 fontSize: "14px",
-                lineHeight: "1.5",
+                lineHeight: "1.6",
                 color: "#222",
               }}
             >
-              If you didn’t make this change, you can revert your account immediately by clicking the button below.
+              We noticed that your account email address was changed from <strong>{censorEmail(oldEmail)}</strong> to{" "}
+              <strong>{censorEmail(newEmail)}</strong>. If you made this change, you can safely disregard this email.
+            </Text>
+
+            {/* Informational text ABOVE button */}
+            <Text
+              style={{
+                margin: "0 0 12px 0",
+                fontSize: "14px",
+                lineHeight: "1.6",
+                color: "#222",
+              }}
+            >
+              If you did not make this change, or believe this was done by mistake, you can revert your account
+              immediately:
             </Text>
 
             {/* Button Block */}
             <Section
               style={{
-                marginTop: "16px",
+                margin: "20px 0",
                 textAlign: "center",
               }}
             >
@@ -70,12 +92,12 @@ export function PasswordChangeRevertTemplate({ name, url }: { name: string; url:
                 href={url}
                 style={{
                   display: "inline-block",
-                  padding: "12px 24px",
+                  padding: "14px 28px",
                   border: "3px solid #000",
                   backgroundColor: "#ff6b6b",
                   boxShadow: "4px 4px 0px #000",
                   fontSize: "16px",
-                  fontWeight: "700",
+                  fontWeight: "800",
                   color: "#000",
                   textDecoration: "none",
                 }}
@@ -84,14 +106,27 @@ export function PasswordChangeRevertTemplate({ name, url }: { name: string; url:
               </Link>
             </Section>
 
+            {/* Informational text BELOW button */}
             <Text
               style={{
-                margin: "24px 0 8px 0",
+                margin: "0 0 12px 0",
+                fontSize: "13px",
+                lineHeight: "1.6",
+                color: "#222",
+              }}
+            >
+              To help keep your account secure, you may be asked to reset your password after reverting the email
+              change.
+            </Text>
+
+            <Text
+              style={{
+                margin: "16px 0 6px 0",
                 fontSize: "12px",
                 color: "#444",
               }}
             >
-              If you recognize this activity, no action is required and you can safely ignore this email.
+              If you recognize this activity, no further action is required.
             </Text>
 
             <Text
@@ -101,7 +136,7 @@ export function PasswordChangeRevertTemplate({ name, url }: { name: string; url:
                 color: "#444",
               }}
             >
-              This link expires in <strong>7 days</strong> and can only be used once.
+              This link will expire in <strong>7 days</strong> and can only be used once.
             </Text>
           </Section>
 
