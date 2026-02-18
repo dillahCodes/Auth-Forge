@@ -17,6 +17,7 @@ import { RateLimiterService } from "./rate-limit.service";
 import { RevertAccountService } from "./revert-account.service";
 
 interface ChangePasswordProps {
+  sessionId: string;
   input: ChangePasswordSchema;
   userId: string;
   vercelTlsFingerprint: string | null;
@@ -31,7 +32,6 @@ interface ChangeEmailVerify {
 
 export const AccountService = {
   async changeName(name: string, userId: string) {
-    // DOC: implement rate limiter
     const redisLimiterKey = `profile:change-name|uid:${userId}`;
     const cfgLimiter = { key: redisLimiterKey, limit: 5, windowSeconds: 60 * 15 };
     await RateLimiterService.fixedWindow(cfgLimiter);
@@ -143,10 +143,10 @@ export const AccountService = {
       await EmailChangeRequestRepository.markVerified(requestedEmailChange.id, { transaction });
       await UserRepository.updateVerifiedAt(userId, new Date(), { transaction });
       await UserRepository.updateEmail(userId, requestedEmailChange.newEmail, { transaction });
-      await SessionRepository.revokeSessionsByUserId(isUserExist.id, { transaction, exceptSessionId: sessionId });
+      await SessionRepository.revokeSessionsByUserId(userId, { transaction, exceptSessionId: sessionId });
     });
 
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(isUserExist.id, { exceptSessionId: sessionId });
+    await SessionRepository.revokeAllAccessTokenByUserIdRedis(userId, { exceptSessionId: sessionId });
 
     await OtpRepository.deleteOtp(redisVerifyKey);
     await OtpRepository.deleteOtp(redisSendOtpKey);
@@ -156,7 +156,7 @@ export const AccountService = {
     await RevertAccountService.sendRevertAccountEmailChange(revertEmailpayload);
   },
 
-  async changePassword({ input, userId, vercelTlsFingerprint }: ChangePasswordProps) {
+  async changePassword({ input, userId, vercelTlsFingerprint, sessionId }: ChangePasswordProps) {
     const { confirmPassword, currentPassword } = input;
 
     const redisLimiterKey = `profile:change-password|uid:${userId}`;
@@ -171,16 +171,12 @@ export const AccountService = {
 
     const hashedNewPassword = await bcrypt.hash(confirmPassword, 10);
 
-    // DOC: update password and revoke all sessions
     await prisma.$transaction(async (transaction) => {
       await UserRepository.updatePassword(userId, hashedNewPassword, { transaction });
-      await SessionRepository.revokeSessionsByUserId(userId, { transaction });
+      await SessionRepository.revokeSessionsByUserId(userId, { transaction, exceptSessionId: sessionId });
     });
 
-    // DOC: revoke all access token
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(userId);
-
-    // DOC: send revert password email
+    await SessionRepository.revokeAllAccessTokenByUserIdRedis(userId, { exceptSessionId: sessionId });
     RevertAccountService.sendRevertAccountPasswordChange({ email: user.email, vercelTlsFingerprint });
   },
 };
