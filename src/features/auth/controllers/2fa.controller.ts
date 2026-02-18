@@ -32,4 +32,12 @@ export const TwoFaController = {
     CookieHttp.set({ response, twoFaToken });
     return response;
   }),
+
+  statusTwoFa: CreateController.create(async (req: Request) => {
+    await AccessTokenHttp.requiredAccessToken(req);
+    const input = await TwoFaHttp.validateFormData(req, "status");
+
+    const statusTwoFa = await TwoFaHttp.statusTwoFaToken(req, input.scope);
+    return sendSuccess(statusTwoFa, "Get status 2fa successfully");
+  }),
 };

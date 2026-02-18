@@ -21,11 +21,11 @@ export type TwoFaSchema = z.infer<typeof twoFaSchema>;
 
 interface ValidateTwoFaForm {
   input: unknown;
-  forEndpoint: "send" | "verify";
+  forEndpoint: "send" | "verify" | "status";
 }
 
 export async function validateTwoFaForm({ forEndpoint, input }: ValidateTwoFaForm) {
-  const schema = { send: twoFaScopeSchema, verify: twoFaSchema };
+  const schema = { send: twoFaScopeSchema, verify: twoFaSchema, status: twoFaScopeSchema };
   const result = schema[forEndpoint].safeParse(input);
 
   if (!result.success) {
