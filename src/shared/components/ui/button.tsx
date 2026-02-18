@@ -1,13 +1,15 @@
 import { Activity } from "react";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   variant: "info" | "warning" | "danger" | "success" | "text" | "outline";
   iconLeft?: React.ReactNode;
   iconRight?: React.ReactNode;
+  isLoading?: boolean;
 }
 
-export function Button({ children, variant, iconLeft, iconRight, ...props }: ButtonProps) {
+export function Button({ children, variant, iconLeft, iconRight, isLoading, ...props }: ButtonProps) {
   const styles = {
     info: "bg-info text-dark-2 cursor-pointer border-2 border-dark p-2 px-4 disabled:bg-info/60 hover:bg-info/80",
     warning:
@@ -27,7 +29,18 @@ export function Button({ children, variant, iconLeft, iconRight, ...props }: But
       <Activity name="button icon left" mode={!iconLeft ? "hidden" : "visible"}>
         {iconLeft}
       </Activity>
-      {children}
+
+      <Activity name="button content" mode={isLoading ? "hidden" : "visible"}>
+        {children}
+      </Activity>
+
+      <Activity name="button loading" mode={isLoading ? "visible" : "hidden"}>
+        <div className="w-full flex items-center gap-4 justify-center">
+          <AiOutlineLoading3Quarters size={24} className="animate-spin" />
+          <span>Loading...</span>
+        </div>
+      </Activity>
+
       <Activity name="button icon right" mode={!iconRight ? "hidden" : "visible"}>
         {iconRight}
       </Activity>
