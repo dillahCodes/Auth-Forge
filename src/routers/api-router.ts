@@ -18,6 +18,7 @@ export enum ApiRouters {
   // 2FA
   TWOFA_SEND = "/api/auth/2fa/send",
   TWOFA_VERIFY = "/api/auth/2fa/verify",
+  TWOFA_STATUS = "/api/auth/2fa/status",
 
   // CHANGE PROFILE EMAIL
   CHANGE_EMAIL_CANCEL = "/api/auth/change-profile/email/cancel",

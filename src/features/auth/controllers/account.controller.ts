@@ -69,13 +69,15 @@ export const AccountController = {
   changePassword: CreateController.create(async (req: Request) => {
     const { vercelTlsFingerprint } = ClientInfoHttp.info(req);
     const { userId, sessionId } = await AccessTokenHttp.requiredAccessToken(req);
+
     const input = await AccountHttp.validateFormData(req, "CHANGE_PASSWORD");
+    await TwoFaHttp.requiredTwoFaToken(req, "CHANGE_PASSWORD");
 
     await SessionService.validateSessionForAccessToken(sessionId);
-    await AccountService.changePassword({ input, userId, vercelTlsFingerprint });
+    await AccountService.changePassword({ input, userId, vercelTlsFingerprint, sessionId });
 
     const response = sendSuccess(null, "Change password successfully");
-    await CookieHttp.clear(response);
+    await CookieHttp.clearByName(response, "2fa_token");
     return response;
   }),
 };
