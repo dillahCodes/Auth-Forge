@@ -76,7 +76,7 @@ const DEFAULT_CONFIG = Object.freeze({
   sendToEmail: "",
 } satisfies OpenVerifyChangeEmailModalProps);
 
-export const VerifyChangeEmailModal = forwardRef<VerifyChangeEmailModalHandle>(function VerifyChangeEmailModal(_, ref) {
+const VerifyChangeEmailModal = forwardRef<VerifyChangeEmailModalHandle>(function VerifyChangeEmailModal(_, ref) {
   const [isOpen, setIsOpen] = useState(false);
   const [ctx, setCtx] = useState<OpenVerifyChangeEmailModalProps>(DEFAULT_CONFIG);
 

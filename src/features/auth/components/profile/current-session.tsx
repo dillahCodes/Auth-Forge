@@ -51,7 +51,7 @@ export default function CurrentSession({
   );
 }
 
-export function CurrentSessionLoading() {
+function CurrentSessionLoading() {
   return (
     <div className="border-2 border-dark shadow-strong p-3 space-y-2 w-full">
       <div className="h-6 bg-dark/20 border-2 border-dark"></div>

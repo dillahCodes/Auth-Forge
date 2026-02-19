@@ -12,9 +12,6 @@ export enum ApiRouters {
   SESSIONS_REVOKE_BYID = "/api/auth/sessions/:sessionId",
   SESSION_COUNT = "/api/auth/sessions/count",
 
-  // USERS
-  USERS_BYID = "/api/users/:userId",
-
   // 2FA
   TWOFA_SEND = "/api/auth/2fa/send",
   TWOFA_VERIFY = "/api/auth/2fa/verify",
