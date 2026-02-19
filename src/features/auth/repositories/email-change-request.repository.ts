@@ -1,7 +1,7 @@
 import { prisma } from "@/shared/lib/prisma";
 import { Prisma, ReqStatus } from "../../../../prisma/generated/client";
 
-export interface CreateEmailChangeRequestParams {
+interface CreateEmailChangeRequestParams {
   userId: string;
   oldEmail: string;
   newEmail: string;

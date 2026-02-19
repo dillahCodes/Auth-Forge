@@ -11,11 +11,6 @@ export interface BuildError {
   error: AxiosError<ApiResponse, unknown>;
 }
 
-export interface ResetStateConfig {
-  resetAfterMiliseconds: number;
-  resetState: ResetState | ResetState[];
-}
-
 interface BuildAxiosErrorParams {
   errors: BuildError[];
   resetAfterMiliseconds?: number;
