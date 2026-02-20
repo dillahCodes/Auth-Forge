@@ -83,12 +83,6 @@ export const GoogleAuthService = {
     const payloadAccessToken = { sessionId, accessToken, userId };
     await SessionRepository.storeAccessTokenRedis(payloadAccessToken);
 
-    return {
-      name: tokenPaylaod?.name,
-      email: tokenPaylaod?.email,
-      tokens,
-      accessToken,
-      refreshToken,
-    };
+    return { googleTokens: tokens, accessToken, refreshToken };
   },
 };

@@ -28,7 +28,7 @@ export const GoogleAuthController = {
     const dashboardUrl = new URL(ClientRouters.DASHBOARD, process.env.BASE_URL!);
     const response = NextResponse.redirect(dashboardUrl);
 
-    googleClient.setCredentials(tokens.tokens);
+    googleClient.setCredentials(tokens.googleTokens);
     CookieHttp.set({ response, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken });
     return response;
   }),
