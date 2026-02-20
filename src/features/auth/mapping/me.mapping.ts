@@ -2,7 +2,7 @@ import { EmailChangeRequest } from "../../../../prisma/generated/client";
 import { AuthProvider } from "../../../../prisma/generated/enums";
 import { UserData } from "../types/user";
 
-export interface MeMapping {
+interface MeMapping {
   user: Omit<UserData, "password" | "provider" | "pendingEmailChange"> | null;
   pendingEmailChange: EmailChangeRequest | null;
   provider: AuthProvider;

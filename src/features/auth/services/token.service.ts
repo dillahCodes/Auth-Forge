@@ -31,8 +31,9 @@ export const REFRESH_TOKEN_EXPIRES_SECONDS = 60 * 60 * 24 * 7;
 export const TWO_FA_TOKEN_EXPIRES_SECONDS = 15 * 60;
 
 // DOC: for development
-// export const ACCESS_TOKEN_EXPIRES_SECONDS = 1 * 60;
+// export const ACCESS_TOKEN_EXPIRES_SECONDS = 2 * 60;
 // export const REFRESH_TOKEN_EXPIRES_SECONDS = 10 * 60;
+// export const TWO_FA_TOKEN_EXPIRES_SECONDS = 2 * 60;
 
 export const TokenService = {
   // DOC: Sign access token
