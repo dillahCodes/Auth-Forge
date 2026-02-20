@@ -57,8 +57,8 @@ export default function Login() {
           </Link>
         </div>
 
-        <Button variant="info" type="submit" className="font-semibold">
-          {isPending ? "Logging in..." : "Login"}
+        <Button variant="info" type="submit" className="font-semibold" disabled={isPending} isLoading={isPending}>
+          Login
         </Button>
 
         <div className="flex items-center justify-center gap-3">
