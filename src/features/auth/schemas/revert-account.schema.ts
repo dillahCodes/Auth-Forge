@@ -1,3 +1,4 @@
+import { refineEmailDomain, refineEmailHumanLike } from "@/shared/utils/refine-email";
 import z from "zod";
 
 const revertAccountSchema = z
@@ -13,7 +14,11 @@ const revertAccountSchema = z
   });
 
 export const revertAccountPasswordSchema = revertAccountSchema.safeExtend({
-  email: z.email({ message: "Invalid email address" }).trim(),
+  email: z
+    .email({ message: "Invalid email address" })
+    .trim()
+    .refine(refineEmailHumanLike, { message: "Email looks invalid" })
+    .refine(refineEmailDomain, { message: "Invalid email domain" }),
 });
 
 export const revertAccountEmailSchema = revertAccountSchema;
@@ -38,14 +43,3 @@ export async function validateRevertAccountForm({ forEndpoint, input }: Validate
 
   return { isError: false, data: result.data, errors: null };
 }
-
-// export async function validateRevertAccountForm({ input }: { input: unknown }) {
-//   const result = revertAccountSchema.safeParse(input);
-
-//   if (!result.success) {
-//     const errors = result.error.flatten().fieldErrors;
-//     return { isError: true, errors, data: null };
-//   }
-
-//   return { isError: false, data: result.data, errors: null };
-// }
