@@ -60,8 +60,9 @@ export default function Register() {
           labelProps={{ htmlFor: "confirmPassword" }}
           inputProps={{ id: "confirmPassword", name: "confirmPassword", placeholder: "Confirm Password" }}
         />
-        <Button variant="info" className="font-semibold">
-          {isPending ? "Registering..." : "Register"}
+
+        <Button type="submit" variant="info" className="font-semibold" disabled={isPending} isLoading={isPending}>
+          Register
         </Button>
 
         <div className="flex items-center justify-center gap-3">
