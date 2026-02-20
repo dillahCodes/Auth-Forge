@@ -9,6 +9,14 @@
 * 🟢 You can import this file directly.
 */
 
+export const AuthProvider = {
+  GOOGLE: 'GOOGLE',
+  CREDENTIALS: 'CREDENTIALS'
+} as const
+
+export type AuthProvider = (typeof AuthProvider)[keyof typeof AuthProvider]
+
+
 export const ReqStatus = {
   PENDING: 'PENDING',
   COMPLETED: 'COMPLETED',
