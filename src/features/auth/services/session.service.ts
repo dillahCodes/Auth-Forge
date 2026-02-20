@@ -5,10 +5,12 @@ import { prisma } from "@/shared/lib/prisma";
 import { v4 as uuidv4 } from "uuid";
 import { SessionRepository } from "../repositories/session.repository";
 import { UserRepository } from "../repositories/user.repositoriy";
-import { TokenService } from "./token.service";
+import { AccessTokenPayload, RefreshTokenPayload, TokenService } from "./token.service";
+import { AuthProvider } from "../../../../prisma/generated/enums";
 
-interface RefreshTokenPayload {
+interface RefreshTokenParams {
   clientInfo: ClientInfo;
+  provider: AuthProvider;
   geolocation: Geolocation;
   sessionId: string;
   userId: string;
@@ -57,18 +59,21 @@ export const SessionService = {
   },
 
   // DOC: refresh token if access token is expired
-  async refreshToken(params: RefreshTokenPayload) {
-    const { clientInfo, geolocation, sessionId, userId } = params;
+  async refreshToken(params: RefreshTokenParams) {
+    const { clientInfo, geolocation, sessionId, userId, provider } = params;
 
-    const user = await UserRepository.getById(userId);
+    const user = await UserRepository.getById({ userId });
     if (!user) throw new AuthUnauthorized();
 
     const { verifiedAt } = user;
 
     // DOC: generate new token
     const newSessionId = uuidv4();
-    const newAccessToken = await TokenService.signAccessToken({ userId, sessionId: newSessionId, verifiedAt });
-    const newRefreshToken = await TokenService.signRefreshToken({ sessionId: newSessionId });
+    const accessTokenPayload: AccessTokenPayload = { userId, sessionId: newSessionId, verifiedAt, provider };
+    const refreshTokenPayload: RefreshTokenPayload = { sessionId: newSessionId, provider };
+
+    const newAccessToken = await TokenService.signAccessToken(accessTokenPayload);
+    const newRefreshToken = await TokenService.signRefreshToken(refreshTokenPayload);
 
     // DOC: create new refresh and access token payload
     const newAccessTokenPayload = { sessionId: newSessionId, accessToken: newAccessToken, userId };

@@ -19,7 +19,7 @@ export const AccessTokenHttp = {
     const result = await TokenService.verify<AccessTokenPayload>(accessToken);
     if (!result.valid) throw new AuthTokenExpired();
 
-    const { userId, sessionId, permissions, verifiedAt } = result.payload;
+    const { userId, sessionId, permissions, verifiedAt, provider } = result.payload;
 
     // DOC: check if email is verified
     if (!verifiedAt && requireEmailVerification) throw new AuthRequiredEmailVerification();
@@ -29,6 +29,7 @@ export const AccessTokenHttp = {
       sessionId,
       permissions,
       verifiedAt,
+      provider,
     };
   },
 };

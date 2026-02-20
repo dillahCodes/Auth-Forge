@@ -13,6 +13,7 @@ export const RefreshTokenHttp = {
 
     return {
       refreshToken,
+      provider: result.payload.provider,
       sessionId: result.payload.sessionId,
     };
   },

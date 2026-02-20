@@ -12,14 +12,13 @@ type RevokeByIdParams = RouteContext<"/api/auth/sessions/[sessionId]">;
 export const SessionsController = {
   // DOC: refresh token if access token is expired
   refreshToken: CreateController.create(async (req: Request) => {
-    // DOC: validate refresh token  and session
-    const { sessionId } = await RefreshTokenHttp.requireValidRefreshToken(req);
+    const { sessionId, provider } = await RefreshTokenHttp.requireValidRefreshToken(req);
     const { userId } = await SessionService.validateSessionForRefresh(sessionId);
 
     const clientInfo = ClientInfoHttp.info(req);
     const geolocation = ClientInfoHttp.geoLocation(req, clientInfo.ip);
 
-    const args = { sessionId, userId, clientInfo, geolocation };
+    const args = { sessionId, userId, clientInfo, geolocation, provider };
     const { accessToken, refreshToken } = await SessionService.refreshToken(args);
 
     const response = sendSuccess(null, "Refresh token successfully");
