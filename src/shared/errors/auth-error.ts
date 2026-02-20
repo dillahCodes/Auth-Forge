@@ -48,3 +48,9 @@ export class TwoFaInvalidScope extends AppError {
     super(message, HttpStatusCode.FORBIDDEN, ErrorCode.AUTH_UNAUTHORIZED);
   }
 }
+
+export class GoogleAuthMissingCode extends AppError {
+  constructor(message = "Missing code") {
+    super(message, HttpStatusCode.BAD_REQUEST, ErrorCode.AUTH_GOOGLE_MISSING_CODE);
+  }
+}

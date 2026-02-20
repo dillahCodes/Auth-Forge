@@ -15,6 +15,23 @@ model User {
   verifiedAt         DateTime?
   sessions           Sessions[]
   emailChangeRequest EmailChangeRequest[]
+  accounts           Account[]
+}
+
+model Account {
+  id                String       @id @default(uuid())
+  userId            String
+  provider          AuthProvider @default(CREDENTIALS)
+  providerAccountId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+enum AuthProvider {
+  GOOGLE
+  CREDENTIALS
 }
 
 model Sessions {

@@ -29,7 +29,7 @@ export const ForgotPasswordService = {
     const cfgLimiter = { key: redisSendOtpLimiterKey, limit: 3, windowSeconds: 60 * 30 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    const userData = await UserRepository.getByEmail(email);
+    const userData = await UserRepository.getByEmail({ email });
     if (!userData) return;
 
     const { name } = userData;
@@ -68,12 +68,12 @@ export const ForgotPasswordService = {
     const isSame = VerificationTokenRepository.isTokenSame(existingToken, token);
     if (!isSame) throw new ResourceUnprocessableEntity("Token invalid or expired, please try again");
 
-    const user = await UserRepository.getByEmail(email);
+    const user = await UserRepository.getByEmail({ email });
     if (!user) throw new ResourceUnprocessableEntity("User not found");
 
     // DOC: Hash password, update and revoke all sessions
     const hashedPassword = await bcrypt.hash(password, 10);
-    await UserRepository.updatePassword(user.id, hashedPassword);
+    await UserRepository.updatePassword({ userId: user.id, hashedPassword });
     await SessionRepository.revokeSessionsByUserId(user.id);
     await SessionRepository.revokeAllAccessTokenByUserIdRedis(user.id);
 

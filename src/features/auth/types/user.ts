@@ -1,4 +1,4 @@
-import { EmailChangeRequest } from "../../../../prisma/generated/client";
+import { AuthProvider, EmailChangeRequest } from "../../../../prisma/generated/client";
 
 export interface User {
   id: string;
@@ -7,6 +7,7 @@ export interface User {
   name: string;
   password: string;
   verifiedAt: Date | null;
+  provider: AuthProvider;
 }
 
 export type UserData = Omit<User, "password">;

@@ -36,19 +36,19 @@ export const AccountService = {
     const cfgLimiter = { key: redisLimiterKey, limit: 5, windowSeconds: 60 * 15 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    const isUserExist = await UserRepository.getById(userId);
+    const isUserExist = await UserRepository.getById({ userId });
     if (!isUserExist) throw new NotFound("user not found");
 
     const isNameSame = isUserExist.name.toLowerCase() === name.toLocaleLowerCase();
     const nameSameError = { name: ["name cannot be the same"] };
     if (isNameSame) throw new ResourceUnprocessableEntity("please check your input", nameSameError);
 
-    const resultUpdate = await UserRepository.updateName(userId, name);
+    const resultUpdate = await UserRepository.updateName({ userId, name });
     return { oldName: isUserExist.name, newName: resultUpdate.name };
   },
 
   async changeEmailRequest(input: ChangeEmailSchema, userId: string) {
-    const isUserExist = await UserRepository.getById(userId);
+    const isUserExist = await UserRepository.getById({ userId });
     if (!isUserExist) throw new NotFound("user not found");
 
     const isEmailSame = isUserExist.email.toLocaleLowerCase() === input.newEmail.toLocaleLowerCase();
@@ -67,7 +67,7 @@ export const AccountService = {
   async changeEmailRequestUpdate(input: ChangeEmailUpdateSchema, userId: string) {
     const { newEmail, requestId } = input;
 
-    const isUserExist = await UserRepository.getById(userId);
+    const isUserExist = await UserRepository.getById({ userId });
     if (!isUserExist) throw new NotFound("user not found");
 
     const isEmailSame = isUserExist.email.toLocaleLowerCase() === newEmail.toLocaleLowerCase();
@@ -82,7 +82,7 @@ export const AccountService = {
   },
 
   async changeEmailCancelRequest(userId: string) {
-    const isUserExist = await UserRepository.getById(userId);
+    const isUserExist = await UserRepository.getById({ userId });
     if (!isUserExist) throw new NotFound("user not found");
 
     const requestedEmailChange = await EmailChangeRequestRepository.findPendingByUserId(userId);
@@ -98,7 +98,7 @@ export const AccountService = {
     const cfgLimiter = { key: redisSendOtpKey, limit: 3, windowSeconds: 60 * 30 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    const isUserExist = await UserRepository.getById(userId);
+    const isUserExist = await UserRepository.getById({ userId });
     if (!isUserExist) throw new NotFound("user not found");
 
     const requestedEmailChange = await EmailChangeRequestRepository.findPendingByUserId(userId);
@@ -112,7 +112,7 @@ export const AccountService = {
     const cfg = { key: redisSendOtpKey, otp, ttlSeconds: 15 * 60 };
     await OtpRepository.storeOtp(cfg);
 
-    const userData = await UserRepository.getById(userId);
+    const userData = await UserRepository.getById({ userId });
     if (!userData) throw new ResourceUnprocessableEntity("User not found");
 
     const payload = { name: userData.name, email: requestedEmailChange.newEmail, otp };
@@ -126,7 +126,7 @@ export const AccountService = {
     const cfgLimiter = { key: redisVerifyKey, limit: 5, windowSeconds: 60 * 10 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    const isUserExist = await UserRepository.getById(userId);
+    const isUserExist = await UserRepository.getById({ userId });
     if (!isUserExist) throw new NotFound("user not found");
 
     const requestedEmailChange = await EmailChangeRequestRepository.findPendingByUserId(userId);
@@ -141,8 +141,8 @@ export const AccountService = {
 
     await prisma.$transaction(async (transaction) => {
       await EmailChangeRequestRepository.markVerified(requestedEmailChange.id, { transaction });
-      await UserRepository.updateVerifiedAt(userId, new Date(), { transaction });
-      await UserRepository.updateEmail(userId, requestedEmailChange.newEmail, { transaction });
+      await UserRepository.updateVerifiedAt({ userId, verifiedAt: new Date(), options: { transaction } });
+      await UserRepository.updateEmail({ userId, email: requestedEmailChange.newEmail, options: { transaction } });
       await SessionRepository.revokeSessionsByUserId(userId, { transaction, exceptSessionId: sessionId });
     });
 
@@ -163,7 +163,7 @@ export const AccountService = {
     const cfgLimiter = { key: redisLimiterKey, limit: 5, windowSeconds: 60 * 15 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    const user = await UserRepository.getById(userId, { withPassword: true });
+    const user = await UserRepository.getById({ userId, options: { withPassword: true } });
     if (!user) throw new NotFound("user not found");
 
     const validCurrentPassword = await bcrypt.compare(currentPassword, user.password);
@@ -172,7 +172,7 @@ export const AccountService = {
     const hashedNewPassword = await bcrypt.hash(confirmPassword, 10);
 
     await prisma.$transaction(async (transaction) => {
-      await UserRepository.updatePassword(userId, hashedNewPassword, { transaction });
+      await UserRepository.updatePassword({ userId, hashedPassword: hashedNewPassword, options: { transaction } });
       await SessionRepository.revokeSessionsByUserId(userId, { transaction, exceptSessionId: sessionId });
     });
 

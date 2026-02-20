@@ -24,9 +24,9 @@ export function Button({ children, variant, iconLeft, iconRight, isLoading, ...p
   return (
     <button
       {...props}
-      className={`text-sm ${iconLeft || (iconRight && "flex items-center gap-2")} ${styles[variant]} ${props.className}`}
+      className={`text-sm ${(iconLeft || iconRight) && "flex items-center justify-center gap-2"} ${styles[variant]} ${props.className}`}
     >
-      <Activity name="button icon left" mode={!iconLeft ? "hidden" : "visible"}>
+      <Activity name="button icon left" mode={!iconLeft || isLoading ? "hidden" : "visible"}>
         {iconLeft}
       </Activity>
 
@@ -41,7 +41,7 @@ export function Button({ children, variant, iconLeft, iconRight, isLoading, ...p
         </div>
       </Activity>
 
-      <Activity name="button icon right" mode={!iconRight ? "hidden" : "visible"}>
+      <Activity name="button icon right" mode={!iconRight || isLoading ? "hidden" : "visible"}>
         {iconRight}
       </Activity>
     </button>

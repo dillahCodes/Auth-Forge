@@ -24,6 +24,12 @@ export default function UserInfo() {
         <div className="border-dark border-t-0 h-full border-2 bg-pink-300 border-x-0" />
         <div className="border-dark relative border-2 border-t-0 h-full border-x-0 row-span-2" />
 
+        {/* provider info */}
+        <div className="border-2 border-dark w-fit z-20 h-fit absolute top-0 right-0 m-4 p-1 px-2 bg-success rounded-full text-sm">
+          <span>Provider: </span>
+          <span className="font-bold">{userData?.data?.provider.toLowerCase()}</span>
+        </div>
+
         {/* profile content */}
         <div className="w-full h-full absolute grid grid-rows-3 grid-cols-1 z-10">
           {/* profile */}

@@ -35,7 +35,7 @@ export const TwoFaService = {
     const cfg = { key: redisSendOtpKey, otp, ttlSeconds: 15 * 60 };
     await OtpRepository.storeOtp(cfg);
 
-    const userData = await UserRepository.getById(userId);
+    const userData = await UserRepository.getById({ userId });
     if (!userData) throw new ResourceUnprocessableEntity("User not found");
 
     const payload = { name: userData.name, email: userData.email, otp, location };
