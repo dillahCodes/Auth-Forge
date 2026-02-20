@@ -177,6 +177,6 @@ export const AccountService = {
     });
 
     await SessionRepository.revokeAllAccessTokenByUserIdRedis(userId, { exceptSessionId: sessionId });
-    RevertAccountService.sendRevertAccountPasswordChange({ email: user.email, vercelTlsFingerprint });
+    await RevertAccountService.sendRevertAccountPasswordChange({ email: user.email, vercelTlsFingerprint });
   },
 };
