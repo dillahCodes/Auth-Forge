@@ -1,5 +1,5 @@
-import { LoginController } from "@/features/auth/controllers/login.controller";
+import { AuthController } from "@/features/auth/controllers/auth.controller";
 
 export async function POST(req: Request) {
-  return await LoginController.login(req);
+  return await AuthController.login(req);
 }
