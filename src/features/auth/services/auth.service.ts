@@ -32,6 +32,15 @@ export const AuthService = {
     const { signAccessToken, signRefreshToken } = TokenService;
     const { id: userId, verifiedAt } = user;
     const provider = AuthProvider.CREDENTIALS;
+    const providerAccountId = userId;
+
+    // DOC: if user login with credentials, check user have credentials account or not, if not create credentials account for user
+    const isHasCredentialsAccount = await UserRepository.getAccountByProviderId({ provider, providerAccountId });
+
+    if (!isHasCredentialsAccount) {
+      const payloadAccount = { provider, providerAccountId: userId };
+      await UserRepository.createAccount({ accountData: payloadAccount, userId });
+    }
 
     // DOC: create session and tokens
     const sessionId = uuidv4();
