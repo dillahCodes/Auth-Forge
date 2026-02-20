@@ -2,14 +2,18 @@ import { expiresInMiliseconds } from "@/shared/utils/expires-in-miliseconds";
 import { errors, JWTPayload, jwtVerify, SignJWT } from "jose";
 import "server-only";
 import { TwoFaScopeSchema } from "../schemas/2fa.schema";
+import { AuthProvider } from "../../../../prisma/generated/enums";
 
 export interface RefreshTokenPayload extends JWTPayload {
   sessionId: string;
+  provider: AuthProvider;
 }
 
 export interface AccessTokenPayload extends JWTPayload {
   userId: string;
   sessionId: string;
+  verifiedAt: Date | null;
+  provider: AuthProvider;
 }
 
 export interface TwoFaTokenPayload extends JWTPayload {
