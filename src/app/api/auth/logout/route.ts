@@ -1,5 +1,5 @@
-import { LogoutController } from "@/features/auth/controllers/logout.controller";
+import { AuthController } from "@/features/auth/controllers/auth.controller";
 
 export async function POST(req: Request) {
-  return await LogoutController.logout(req);
+  return await AuthController.logout(req);
 }
