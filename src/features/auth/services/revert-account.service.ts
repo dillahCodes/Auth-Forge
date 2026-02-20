@@ -56,7 +56,7 @@ export const RevertAccountService: RevertAccountServiceContract = {
     const cfgLimiter = { key: redisSendRevertPasswordKey, limit: 3, windowSeconds: 60 * 15 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    const user = await UserRepository.getByEmail(email);
+    const user = await UserRepository.getByEmail({ email });
     if (!user) throw new ResourceUnprocessableEntity("User not found");
 
     // DOC: Generate revert token
@@ -80,7 +80,7 @@ export const RevertAccountService: RevertAccountServiceContract = {
     const cfgLimiter = { key: redisSendRevertPasswordKey, limit: 3, windowSeconds: 60 * 15 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    const user = await UserRepository.getByEmail(email);
+    const user = await UserRepository.getByEmail({ email });
     if (!user) throw new ResourceUnprocessableEntity("User not found");
 
     // DOC: Get existing token and validate
@@ -93,7 +93,7 @@ export const RevertAccountService: RevertAccountServiceContract = {
 
     // DOC: Hash password, update and revoke all sessions
     const hashedPassword = await bcrypt.hash(password, 10);
-    await UserRepository.updatePassword(user.id, hashedPassword);
+    await UserRepository.updatePassword({ userId: user.id, hashedPassword });
     await SessionRepository.revokeSessionsByUserId(user.id);
     await SessionRepository.revokeAllAccessTokenByUserIdRedis(user.id);
 
@@ -109,7 +109,7 @@ export const RevertAccountService: RevertAccountServiceContract = {
     const cfgLimiter = { key: redisSendRevertEmailKey, limit: 3, windowSeconds: 60 * 15 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    const user = await UserRepository.getById(userId);
+    const user = await UserRepository.getById({ userId });
     if (!user) throw new ResourceUnprocessableEntity("User not found");
 
     // DOC: Generate revert token
@@ -145,16 +145,17 @@ export const RevertAccountService: RevertAccountServiceContract = {
     if (!requestChangeEmail) throw new ResourceUnprocessableEntity("Token invalid or expired, please try again");
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const { oldEmail, userId } = requestChangeEmail;
 
     // DOC: update password, changeb back email and revoke all sessions
     await prisma.$transaction(async (transaction) => {
-      await UserRepository.updatePassword(requestChangeEmail.userId, hashedPassword, { transaction });
-      await UserRepository.updateEmail(requestChangeEmail.userId, requestChangeEmail.oldEmail, { transaction });
-      await SessionRepository.revokeSessionsByUserId(requestChangeEmail.userId, { transaction });
+      await UserRepository.updatePassword({ userId, hashedPassword, options: { transaction } });
+      await UserRepository.updateEmail({ userId, email: oldEmail, options: { transaction } });
+      await SessionRepository.revokeSessionsByUserId(userId, { transaction });
     });
 
     // DOC: revoke all access token
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(requestChangeEmail.userId);
+    await SessionRepository.revokeAllAccessTokenByUserIdRedis(userId);
   },
 
   generateUrl<T extends RevertUrlParams>(path: string, params: T) {
