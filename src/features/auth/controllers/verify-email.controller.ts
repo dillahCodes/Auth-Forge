@@ -19,11 +19,11 @@ export const VerifyEmailController = {
 
   // DOC: verify email
   verifyEmailOtp: CreateController.create(async (req: Request) => {
-    const { userId, sessionId } = await AccessTokenHttp.requiredAccessToken(req, { requireEmailVerification: false });
+    const { userId, sessionId, provider } = await AccessTokenHttp.requiredAccessToken(req, { requireEmailVerification: false });
     const { otp } = await VerifyEmailHttp.validateFormData(req);
 
     await SessionService.validateSessionForAccessToken(sessionId);
-    const { accessToken } = await VerifyEmailService.verify(userId, otp, sessionId);
+    const { accessToken } = await VerifyEmailService.verify({ userId, inputOtp: otp, sessionId, provider });
 
     // DOC: return response and give new access token
     const response = sendSuccess(null, "Verification email successfully");

@@ -1,9 +1,17 @@
 import { ResourceUnprocessableEntity } from "@/shared/errors/resource-error";
 import { OtpRepository } from "../repositories/otp.repository";
 import { UserRepository } from "../repositories/user.repositoriy";
-import { RateLimiterService } from "./rate-limit.service";
 import { EmailService } from "./email.service";
+import { RateLimiterService } from "./rate-limit.service";
 import { TokenService } from "./token.service";
+import { AuthProvider } from "../../../../prisma/generated/enums";
+
+interface VerifyEmailParams {
+  userId: string;
+  inputOtp: string;
+  sessionId: string;
+  provider: AuthProvider;
+}
 
 export const VerifyEmailService = {
   send: async (userId: string) => {
@@ -25,7 +33,7 @@ export const VerifyEmailService = {
     await OtpRepository.storeOtp(cfg);
 
     // DOC: get user by id
-    const userData = await UserRepository.getById(userId);
+    const userData = await UserRepository.getById({ userId });
     if (!userData) throw new ResourceUnprocessableEntity("User not found");
 
     // DOC: send email
@@ -33,8 +41,9 @@ export const VerifyEmailService = {
     await EmailService.sendVerifyEmail(payload);
   },
 
-  verify: async (userId: string, inputOtp: string, sessionId: string) => {
-    // DOC: implement rate limiter
+  verify: async (params: VerifyEmailParams) => {
+    const { userId, inputOtp, sessionId, provider } = params;
+
     const redisVerifyKey = `otp:email|type:verify|uid:${userId}`;
     const cfgLimiter = { key: redisVerifyKey, limit: 5, windowSeconds: 60 * 10 };
     await RateLimiterService.fixedWindow(cfgLimiter);
@@ -54,8 +63,8 @@ export const VerifyEmailService = {
     }
 
     // DOC: update user and give new access token
-    const result = await UserRepository.updateVerifiedAt(userId, new Date());
-    const newAccessToken = await TokenService.signAccessToken({ userId, sessionId, verifiedAt: result.verifiedAt });
+    const { verifiedAt } = await UserRepository.updateVerifiedAt({ userId, verifiedAt: new Date() });
+    const newAccessToken = await TokenService.signAccessToken({ userId, sessionId, verifiedAt, provider });
 
     // DOC: Cleanup redis keys
     await OtpRepository.deleteOtp(redisVerifyKey);
