@@ -1,5 +1,6 @@
 "use client";
 
+import { useGoogleAuth } from "@/features/auth/hooks/use-google-auth";
 import { useRegister } from "@/features/auth/hooks/use-register";
 import { Button } from "@/shared/components/ui/button";
 import { Form } from "@/shared/components/ui/form/form";
@@ -13,9 +14,11 @@ import { ApiResponse } from "@/shared/types/response";
 import { getFieldError } from "@/shared/utils/response-helper";
 import { AxiosError } from "axios";
 import { Activity } from "react";
+import { FcGoogle } from "react-icons/fc";
 import { LuIdCard } from "react-icons/lu";
 
 export default function Register() {
+  const { mutate: loginWithGoogle, isPending: isGooglePending } = useGoogleAuth();
   const { mutate: register, error, isPending, data, status, reset } = useRegister();
   const axiosError = error as AxiosError<ApiResponse>;
 
@@ -59,6 +62,24 @@ export default function Register() {
         />
         <Button variant="info" className="font-semibold">
           {isPending ? "Registering..." : "Register"}
+        </Button>
+
+        <div className="flex items-center justify-center gap-3">
+          <div className="w-full bg-black h-0.5" />
+          <span className="text-sm">Or</span>
+          <div className="w-full bg-black h-0.5" />
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => loginWithGoogle()}
+          iconLeft={<FcGoogle size={24} />}
+          isLoading={isGooglePending}
+          disabled={isGooglePending}
+          className="font-semibold"
+        >
+          Register with Google
         </Button>
       </Form>
     </main>

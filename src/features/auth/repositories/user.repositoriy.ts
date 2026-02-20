@@ -1,9 +1,65 @@
 import { prisma } from "@/shared/lib/prisma";
-import { Prisma } from "../../../../prisma/generated/client";
+import { AuthProvider, Prisma } from "../../../../prisma/generated/client";
+
+interface RespositoryOptions {
+  transaction?: Prisma.TransactionClient;
+}
+
+export interface CreateUserPayload {
+  userData: { name: string; email: string; password: string; id?: string; verifiedAt?: Date | null };
+  userAccount: { provider: AuthProvider; providerAccountId: string };
+  options?: RespositoryOptions;
+}
+
+interface CreateAccountParams {
+  userId: string;
+  accountData: CreateUserPayload["userAccount"];
+  options?: RespositoryOptions;
+}
+
+interface UpdateEmailParams {
+  userId: string;
+  email: string;
+  options?: RespositoryOptions;
+}
+
+interface UpdateVerifiedAtParams {
+  userId: string;
+  verifiedAt: Date;
+  options?: RespositoryOptions;
+}
+
+interface UpdateNameParams {
+  userId: string;
+  name: string;
+  options?: RespositoryOptions;
+}
+
+interface UpdatePasswordParams {
+  userId: string;
+  hashedPassword: string;
+  options?: RespositoryOptions;
+}
+
+interface GetUserByIdParams {
+  userId: string;
+  options?: { withPassword: boolean };
+}
+
+interface GetUserByEmailParams {
+  email: string;
+  options?: { withPassword: boolean };
+}
+
+interface GetAccount {
+  provider: AuthProvider;
+  providerAccountId: string;
+}
 
 export const UserRepository = {
   // DOC: Find user by email
-  getByEmail(email: string, { withPassword = false } = {}) {
+  getByEmail({ email, options }: GetUserByEmailParams) {
+    const { withPassword = false } = options ?? {};
     return prisma.user.findUnique({
       where: { email },
       select: {
@@ -17,24 +73,25 @@ export const UserRepository = {
   },
 
   // DOC: Find user by id
-  getById(userId: string, { withPassword = false } = {}) {
+  getById({ userId, options }: GetUserByIdParams) {
     return prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, email: true, verifiedAt: true, password: withPassword },
+      select: { id: true, name: true, email: true, verifiedAt: true, password: options?.withPassword ?? false },
+    });
+  },
+
+  // DOC: Find account by provider id
+  getAccountByProviderId({ provider, providerAccountId }: GetAccount) {
+    return prisma.account.findUnique({
+      where: { provider_providerAccountId: { provider, providerAccountId } },
+      select: { userId: true },
     });
   },
 
   // DOC: Update user password (hashed)
-  updatePassword(userId: string, hashedPassword: string, options?: { transaction?: Prisma.TransactionClient }) {
-    if (options?.transaction) {
-      return options.transaction.user.update({
-        where: { id: userId },
-        data: { password: hashedPassword },
-        select: { id: true, name: true, email: true },
-      });
-    }
-
-    return prisma.user.update({
+  updatePassword({ userId, hashedPassword, options }: UpdatePasswordParams) {
+    const db = options?.transaction ?? prisma;
+    return db.user.update({
       where: { id: userId },
       data: { password: hashedPassword },
       select: { id: true, name: true, email: true },
@@ -42,8 +99,9 @@ export const UserRepository = {
   },
 
   // DOC: Update user name
-  updateName(userId: string, name: string) {
-    return prisma.user.update({
+  updateName({ userId, name, options }: UpdateNameParams) {
+    const db = options?.transaction ?? prisma;
+    return db.user.update({
       where: { id: userId },
       data: { name },
       select: { id: true, name: true, email: true },
@@ -51,7 +109,7 @@ export const UserRepository = {
   },
 
   // DOC: Update email verification date
-  updateVerifiedAt(userId: string, verifiedAt: Date, options?: { transaction?: Prisma.TransactionClient }) {
+  updateVerifiedAt({ userId, verifiedAt, options }: UpdateVerifiedAtParams) {
     const db = options?.transaction ?? prisma;
     return db.user.update({
       where: { id: userId },
@@ -61,7 +119,7 @@ export const UserRepository = {
   },
 
   // DOC: Update user email
-  updateEmail(userId: string, email: string, options?: { transaction?: Prisma.TransactionClient }) {
+  updateEmail({ userId, email, options }: UpdateEmailParams) {
     const db = options?.transaction ?? prisma;
     return db.user.update({
       where: { id: userId },
@@ -71,10 +129,19 @@ export const UserRepository = {
   },
 
   // DOC: Create new user
-  create(data: { name: string; email: string; password: string }) {
-    return prisma.user.create({
-      data,
+  create({ userData, userAccount, options }: CreateUserPayload) {
+    const db = options?.transaction ?? prisma;
+    return db.user.create({
+      data: { ...userData, accounts: { create: userAccount } },
       select: { id: true, name: true, email: true },
+    });
+  },
+
+  // DOC: Create new account for user (for social login)
+  createAccount({ userId, accountData, options }: CreateAccountParams) {
+    const db = options?.transaction ?? prisma;
+    return db.account.create({
+      data: { userId, ...accountData },
     });
   },
 };
