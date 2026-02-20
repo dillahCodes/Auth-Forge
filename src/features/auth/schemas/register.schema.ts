@@ -1,4 +1,4 @@
-import { refineEmail } from "@/shared/utils/refine-email";
+import { refineEmailDomain, refineEmailHumanLike } from "@/shared/utils/refine-email";
 import z from "zod";
 
 export const registerSchema = z
@@ -12,7 +12,9 @@ export const registerSchema = z
     email: z
       .email({ message: "Invalid email address" })
       .trim()
-      .refine(refineEmail, { message: "Invalid email domain" }),
+      .max(255, { message: "Email must be at most 255 characters long" })
+      .refine(refineEmailHumanLike, { message: "Email looks invalid" })
+      .refine(refineEmailDomain, { message: "Invalid email domain" }),
 
     password: z.string().min(8, { message: "Password must be at least 8 characters long" }).trim(),
     confirmPassword: z.string().min(8, { message: "Password must be at least 8 characters long" }).trim(),

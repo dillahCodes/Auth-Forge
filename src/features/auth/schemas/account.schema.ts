@@ -1,3 +1,4 @@
+import { refineEmailDomain, refineEmailHumanLike } from "@/shared/utils/refine-email";
 import z from "zod";
 
 export const changeNameSchema = z.object({
@@ -9,13 +10,25 @@ export const changeNameSchema = z.object({
 });
 
 export const changeEmailSchema = z.object({
-  email: z.email({ message: "Invalid email address" }).trim(),
-  newEmail: z.email({ message: "Invalid email address" }).trim(),
+  email: z
+    .email({ message: "Invalid email address" })
+    .trim()
+    .refine(refineEmailHumanLike, { message: "Email looks invalid" })
+    .refine(refineEmailDomain, { message: "Invalid email domain" }),
+  newEmail: z
+    .email({ message: "Invalid email address" })
+    .trim()
+    .refine(refineEmailHumanLike, { message: "Email looks invalid" })
+    .refine(refineEmailDomain, { message: "Invalid email domain" }),
 });
 
 export const changeEmailUpdateSchema = z.object({
   requestId: z.uuid().trim(),
-  newEmail: z.email({ message: "Invalid email address" }).trim(),
+  newEmail: z
+    .email({ message: "Invalid email address" })
+    .trim()
+    .refine(refineEmailHumanLike, { message: "Email looks invalid" })
+    .refine(refineEmailDomain, { message: "Invalid email domain" }),
 });
 
 export const changeEmailVerifySchema = z.object({

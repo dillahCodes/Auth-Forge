@@ -1,14 +1,22 @@
-import { refineEmail } from "@/shared/utils/refine-email";
+import { refineEmailDomain, refineEmailHumanLike } from "@/shared/utils/refine-email";
 import z from "zod";
 
 export const forgotPasswordEmailSchema = z.object({
-  email: z.email({ message: "Invalid email address" }).trim().refine(refineEmail, { message: "Invalid email domain" }),
+  email: z
+    .email({ message: "Invalid email address" })
+    .trim()
+    .refine(refineEmailHumanLike, { message: "Email looks invalid" })
+    .refine(refineEmailDomain, { message: "Invalid email domain" }),
 });
 
 export const forgotPasswordSchema = z
   .object({
     token: z.uuid(),
-    email: z.email({ message: "Invalid email address" }).trim(),
+    email: z
+      .email({ message: "Invalid email address" })
+      .trim()
+      .refine(refineEmailHumanLike, { message: "Email looks invalid" })
+      .refine(refineEmailDomain, { message: "Invalid email domain" }),
     password: z.string().min(8, { message: "Password must be at least 8 characters long" }).trim(),
     confirmPassword: z.string().min(8, { message: "Password must be at least 8 characters long" }).trim(),
   })
