@@ -1,14 +1,25 @@
-import "server-only";
-import { errors, JWTPayload, jwtVerify, SignJWT } from "jose";
 import { expiresInMiliseconds } from "@/shared/utils/expires-in-miliseconds";
+import { errors, JWTPayload, jwtVerify, SignJWT } from "jose";
+import "server-only";
+import { TwoFaScopeSchema } from "../schemas/2fa.schema";
+import { AuthProvider } from "../../../../prisma/generated/enums";
 
 export interface RefreshTokenPayload extends JWTPayload {
   sessionId: string;
+  provider: AuthProvider;
 }
 
 export interface AccessTokenPayload extends JWTPayload {
   userId: string;
   sessionId: string;
+  verifiedAt: Date | null;
+  provider: AuthProvider;
+}
+
+export interface TwoFaTokenPayload extends JWTPayload {
+  userId: string;
+  sessionId: string;
+  scope: TwoFaScopeSchema["scope"];
 }
 
 const SESSION_SECRET = process.env.SESSION_SECRET!;
@@ -17,10 +28,12 @@ const SECRET = new TextEncoder().encode(SESSION_SECRET);
 // DOC: for production
 export const ACCESS_TOKEN_EXPIRES_SECONDS = 15 * 60;
 export const REFRESH_TOKEN_EXPIRES_SECONDS = 60 * 60 * 24 * 7;
+export const TWO_FA_TOKEN_EXPIRES_SECONDS = 15 * 60;
 
 // DOC: for development
-// export const ACCESS_TOKEN_EXPIRES_SECONDS = 1 * 60;
+// export const ACCESS_TOKEN_EXPIRES_SECONDS = 2 * 60;
 // export const REFRESH_TOKEN_EXPIRES_SECONDS = 10 * 60;
+// export const TWO_FA_TOKEN_EXPIRES_SECONDS = 2 * 60;
 
 export const TokenService = {
   // DOC: Sign access token
@@ -38,6 +51,15 @@ export const TokenService = {
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
       .setExpirationTime(expiresInMiliseconds(REFRESH_TOKEN_EXPIRES_SECONDS))
+      .sign(SECRET);
+  },
+
+  // DOC: Sign 2fa token
+  signTwoFaToken(payload: TwoFaTokenPayload) {
+    return new SignJWT(payload)
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime(expiresInMiliseconds(TWO_FA_TOKEN_EXPIRES_SECONDS))
       .sign(SECRET);
   },
 

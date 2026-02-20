@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useEffectEvent, useState } from "react";
 
 interface OtpCountdownOptions {
@@ -5,47 +6,71 @@ interface OtpCountdownOptions {
   timeoutSeconds: number; // countdown length in seconds
 }
 
-export const useCountdown = ({ key, timeoutSeconds }: OtpCountdownOptions) => {
-  const [remaining, setRemaining] = useState(0);
-  const isCountdownDone = remaining <= 1;
+interface OtpCountdownReturn {
+  remaining: number;
+  isCountdownDone: boolean;
+}
 
-  const setCountDownvalue = (timestamp: string) => {
+// DOC: Get remaining time from localStorage
+export const getCountdownRemaining = ({ key, timeoutSeconds }: OtpCountdownOptions): OtpCountdownReturn => {
+  const stored = localStorage.getItem(key);
+  if (!stored) return { remaining: 0, isCountdownDone: true };
+
+  const lastCountdownDateValue = Number(stored);
+  const elapsedTime = Math.floor((Date.now() - lastCountdownDateValue) / 1000);
+  const timeLeft = timeoutSeconds - elapsedTime;
+
+  return { remaining: timeLeft, isCountdownDone: timeLeft <= 1 };
+};
+
+export const useCountdown = ({ key, timeoutSeconds }: OtpCountdownOptions) => {
+  const [stateRemaining, setStateRemaining] = useState(0);
+  const internalState = { remaining: stateRemaining, isCountdownDone: stateRemaining <= 1 };
+
+  // DOC: start countdown
+  const startCountdown = () => {
+    const { isCountdownDone } = getCountdownRemaining({ key, timeoutSeconds });
+    if (!isCountdownDone) return;
+
+    const timestamp = Date.now().toString();
+
     localStorage.setItem(key, timestamp);
-    setRemaining(timeoutSeconds);
+    setStateRemaining(timeoutSeconds);
   };
 
+  // DOC: event handler
   const handleSetReamining = useEffectEvent((remaining: number) => {
-    setRemaining(remaining);
+    setStateRemaining(remaining);
+  });
+
+  const handleRevomeCountdown = useEffectEvent(() => {
+    localStorage.removeItem(key);
+    setStateRemaining(0);
   });
 
   const decreaseCountdown = useEffectEvent(() => {
-    setRemaining((prev) => Math.max(0, prev - 1));
+    setStateRemaining((prev) => Math.max(0, prev - 1));
+    const localStorageState = getCountdownRemaining({ key, timeoutSeconds });
+    if (localStorageState.isCountdownDone) return handleRevomeCountdown();
   });
 
   // DOC: resume countdown, deacreasing the remaining time
   useEffect(() => {
-    const stored = localStorage.getItem(key);
-    if (!stored) return;
+    const localStorageState = getCountdownRemaining({ key, timeoutSeconds });
+    const { remaining, isCountdownDone } = localStorageState;
 
-    const lastCountdownDateValue = Number(stored);
-    const elapsedTime = Math.floor((Date.now() - lastCountdownDateValue) / 1000);
-    const timeLeft = timeoutSeconds - elapsedTime;
-
-    if (timeLeft > 0) handleSetReamining(timeLeft);
+    if (isCountdownDone) return handleRevomeCountdown();
+    handleSetReamining(remaining);
   }, [key, timeoutSeconds]);
 
   // DOC: start countdown
   useEffect(() => {
-    const isCountdownDone = remaining <= 1;
-    if (isCountdownDone) return;
-
     const intervalId = setInterval(() => decreaseCountdown(), 1000);
     return () => clearInterval(intervalId);
-  }, [remaining]);
+  }, []);
 
   return {
-    remaining,
-    isCountdownDone,
-    setCountDownvalue,
+    internalState,
+    startCountdown,
   };
 };

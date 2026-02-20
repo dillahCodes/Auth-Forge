@@ -1,4 +1,5 @@
 "use client";
+import { ApiRouters } from "@/routers/api-router";
 import { axiosInstance } from "@/shared/lib/axios/axios";
 import { ApiResponse } from "@/shared/types/response";
 import { useMutation } from "@tanstack/react-query";
@@ -6,7 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 export function useEmailVerify() {
   const mutation = useMutation({
     mutationFn: async (payload: { otp: string }) => {
-      const res = await axiosInstance.post("/api/auth/email/verify", payload, {
+      const res = await axiosInstance.post(ApiRouters.EMAIL_VERIFICATION_VERIFY, payload, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data as ApiResponse<null>;

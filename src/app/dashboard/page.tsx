@@ -8,7 +8,25 @@ export default function Dashboard() {
   const revokedSessions = data?.data?.find((s) => s.revoked === true)?._count || 0;
   const activeSessions = data?.data?.find((s) => s.revoked === false)?._count || 0;
 
-  if (isLoading) return <DashboardLoading />;
+  if (isLoading) {
+    return (
+      <section className="flex flex-col gap-6 w-full max-w-xl animate-pulse">
+        <div className="h-8 w-40 bg-dark/20 border-2 border-dark" />
+        <section className="border-2 shadow-strong p-3 space-y-3">
+          <div className="flex gap-3 flex-wrap items-center sm:w-full max-w-xs">
+            <div className="aspect-square w-32 border-2 border-dark bg-dark/20" />
+            <div className="flex flex-col gap-2 w-full sm:w-auto">
+              <div className="h-6 w-36 bg-dark/20 border-2 border-dark" />
+              <div className="flex flex-col gap-2">
+                <div className="h-5 w-40 bg-dark/20 border-2 border-dark" />
+                <div className="h-5 w-40 bg-dark/20 border-2 border-dark" />
+              </div>
+            </div>
+          </div>
+        </section>
+      </section>
+    );
+  }
 
   return (
     <section className="flex flex-col gap-6 w-full max-w-xl">
@@ -30,26 +48,6 @@ export default function Dashboard() {
                 <span className="min-h-5 rounded-full bg-danger min-w-5 max-w-5 max-h-5 border-2 border-dark" />
                 <span>Revoked: {revokedSessions}</span>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </section>
-  );
-}
-
-export function DashboardLoading() {
-  return (
-    <section className="flex flex-col gap-6 w-full max-w-xl animate-pulse">
-      <div className="h-8 w-40 bg-dark/20 border-2 border-dark" />
-      <section className="border-2 shadow-strong p-3 space-y-3">
-        <div className="flex gap-3 flex-wrap items-center sm:w-full max-w-xs">
-          <div className="aspect-square w-32 border-2 border-dark bg-dark/20" />
-          <div className="flex flex-col gap-2 w-full sm:w-auto">
-            <div className="h-6 w-36 bg-dark/20 border-2 border-dark" />
-            <div className="flex flex-col gap-2">
-              <div className="h-5 w-40 bg-dark/20 border-2 border-dark" />
-              <div className="h-5 w-40 bg-dark/20 border-2 border-dark" />
             </div>
           </div>
         </div>

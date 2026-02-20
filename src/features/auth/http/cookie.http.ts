@@ -1,15 +1,20 @@
 import { NextResponse } from "next/server";
-import { ACCESS_TOKEN_EXPIRES_SECONDS, REFRESH_TOKEN_EXPIRES_SECONDS } from "../services/token.service";
+import {
+  ACCESS_TOKEN_EXPIRES_SECONDS,
+  REFRESH_TOKEN_EXPIRES_SECONDS,
+  TWO_FA_TOKEN_EXPIRES_SECONDS,
+} from "../services/token.service";
 
 interface SetCookieHttp {
   response: NextResponse;
   accessToken?: string;
   refreshToken?: string;
+  twoFaToken?: string;
 }
 
 export const CookieHttp = {
   // DOC: Set auth cookies in response
-  set({ response, accessToken, refreshToken }: SetCookieHttp) {
+  set({ response, accessToken, refreshToken, twoFaToken }: SetCookieHttp) {
     if (accessToken) {
       response.cookies.set("access_token", accessToken, {
         httpOnly: true,
@@ -29,6 +34,16 @@ export const CookieHttp = {
         maxAge: REFRESH_TOKEN_EXPIRES_SECONDS,
       });
     }
+
+    if (twoFaToken) {
+      response.cookies.set("2fa_token", twoFaToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        path: "/",
+        maxAge: TWO_FA_TOKEN_EXPIRES_SECONDS,
+      });
+    }
   },
 
   // DOC: function to get token from cookies
@@ -45,5 +60,9 @@ export const CookieHttp = {
   async clear(response: NextResponse) {
     response.cookies.delete("access_token");
     response.cookies.delete("refresh_token");
+  },
+
+  async clearByName(response: NextResponse, name: string) {
+    response.cookies.delete(name);
   },
 };

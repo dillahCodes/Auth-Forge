@@ -8,11 +8,11 @@ interface FormHeaderProps {
 
 export const FormHeader = ({ description, title, icon: ReactIcon }: FormHeaderProps) => {
   return (
-    <section className="flex items-center justify-center flex-col">
+    <section className="flex items-center justify-center flex-col gap-2">
       <span className="mx-auto">{ReactIcon && <ReactIcon size={50} />}</span>
-      <div className="w-full">
+      <div className="w-full flex flex-col">
         <h1 className="text-center font-semibold text-xl">{title}</h1>
-        <p className="text-center text-sm font-light">{description}</p>
+        <p className="text-center text-sm text-dark-6">{description}</p>
       </div>
     </section>
   );

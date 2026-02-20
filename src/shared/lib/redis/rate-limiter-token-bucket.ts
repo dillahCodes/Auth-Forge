@@ -61,11 +61,12 @@ export async function rateLimiterTokenBucket({
   const redis = await getRedis();
   const currentTimmeMs = new Date().getTime();
   const tokenUsedPerRequest = 1;
+  const refillBufferSeconds = 2;
 
   const rateLimiterKey = `limiter:${key}`;
   const keyLastRefill = `${rateLimiterKey}:lastRefill`;
 
-  const ttlSeconds = Math.ceil(bucketCapacity / refillRatePerSecond) * 2;
+  const ttlSeconds = Math.ceil(bucketCapacity / refillRatePerSecond) * refillBufferSeconds;
 
   const result = await redis.eval(LUA_TOKEN_BUCKET_SCRIPT, {
     keys: [key, keyLastRefill],

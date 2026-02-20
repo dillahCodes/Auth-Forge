@@ -5,53 +5,48 @@ import bcrypt from "bcrypt";
 import "server-only";
 import { v4 as uuidv4 } from "uuid";
 import { SessionRepository } from "../repositories/session.repository";
-import { UserRepository } from "../repositories/user.repositoriy";
+import { CreateUserPayload, UserRepository } from "../repositories/user.repositoriy";
 import { LoginSchema } from "../schemas/login.schema";
 import { RegisterSchema } from "../schemas/register.schema";
-import { RateLimiterService } from "./rate-limit.service";
-import { TokenService } from "./token.service";
+import { AccessTokenPayload, RefreshTokenPayload, TokenService } from "./token.service";
+import { AuthProvider } from "../../../../prisma/generated/enums";
 
 interface LoginContext {
   geo: Geolocation;
   clientInfo: ClientInfo;
 }
 
+type userDataPayload = CreateUserPayload["userData"];
+type userAccountPayload = CreateUserPayload["userAccount"];
+
 export const AuthService = {
-  // DOC: Handle user login flow
   async login(input: LoginSchema, context: LoginContext) {
     const invalidCredentials = { email: ["Invalid email or password"], password: ["Invalid email or password"] };
 
-    // DOC: Implement Rate Limit
-    const redisLoginLimiterKey = `login|fg:${context.clientInfo.vercelTlsFingerprint}`;
-    const cfgLimiter = { key: redisLoginLimiterKey, limit: 5, windowSeconds: 60 * 15 };
-    await RateLimiterService.fixedWindow(cfgLimiter);
-
-    // DOC: find user by email
-    const user = await UserRepository.getByEmail(input.email, true);
+    const user = await UserRepository.getByEmail({ email: input.email, options: { withPassword: true } });
     if (!user) throw new AuthInvalidCredentials(invalidCredentials);
 
-    // DOC: validate password
     const valid = await bcrypt.compare(input.password, user.password);
     if (!valid) throw new AuthInvalidCredentials(invalidCredentials);
 
     const { signAccessToken, signRefreshToken } = TokenService;
+    const { id: userId, verifiedAt } = user;
+    const provider = AuthProvider.CREDENTIALS;
 
     // DOC: create session and tokens
     const sessionId = uuidv4();
-    const accessToken = await signAccessToken({ userId: user.id, sessionId, verifiedAt: user.verifiedAt });
-    const refreshToken = await signRefreshToken({ sessionId });
+    const accessTokenPayload: AccessTokenPayload = { userId, sessionId, verifiedAt, provider };
+    const refreshTokenPayload: RefreshTokenPayload = { sessionId, provider };
+    const accessToken = await signAccessToken(accessTokenPayload);
+    const refreshToken = await signRefreshToken(refreshTokenPayload);
 
-    // DOC: store session and tokens in database
-    await SessionRepository.create({
-      sessionId,
-      userId: user.id,
-      refreshToken,
-      ...context.clientInfo,
-      ...context.geo,
-    });
+    // DOC: store refresh tokens in database
+    const payloadRefreshToken = { sessionId, refreshToken, userId: user.id, ...context.clientInfo, ...context.geo };
+    await SessionRepository.storeSession(payloadRefreshToken);
 
-    // DOC: delete login limiter
-    RateLimiterService.clearLimiter(redisLoginLimiterKey);
+    // DOC: store access token in redis database
+    const payloadAccessToken = { sessionId, accessToken, userId: user.id };
+    await SessionRepository.storeAccessTokenRedis(payloadAccessToken);
 
     return {
       user: { id: user.id, email: user.email, name: user.name },
@@ -59,28 +54,26 @@ export const AuthService = {
     };
   },
 
-  // DOC: handle register flow
-  async register(input: RegisterSchema, vercelTlsFingerprint: string | null) {
-    // DOC: Implement Rate Limit
-    const redisRegisterLimiterKey = `register|fg:${vercelTlsFingerprint}`;
-    const cfgLimiter = { key: redisRegisterLimiterKey, limit: 5, windowSeconds: 60 * 30 };
-    await RateLimiterService.fixedWindow(cfgLimiter);
+  async register(input: RegisterSchema) {
+    const { email, name, password } = input;
 
-    // DOC: check if email already exists
-    const user = await UserRepository.getByEmail(input.email);
+    const user = await UserRepository.getByEmail({ email });
     if (user) throw new ValidationFailed({ email: ["Email already exists"] });
 
-    // DOC: hash password
-    const hashedPassword = await bcrypt.hash(input.password, 10);
+    const userId = uuidv4();
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // DOC: create user
-    const newUser = await UserRepository.create({ email: input.email, name: input.name, password: hashedPassword });
+    const userDataPayload: userDataPayload = { email, name, password: hashedPassword, id: userId };
+    const payloadAccount: userAccountPayload = { provider: AuthProvider.CREDENTIALS, providerAccountId: userId };
+    const newUser = await UserRepository.create({ userData: userDataPayload, userAccount: payloadAccount });
+
     return newUser;
   },
 
   // DOC: handle logout flow
   async logout(sessionId: string) {
-    const res = await SessionRepository.revokeById(sessionId);
+    const res = await SessionRepository.revokeSessionById(sessionId);
+    await SessionRepository.revokeAccessTokenBySessionIdRedis(sessionId, res.userId);
     return res;
   },
 };

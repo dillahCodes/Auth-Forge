@@ -36,3 +36,21 @@ export class AuthSessionRevoked extends AppError {
     super(message, HttpStatusCode.UNAUTHORIZED, ErrorCode.AUTH_SESSION_REVOKED);
   }
 }
+
+export class TwoFaRequired extends AppError {
+  constructor(message = "Two-factor authentication required") {
+    super(message, HttpStatusCode.UNAUTHORIZED, ErrorCode.AUTH_MISSING_2FA_TOKEN);
+  }
+}
+
+export class TwoFaInvalidScope extends AppError {
+  constructor(message = "Invalid two-factor authentication scope") {
+    super(message, HttpStatusCode.FORBIDDEN, ErrorCode.AUTH_UNAUTHORIZED);
+  }
+}
+
+export class GoogleAuthMissingCode extends AppError {
+  constructor(message = "Missing code") {
+    super(message, HttpStatusCode.BAD_REQUEST, ErrorCode.AUTH_GOOGLE_MISSING_CODE);
+  }
+}

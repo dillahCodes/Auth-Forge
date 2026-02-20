@@ -9,8 +9,8 @@ export type HttpResponse<T> = NextResponse<ApiResponse<T>>;
 export type HttpResponseOrNull<T> = NextResponse<ApiResponse<T | null>>;
 
 export const CreateController = {
-  create<T, C = undefined>(handler: (req: Request, context: C) => Promise<HttpResponse<T>>) {
-    return async (req: Request, context?: C): Promise<HttpResponseOrNull<T>> => {
+  create<T, C = undefined>(handler: (req: Request, context: C) => Promise<HttpResponse<T> | NextResponse>) {
+    return async (req: Request, context?: C): Promise<HttpResponseOrNull<T> | NextResponse> => {
       try {
         return await handler(req, context as C);
       } catch (error) {

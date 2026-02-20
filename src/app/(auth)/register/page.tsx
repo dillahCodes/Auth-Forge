@@ -1,61 +1,34 @@
 "use client";
 
+import { useGoogleAuth } from "@/features/auth/hooks/use-google-auth";
+import { useRegister } from "@/features/auth/hooks/use-register";
 import { Button } from "@/shared/components/ui/button";
 import { Form } from "@/shared/components/ui/form/form";
 import { FormHeader } from "@/shared/components/ui/form/form-header";
 import { InputEmail } from "@/shared/components/ui/input/input-email";
 import { InputPassword } from "@/shared/components/ui/input/input-password";
 import { InputText } from "@/shared/components/ui/input/input-text";
-import { useRegister } from "@/features/auth/hooks/use-register";
-import { getFieldError } from "@/shared/utils/response-helper";
-import { ApiResponse } from "@/shared/types/response";
-import { AxiosError } from "axios";
-import { LuIdCard } from "react-icons/lu";
-import { Activity, useEffect, useMemo } from "react";
 import { MessageBox } from "@/shared/components/ui/messagebox";
-
-interface MessageBoxType {
-  condition: boolean;
-  message: string;
-  type: "success" | "error";
-}
+import { BuildError, useBuildAxiosError } from "@/shared/hooks/use-build-axios-erros";
+import { ApiResponse } from "@/shared/types/response";
+import { getFieldError } from "@/shared/utils/response-helper";
+import { AxiosError } from "axios";
+import { Activity } from "react";
+import { FcGoogle } from "react-icons/fc";
+import { LuIdCard } from "react-icons/lu";
 
 export default function Register() {
+  const { mutate: loginWithGoogle, isPending: isGooglePending } = useGoogleAuth();
   const { mutate: register, error, isPending, data, status, reset } = useRegister();
   const axiosError = error as AxiosError<ApiResponse>;
 
-  const message = useMemo(() => {
-    const conditions: MessageBoxType[] = [
-      {
-        condition: status === "success",
-        message: data?.message as string,
-        type: "success",
-      },
-      {
-        condition: status === "error",
-        message: axiosError?.response?.data.message as string,
-        type: "error",
-      },
-    ];
-
-    const match = conditions.find((i) => Boolean(i.condition));
-    return match || null;
-  }, [data, status, axiosError]);
+  const flows: BuildError[] = [{ data: data, error: axiosError, status }];
+  const message = useBuildAxiosError({ errors: flows, resetState: reset });
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     register(new FormData(e.currentTarget));
   };
-
-  useEffect(() => {
-    if (!message) return;
-
-    const timeOutId = setTimeout(() => {
-      reset();
-    }, 5000);
-
-    return () => clearTimeout(timeOutId);
-  }, [reset, message]);
 
   return (
     <main className="flex flex-col gap-6 w-full max-w-md">
@@ -89,6 +62,24 @@ export default function Register() {
         />
         <Button variant="info" className="font-semibold">
           {isPending ? "Registering..." : "Register"}
+        </Button>
+
+        <div className="flex items-center justify-center gap-3">
+          <div className="w-full bg-black h-0.5" />
+          <span className="text-sm">Or</span>
+          <div className="w-full bg-black h-0.5" />
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => loginWithGoogle()}
+          iconLeft={<FcGoogle size={24} />}
+          isLoading={isGooglePending}
+          disabled={isGooglePending}
+          className="font-semibold"
+        >
+          Register with Google
         </Button>
       </Form>
     </main>
