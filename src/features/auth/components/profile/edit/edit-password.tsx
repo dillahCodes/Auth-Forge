@@ -27,7 +27,7 @@ export default function EditPassword({ defaultEmail }: EditPasswordProps) {
 
   const twoFaModal = useTwoFaModal();
 
-  const { status: twoFaStatusFetch, data: twoFaStatusData, mutate: twoFaStatusMutate } = useTwoFaStatus();
+  const { data: twoFaStatusData, mutate: twoFaStatusMutate, isPending: isTwoFaStatusPending } = useTwoFaStatus();
 
   const {
     status: changePasswordStatus,
@@ -35,7 +35,10 @@ export default function EditPassword({ defaultEmail }: EditPasswordProps) {
     reset: changePasswordReset,
     error: changePasswordError,
     mutate: changePasswordMutate,
+    isPending: isChangePasswordPending,
   } = useChangePassword();
+
+  const isButtonSubmitLoading = isTwoFaStatusPending || isChangePasswordPending;
 
   const changePasswordErrorAxios = changePasswordError as AxiosError<ApiResponse>;
 
@@ -123,8 +126,8 @@ export default function EditPassword({ defaultEmail }: EditPasswordProps) {
       <Button
         variant="info"
         className="w-full font-bold"
-        isLoading={twoFaStatusFetch === "pending"}
-        disabled={twoFaStatusFetch === "pending"}
+        isLoading={isButtonSubmitLoading}
+        disabled={isButtonSubmitLoading}
       >
         Edit Password
       </Button>
