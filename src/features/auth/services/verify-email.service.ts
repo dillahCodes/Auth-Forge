@@ -37,8 +37,8 @@ export const VerifyEmailService = {
     if (!userData) throw new ResourceUnprocessableEntity("User not found");
 
     // DOC: send email
-    const payload = { name: userData.name, email: userData.email, otp };
-    await EmailService.sendVerifyEmail(payload);
+    const verifyEmailArgs = { name: userData.name, email: userData.email, otp };
+    await EmailService.sendVerifyEmail(verifyEmailArgs);
   },
 
   verify: async (params: VerifyEmailParams) => {
