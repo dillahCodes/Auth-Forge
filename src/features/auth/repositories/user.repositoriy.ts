@@ -6,7 +6,7 @@ interface RespositoryOptions {
 }
 
 export interface CreateUserPayload {
-  userData: { name: string; email: string; password: string; id?: string; verifiedAt?: Date | null };
+  userData: { name: string; email: string; password: string | null; id?: string; verifiedAt?: Date | null };
   userAccount: { provider: AuthProvider; providerAccountId: string };
   options?: RespositoryOptions;
 }
@@ -37,7 +37,7 @@ interface UpdateNameParams {
 
 interface UpdatePasswordParams {
   userId: string;
-  hashedPassword: string;
+  hashedPassword: string | null;
   options?: RespositoryOptions;
 }
 
@@ -54,6 +54,17 @@ interface GetUserByEmailParams {
 interface GetAccount {
   provider: AuthProvider;
   providerAccountId: string;
+}
+
+interface DeleteAccount {
+  provider: AuthProvider;
+  providerAccountId: string;
+  options?: RespositoryOptions;
+}
+
+interface GetProviderByNameParams {
+  provider: AuthProvider;
+  userId: string;
 }
 
 export const UserRepository = {
@@ -74,9 +85,10 @@ export const UserRepository = {
 
   // DOC: Find user by id
   getById({ userId, options }: GetUserByIdParams) {
+    const { withPassword = false } = options ?? {};
     return prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, email: true, verifiedAt: true, password: options?.withPassword ?? false },
+      select: { id: true, name: true, email: true, verifiedAt: true, password: withPassword },
     });
   },
 
@@ -84,7 +96,23 @@ export const UserRepository = {
   getAccountByProviderId({ provider, providerAccountId }: GetAccount) {
     return prisma.account.findUnique({
       where: { provider_providerAccountId: { provider, providerAccountId } },
-      select: { userId: true },
+      select: { user: { omit: { password: true } }, userId: true },
+    });
+  },
+
+  // DOC: Find account by provider name
+  getAccountByProviderName({ provider, userId }: GetProviderByNameParams) {
+    return prisma.account.findFirst({
+      where: { provider: provider, userId },
+      select: { user: { omit: { password: true } }, userId: true },
+    });
+  },
+
+  // DOC: Find accounts by user id
+  getAccountsByUserId(userId: string) {
+    return prisma.account.findMany({
+      where: { userId },
+      select: { provider: true, providerAccountId: true, id: true },
     });
   },
 
@@ -133,7 +161,7 @@ export const UserRepository = {
     const db = options?.transaction ?? prisma;
     return db.user.create({
       data: { ...userData, accounts: { create: userAccount } },
-      select: { id: true, name: true, email: true },
+      select: { id: true, name: true, email: true, verifiedAt: true },
     });
   },
 
@@ -143,5 +171,11 @@ export const UserRepository = {
     return db.account.create({
       data: { userId, ...accountData },
     });
+  },
+
+  // DOC: Delete account
+  deleteAccount({ provider, providerAccountId, options }: DeleteAccount) {
+    const db = options?.transaction ?? prisma;
+    return db.account.delete({ where: { provider_providerAccountId: { provider, providerAccountId } } });
   },
 };

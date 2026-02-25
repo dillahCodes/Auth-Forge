@@ -49,8 +49,9 @@ export const TwoFaHttp: TwoFaHttpContract = {
     const verification = await TokenService.verify<TwoFaTokenPayload>(twoFaToken);
 
     if (!verification.valid) {
+      const isExpired = verification.reason === "expired";
       return {
-        status: verification.reason === "expired" ? StatusTwoFaToken.EXPIRED : StatusTwoFaToken.MISSING,
+        status: isExpired ? StatusTwoFaToken.EXPIRED : StatusTwoFaToken.MISSING,
         scopeTarget,
         scopePayload: null,
       };
@@ -58,9 +59,8 @@ export const TwoFaHttp: TwoFaHttpContract = {
 
     const { payload } = verification;
 
-    if (payload.scope !== scopeTarget) {
-      return { status: StatusTwoFaToken.INVALID_SCOPE, scopeTarget, scopePayload: payload.scope };
-    }
+    const isScopeNotMatch = payload.scope !== scopeTarget;
+    if (isScopeNotMatch) return { status: StatusTwoFaToken.INVALID_SCOPE, scopeTarget, scopePayload: payload.scope };
 
     return {
       status: StatusTwoFaToken.AVAILABLE,

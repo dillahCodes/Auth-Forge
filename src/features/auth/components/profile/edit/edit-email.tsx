@@ -8,6 +8,7 @@ import { InputEmail } from "@/shared/components/ui/input/input-email";
 import { MessageBox } from "@/shared/components/ui/messagebox";
 import { useModal } from "@/shared/components/ui/modal/modal";
 import { TwoFaConfig, useTwoFaModal } from "@/shared/components/ui/modal/modal-2fa";
+import { Restricted } from "@/shared/components/ui/restricted";
 import { BuildError, useBuildAxiosError } from "@/shared/hooks/use-build-axios-erros";
 import { ApiResponse } from "@/shared/types/response";
 import { getFieldError } from "@/shared/utils/response-helper";
@@ -25,11 +26,12 @@ import { useVerifyChangeEmailModal, VerifyChangeEmailConfig } from "../../modal/
 interface ChangeEmailProps {
   defaultEmail?: string;
   pendingEmailChange?: EmailChangeRequest | null;
+  isOnlyCredentialsProvider: boolean;
 }
 
 type FormMode = "PENDING" | "EDIT" | "PENDING_UPDATE";
 
-type formdataEntries = {
+type FormdataEntries = {
   [k: string]: FormDataEntryValue;
 } | null;
 
@@ -40,10 +42,10 @@ const CHANGE_EMAIL_CONFIG: VerifyChangeEmailConfig = {
   otpLength: 6,
 };
 
-export default function EditEmail({ defaultEmail, pendingEmailChange }: ChangeEmailProps) {
+export default function EditEmail({ defaultEmail, pendingEmailChange, isOnlyCredentialsProvider }: ChangeEmailProps) {
   const email = defaultEmail as string;
   const [formMode, setFormMode] = useState<FormMode>("EDIT");
-  const [formdataEntries, setFormDataEntries] = useState<formdataEntries>(null);
+  const [formdataEntries, setFormDataEntries] = useState<FormdataEntries>(null);
 
   const modal = useModal();
   const twoFaModal = useTwoFaModal();
@@ -218,82 +220,88 @@ export default function EditEmail({ defaultEmail, pendingEmailChange }: ChangeEm
   }, [pendingEmailChange]);
 
   return (
-    <Form className="p-4!" onSubmit={handleSubmit}>
+    <Form className="p-4! relative" onSubmit={handleSubmit}>
       <h2 className="font-bold mb-2">Email</h2>
 
-      {/* message box */}
-      <Activity mode={requestChangeEmailMessage ? "visible" : "hidden"}>
-        <MessageBox type={requestChangeEmailMessage?.type as "success" | "error"}>
-          {requestChangeEmailMessage?.message}
-        </MessageBox>
-      </Activity>
+      <Restricted
+        mode={isOnlyCredentialsProvider ? "hidden" : "visible"}
+        infoMessage="Email can only be changed for Credentials provider."
+        className="flex flex-col gap-4"
+      >
+        {/* message box */}
+        <Activity mode={requestChangeEmailMessage ? "visible" : "hidden"}>
+          <MessageBox type={requestChangeEmailMessage?.type as "success" | "error"}>
+            {requestChangeEmailMessage?.message}
+          </MessageBox>
+        </Activity>
 
-      {/* current email with status */}
-      <div className="flex gap-4 items-center">
-        <IconWithText icon={MdOutlineEmail} text={defaultEmail} />
-        <StatusBadge status="verified" />
-      </div>
-
-      {/* new email with status */}
-      <Activity name="cancel email change" mode={["PENDING"].includes(formMode) ? "visible" : "hidden"}>
+        {/* current email with status */}
         <div className="flex gap-4 items-center">
-          <IconWithText icon={MdOutlineEmail} text={pendingEmailChange?.newEmail} />
-          <StatusBadge status="pending" />
-
-          <Button
-            iconRight={<BsPencilSquare />}
-            onClick={() => setFormMode("PENDING_UPDATE")}
-            type="button"
-            variant="text"
-            className="underline font-semibold"
-          >
-            Update
-          </Button>
+          <IconWithText icon={MdOutlineEmail} text={defaultEmail} />
+          <StatusBadge status="verified" />
         </div>
 
-        {/* verify new email and cancel change email button */}
-        <div className="w-full grid grid-cols-2 gap-4">
+        {/* new email with status */}
+        <Activity name="cancel email change" mode={["PENDING"].includes(formMode) ? "visible" : "hidden"}>
+          <div className="flex gap-4 items-center">
+            <IconWithText icon={MdOutlineEmail} text={pendingEmailChange?.newEmail} />
+            <StatusBadge status="pending" />
+
+            <Button
+              iconRight={<BsPencilSquare />}
+              onClick={() => setFormMode("PENDING_UPDATE")}
+              type="button"
+              variant="text"
+              className="underline font-semibold"
+            >
+              Update
+            </Button>
+          </div>
+
+          {/* verify new email and cancel change email button */}
+          <div className="w-full grid grid-cols-2 gap-4">
+            <Button
+              variant="danger"
+              type="button"
+              isLoading={isCancelPendingChangeEmail}
+              className="font-bold"
+              onClick={handleCancelChangeEmail}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="info"
+              type="button"
+              disabled={isCancelPendingChangeEmail}
+              className="font-bold"
+              onClick={handleVerifyNewEmail}
+            >
+              Verify
+            </Button>
+          </div>
+        </Activity>
+
+        {/* input new email and edit pending email */}
+        <Activity name="input new email" mode={["EDIT", "PENDING_UPDATE"].includes(formMode) ? "visible" : "hidden"}>
+          <div className="flex gap-4">
+            <InputEmail
+              errorMessage={axiosErrorRequestChangeEmail && getFieldError(axiosErrorRequestChangeEmail, "newEmail")}
+              labelProps={{ htmlFor: "newEmail" }}
+              inputProps={{ id: "newEmail", name: "newEmail", placeholder: "New Email", required: true }}
+            />
+          </div>
+
           <Button
-            variant="danger"
-            type="button"
-            isLoading={isCancelPendingChangeEmail}
-            className="font-bold"
-            onClick={handleCancelChangeEmail}
-          >
-            Cancel
-          </Button>
-          <Button
+            isLoading={isFormEditAndPendingUpdateLoading}
+            disabled={isFormEditAndPendingUpdateLoading}
             variant="info"
-            type="button"
-            disabled={isCancelPendingChangeEmail}
-            className="font-bold"
-            onClick={handleVerifyNewEmail}
+            type="submit"
+            className="w-full font-bold disabled:opacity-50"
           >
-            Verify
+            Edit Email
           </Button>
-        </div>
-      </Activity>
-
-      {/* input new email and edit pending email */}
-      <Activity name="input new email" mode={["EDIT", "PENDING_UPDATE"].includes(formMode) ? "visible" : "hidden"}>
-        <div className="flex gap-4">
-          <InputEmail
-            errorMessage={axiosErrorRequestChangeEmail && getFieldError(axiosErrorRequestChangeEmail, "newEmail")}
-            labelProps={{ htmlFor: "newEmail" }}
-            inputProps={{ id: "newEmail", name: "newEmail", placeholder: "New Email", required: true }}
-          />
-        </div>
-
-        <Button
-          isLoading={isFormEditAndPendingUpdateLoading}
-          disabled={isFormEditAndPendingUpdateLoading}
-          variant="info"
-          type="submit"
-          className="w-full font-bold disabled:opacity-50"
-        >
-          Edit Email
-        </Button>
-      </Activity>
+        </Activity>
+      </Restricted>
     </Form>
   );
 }

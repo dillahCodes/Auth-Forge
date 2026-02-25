@@ -1,9 +1,17 @@
 export enum ApiRouters {
-  // AUTH
-  LOGIN = "/api/auth/login",
-  LOGOUT = "/api/auth/logout",
   ME = "/api/auth/me",
-  REGISTER = "/api/auth/register",
+
+  // GOOGLE
+  AUTH_GOOGLE = "/api/auth/providers/account/google",
+  AUTH_GOOGLE_CONNECT = "/api/auth/providers/connection/google",
+
+  // CREDENTIALS
+  AUTH_CREDENTIALS_LOGIN = "/api/auth/providers/account/credentials/login",
+  AUTH_CREDENTIALS_REGISTER = "/api/auth/providers/account/credentials/register",
+  AUTH_CREDENTIALS_CONNECT = "/api/auth/providers/connection/credentials",
+
+  // LOGOUT
+  LOGOUT = "/api/auth/providers/account/logout",
 
   // SESSIONS
   SESSIONS = "/api/auth/sessions",

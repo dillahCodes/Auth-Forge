@@ -2,11 +2,12 @@ import { axiosInstance } from "@/shared/lib/axios/axios";
 import { ApiResponse } from "@/shared/types/response";
 import { useMutation } from "@tanstack/react-query";
 import { GoogleAuthUrl } from "../types/google-auth";
+import { ApiRouters } from "@/routers/api-router";
 
 export const useGoogleAuth = () => {
   return useMutation({
     mutationFn: async () => {
-      const res = await axiosInstance.get("/api/auth/google");
+      const res = await axiosInstance.get(ApiRouters.AUTH_GOOGLE);
       return res.data as ApiResponse<GoogleAuthUrl>;
     },
 

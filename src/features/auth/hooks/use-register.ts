@@ -7,7 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 export function useRegister() {
   const mutation = useMutation({
     mutationFn: async (payload: FormData) => {
-      const res = await axiosInstance.post(ApiRouters.REGISTER, payload, {
+      const res = await axiosInstance.post(ApiRouters.AUTH_CREDENTIALS_REGISTER, payload, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data;

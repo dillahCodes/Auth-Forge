@@ -701,10 +701,6 @@ export type SessionsUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.SessionsScalarWhereInput | Prisma.SessionsScalarWhereInput[]
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type NullableFloatFieldUpdateOperationsInput = {
   set?: number | null
   increment?: number

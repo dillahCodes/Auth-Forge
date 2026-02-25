@@ -3,13 +3,15 @@
 import EditEmail from "@/features/auth/components/profile/edit/edit-email";
 import EditName from "@/features/auth/components/profile/edit/edit-name";
 import EditPassword from "@/features/auth/components/profile/edit/edit-password";
+import EditProvider from "@/features/auth/components/profile/edit/edit-provider";
 import { useMe } from "@/features/auth/hooks/use-me";
-import { Activity } from "react";
-import { AuthProvider } from "../../../../prisma/generated/enums";
+import { ProviderHelpers } from "@/shared/utils/providers-helper";
 
 export default function EditProfile() {
   const { data: userData, isLoading } = useMe();
-  const isGoogleProvider = AuthProvider.GOOGLE.includes(userData?.data?.provider as AuthProvider);
+  const providers = userData?.data?.providers;
+  const isOnlyCredentialsProvider = ProviderHelpers.isOnlyCredentialsProvider(providers);
+  const isContainsCredentials = ProviderHelpers.isContainsCredentials(providers);
 
   if (isLoading) {
     return Array.from({ length: 3 }).map((_, index) => (
@@ -25,11 +27,13 @@ export default function EditProfile() {
     <section className="flex flex-col gap-6 w-full max-w-xl">
       <h1 className="font-bold text-3xl">Edit Profile</h1>
       <EditName defaultValue={userData?.data?.name} />
-
-      <Activity name="password email change" mode={isGoogleProvider ? "hidden" : "visible"}>
-        <EditEmail defaultEmail={userData?.data?.email} pendingEmailChange={userData?.data?.pendingEmailChange} />
-        <EditPassword />
-      </Activity>
+      <EditProvider userEmail={userData?.data?.email} providers={userData?.data?.providers} />
+      <EditEmail
+        isOnlyCredentialsProvider={isOnlyCredentialsProvider}
+        defaultEmail={userData?.data?.email}
+        pendingEmailChange={userData?.data?.pendingEmailChange}
+      />
+      <EditPassword isContainsCredentials={isContainsCredentials} />
     </section>
   );
 }

@@ -47,7 +47,7 @@ export const ForgotPasswordService = {
     await VerificationTokenRepository.storeToken(cfg);
 
     // DOC: Generate reset password url and send email
-    const url = this.generateUrlForgotPassword(email, token);
+    const url = ForgotPasswordService.generateUrlForgotPassword(email, token);
     await EmailService.sendResetPasswordEmail({ email, url, name });
   },
 

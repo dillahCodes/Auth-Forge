@@ -1,6 +1,6 @@
 import { sendSuccess } from "@/shared/utils/response-helper";
 import { AccessTokenHttp } from "../http/access-token.http";
-import { meMapping } from "../mapping/me.mapping";
+import { MeMapping, meMapping } from "../mapping/me.mapping";
 import { MeService } from "../services/me.service";
 import { SessionService } from "../services/session.service";
 import { CreateController } from "./create.controller";
@@ -11,7 +11,7 @@ export const MeController = {
     await SessionService.validateSessionForAccessToken(sessionId);
 
     const result = await MeService.getMe(userId, provider);
-    const mappedUserData = meMapping(result);
+    const mappedUserData = meMapping(result as MeMapping);
     return sendSuccess(mappedUserData, "Get my user data successfully");
   }),
 };
