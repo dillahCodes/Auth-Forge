@@ -6,7 +6,8 @@ export const MeService = {
   async getMe(userId: string, provider: AuthProvider) {
     const user = await UserRepository.getById({ userId });
     const pendingEmailChange = await EmailChangeRequestRepository.findPendingByUserId(userId);
+    const accounts = await UserRepository.getAccountsByUserId(userId);
 
-    return { user, pendingEmailChange, provider };
+    return { user, pendingEmailChange, provider, accounts };
   },
 };
