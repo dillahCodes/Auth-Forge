@@ -12,11 +12,11 @@ interface IconTextProps {
   textProps?: TextProps;
 }
 
-export function IconWithText({ icon: Icon, text, ...props }: IconTextProps) {
+export function IconWithText({ icon: Icon, text, size = 24, wrapperProps, textProps }: IconTextProps) {
   return (
-    <div {...props} className={`flex items-center gap-1.5 ${props.wrapperProps?.className}`}>
-      <Icon size={props.size || 24} />
-      <p {...props.textProps}>{text}</p>
+    <div {...wrapperProps} className={`flex items-center gap-1.5 ${wrapperProps?.className ?? ""}`}>
+      <Icon size={size} />
+      <p {...textProps}>{text}</p>
     </div>
   );
 }
