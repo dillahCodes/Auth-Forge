@@ -1,11 +1,12 @@
 import { EmailChangeRequest } from "../../../../prisma/generated/client";
 import { AuthProvider } from "../../../../prisma/generated/enums";
-import { UserData } from "../types/user";
+import { UserAccount, UserData } from "../types/user";
 
-interface MeMapping {
+export interface MeMapping {
   user: Omit<UserData, "password" | "provider" | "pendingEmailChange"> | null;
   pendingEmailChange: EmailChangeRequest | null;
   provider: AuthProvider;
+  accounts: UserAccount[];
 }
 
 export const meMapping = (params: MeMapping) => {
@@ -15,6 +16,11 @@ export const meMapping = (params: MeMapping) => {
     email: params.user?.email,
     pendingEmailChange: params.pendingEmailChange,
     verifiedAt: params.user?.verifiedAt,
-    provider: params.provider,
+    providers: params.accounts.map((account) => ({
+      provider: account.provider,
+      providerAccountId: account.providerAccountId,
+      isCurrentProvider: account.provider === params.provider,
+      id: account.id,
+    })),
   } as UserData;
 };

@@ -30,3 +30,9 @@ export class ResourceConflict extends AppError {
     super(message, HttpStatusCode.CONFLICT, ErrorCode.CONFLICT, errors);
   }
 }
+
+export class OperationNotAllowed extends AppError {
+  constructor(message = "Operation not allowed due to current state", errors?: Record<string, string[]>) {
+    super(message, HttpStatusCode.FORBIDDEN, ErrorCode.OPERATION_NOT_ALLOWED, errors);
+  }
+}

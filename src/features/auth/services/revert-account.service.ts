@@ -63,7 +63,7 @@ export const RevertAccountService: RevertAccountServiceContract = {
     const path = ClientRouters.REVERT_ACCOUNT_PASSWORD;
     const revertToken = VerificationTokenRepository.generateToken();
     const revertTokenId = VerificationTokenRepository.generateToken();
-    const revertTokenUrl = this.generateUrl(path, { email, revertToken, revertTokenId });
+    const revertTokenUrl = RevertAccountService.generateUrl(path, { email, revertToken, revertTokenId });
 
     // DOC: Generate revert tokenn redis key
     const redisRevertTokenKey = `token:password-change|type:revert|email:${email}:tokenId:${revertTokenId}`;
@@ -116,7 +116,7 @@ export const RevertAccountService: RevertAccountServiceContract = {
     const path = ClientRouters.REVERT_ACCOUNT_EMAIL;
     const revertToken = requestChangeEmailId;
     const revertTokenId = VerificationTokenRepository.generateToken();
-    const revertTokenUrl = this.generateUrl(path, { revertToken, revertTokenId });
+    const revertTokenUrl = RevertAccountService.generateUrl(path, { revertToken, revertTokenId });
 
     // DOC: Generate revert tokenn redis key
     const redisRevertTokenKey = `token:email-change|type:revert|tokenId:${revertTokenId}`;

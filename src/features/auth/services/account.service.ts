@@ -1,5 +1,10 @@
 import { AuthInvalidCredentials } from "@/shared/errors/auth-error";
-import { NotFound, ResourceConflict, ResourceUnprocessableEntity } from "@/shared/errors/resource-error";
+import {
+  NotFound,
+  OperationNotAllowed,
+  ResourceConflict,
+  ResourceUnprocessableEntity,
+} from "@/shared/errors/resource-error";
 import { prisma } from "@/shared/lib/prisma";
 import bcrypt from "bcrypt";
 import { EmailChangeRequestRepository } from "../repositories/email-change-request.repository";
@@ -15,6 +20,7 @@ import {
 import { EmailService } from "./email.service";
 import { RateLimiterService } from "./rate-limit.service";
 import { RevertAccountService } from "./revert-account.service";
+import { ProviderHelpers } from "@/shared/utils/providers-helper";
 
 interface ChangePasswordProps {
   sessionId: string;
@@ -51,6 +57,13 @@ export const AccountService = {
     const isUserExist = await UserRepository.getById({ userId });
     if (!isUserExist) throw new NotFound("user not found");
 
+    const accounts = await UserRepository.getAccountsByUserId(userId);
+    const isOnlyCredentialsProvider = ProviderHelpers.isOnlyCredentialsProvider(accounts);
+
+    if (!isOnlyCredentialsProvider) {
+      throw new OperationNotAllowed("Email can only be changed for accounts with credentials provider");
+    }
+
     const isEmailSame = isUserExist.email.toLocaleLowerCase() === input.newEmail.toLocaleLowerCase();
     const emailSameError = { newEmail: ["new email cannot be the same"] };
     if (isEmailSame) throw new ResourceUnprocessableEntity("please check your input", emailSameError);
@@ -58,8 +71,8 @@ export const AccountService = {
     const hasRequestedChangeEmail = await EmailChangeRequestRepository.findPendingByUserId(userId);
     if (hasRequestedChangeEmail) throw new ResourceConflict("Email change already requested");
 
-    const payload = { userId, oldEmail: isUserExist.email, newEmail: input.newEmail };
-    const resultCreateRequest = await EmailChangeRequestRepository.create(payload);
+    const emailChangeArgs = { userId, oldEmail: isUserExist.email, newEmail: input.newEmail };
+    const resultCreateRequest = await EmailChangeRequestRepository.create(emailChangeArgs);
 
     return resultCreateRequest;
   },
@@ -69,6 +82,13 @@ export const AccountService = {
 
     const isUserExist = await UserRepository.getById({ userId });
     if (!isUserExist) throw new NotFound("user not found");
+
+    const accounts = await UserRepository.getAccountsByUserId(userId);
+    const isOnlyCredentialsProvider = ProviderHelpers.isOnlyCredentialsProvider(accounts);
+
+    if (!isOnlyCredentialsProvider) {
+      throw new OperationNotAllowed("Email can only be changed for accounts with credentials provider");
+    }
 
     const isEmailSame = isUserExist.email.toLocaleLowerCase() === newEmail.toLocaleLowerCase();
     const emailSameError = { newEmail: ["new email cannot be the same"] };
@@ -101,6 +121,13 @@ export const AccountService = {
     const isUserExist = await UserRepository.getById({ userId });
     if (!isUserExist) throw new NotFound("user not found");
 
+    const accounts = await UserRepository.getAccountsByUserId(userId);
+    const isOnlyCredentialsProvider = ProviderHelpers.isOnlyCredentialsProvider(accounts);
+
+    if (!isOnlyCredentialsProvider) {
+      throw new OperationNotAllowed("Email can only be changed for accounts with credentials provider");
+    }
+
     const requestedEmailChange = await EmailChangeRequestRepository.findPendingByUserId(userId);
     if (!requestedEmailChange) throw new NotFound("Email change request not found");
 
@@ -115,8 +142,8 @@ export const AccountService = {
     const userData = await UserRepository.getById({ userId });
     if (!userData) throw new ResourceUnprocessableEntity("User not found");
 
-    const payload = { name: userData.name, email: requestedEmailChange.newEmail, otp };
-    await EmailService.sendVerifyEmail(payload);
+    const verifyEmailArgs = { name: userData.name, email: requestedEmailChange.newEmail, otp };
+    await EmailService.sendVerifyEmail(verifyEmailArgs);
   },
 
   async changeEmailVerify({ input, userId, vercelTlsFingerprint, sessionId }: ChangeEmailVerify) {
@@ -128,6 +155,13 @@ export const AccountService = {
 
     const isUserExist = await UserRepository.getById({ userId });
     if (!isUserExist) throw new NotFound("user not found");
+
+    const accounts = await UserRepository.getAccountsByUserId(userId);
+    const isOnlyCredentialsProvider = ProviderHelpers.isOnlyCredentialsProvider(accounts);
+
+    if (!isOnlyCredentialsProvider) {
+      throw new OperationNotAllowed("Email can only be changed for accounts with credentials provider");
+    }
 
     const requestedEmailChange = await EmailChangeRequestRepository.findPendingByUserId(userId);
     if (!requestedEmailChange) throw new NotFound("Email change request not found");
@@ -165,6 +199,17 @@ export const AccountService = {
 
     const user = await UserRepository.getById({ userId, options: { withPassword: true } });
     if (!user) throw new NotFound("user not found");
+
+    if (!user.password) {
+      throw new OperationNotAllowed("Password can only be changed for accounts with credentials provider");
+    }
+
+    const accounts = await UserRepository.getAccountsByUserId(userId);
+    const isContainsCredentials = ProviderHelpers.isContainsCredentials(accounts);
+
+    if (!isContainsCredentials) {
+      throw new OperationNotAllowed("Password can only be changed for accounts with credentials provider");
+    }
 
     const validCurrentPassword = await bcrypt.compare(currentPassword, user.password);
     if (!validCurrentPassword) throw new AuthInvalidCredentials();

@@ -1,6 +1,8 @@
 import z from "zod";
 
-export const twoFaScopeSchema = z.object({ scope: z.enum(["CHANGE_EMAIL", "CHANGE_PASSWORD"]) });
+export const twoFaScopeSchema = z.object({
+  scope: z.enum(["CHANGE_EMAIL", "CHANGE_PASSWORD", "TOGGLE_GOOGLE_CONNECTION", "TOGGLE_CREDENTIALS_CONNECTION"]),
+});
 export type TwoFaScopeSchema = z.infer<typeof twoFaScopeSchema>;
 
 export const twoFaOtpSchema = z.object({

@@ -7,7 +7,14 @@ export interface User {
   name: string;
   password: string;
   verifiedAt: Date | null;
-  provider: AuthProvider;
+  providers: UserAccount[];
 }
 
 export type UserData = Omit<User, "password">;
+
+export interface UserAccount {
+  isCurrentProvider: boolean;
+  provider: AuthProvider;
+  providerAccountId: string;
+  id: string;
+}

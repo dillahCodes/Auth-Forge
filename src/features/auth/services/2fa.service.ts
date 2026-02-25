@@ -38,8 +38,8 @@ export const TwoFaService = {
     const userData = await UserRepository.getById({ userId });
     if (!userData) throw new ResourceUnprocessableEntity("User not found");
 
-    const payload = { name: userData.name, email: userData.email, otp, location };
-    await EmailService.sendTwoFactorEmail(payload);
+    const sendTwoFaArgs = { name: userData.name, email: userData.email, otp, location };
+    await EmailService.sendTwoFactorEmail(sendTwoFaArgs);
   },
 
   async verifyOtp({ sessionId, userId, input }: VerifyOtpParams) {

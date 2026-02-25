@@ -6,10 +6,14 @@ import { FaCircleCheck } from "react-icons/fa6";
 import { LuPencil } from "react-icons/lu";
 import { useMe } from "../../hooks/use-me";
 import { useRouter } from "next/navigation";
+import { ProviderHelpers } from "@/shared/utils/providers-helper";
+import { CurrentProvider } from "@/shared/components/ui/current-provider";
 
 export default function UserInfo() {
   const router = useRouter();
   const { data: userData, isLoading } = useMe();
+  const currentProvider = ProviderHelpers.getCurrentProvider(userData?.data?.providers);
+  const currentProviderName = currentProvider?.provider;
 
   const handleGoToEdit = () => {
     router.push(ClientRouters.EDIT_PROFILE);
@@ -25,10 +29,7 @@ export default function UserInfo() {
         <div className="border-dark relative border-2 border-t-0 h-full border-x-0 row-span-2" />
 
         {/* provider info */}
-        <div className="border-2 border-dark w-fit z-20 h-fit absolute top-0 right-0 m-4 p-1 px-2 bg-success rounded-full text-sm">
-          <span>Provider: </span>
-          <span className="font-bold">{userData?.data?.provider.toLowerCase()}</span>
-        </div>
+        <CurrentProvider providerName={currentProviderName} className="absolute top-0 right-0 m-4" />
 
         {/* profile content */}
         <div className="w-full h-full absolute grid grid-rows-3 grid-cols-1 z-10">
