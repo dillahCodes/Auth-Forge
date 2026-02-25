@@ -12,16 +12,18 @@ import { useChangePassword } from "../../../hooks/use-change-password";
 import { ChangePasswordSchema } from "../../../schemas/account.schema";
 import { useTwoFaStatus } from "@/features/auth/hooks/use-2fa-status";
 import { StatusTwoFaToken } from "@/features/auth/types/2fa";
+import { Restricted } from "@/shared/components/ui/restricted";
 
 interface EditPasswordProps {
   defaultEmail?: string;
+  isContainsCredentials: boolean;
 }
 
 type FormDataChangePassword = ChangePasswordSchema | null;
 
 const TWO_VERIFICATION_CONFIG: TwoFaConfig = { timeoutSeconds: 120, featureKey: "2fa-edit-password", otpLength: 6 };
 
-export default function EditPassword({ defaultEmail }: EditPasswordProps) {
+export default function EditPassword({ defaultEmail, isContainsCredentials }: EditPasswordProps) {
   const email = defaultEmail as string;
   const [formData, setFormData] = useState<FormDataChangePassword>(null);
 
@@ -96,41 +98,52 @@ export default function EditPassword({ defaultEmail }: EditPasswordProps) {
     <Form className="p-4!" onSubmit={handleSubmit}>
       <h2 className="font-bold mb-2">Password</h2>
 
-      <Activity mode={message ? "visible" : "hidden"}>
-        <MessageBox type={message?.type as "success" | "error"}>{message?.message}</MessageBox>
-      </Activity>
-
-      <InputPassword
-        errorMessage={changePasswordErrorAxios && getFieldError(changePasswordErrorAxios, "currentPassword")}
-        labelProps={{ htmlFor: "currentPassword" }}
-        inputProps={{ id: "currentPassword", name: "currentPassword", placeholder: "Current Password", required: true }}
-      />
-
-      <InputPassword
-        errorMessage={changePasswordErrorAxios && getFieldError(changePasswordErrorAxios, "password")}
-        labelProps={{ htmlFor: "password" }}
-        inputProps={{ id: "password", name: "password", placeholder: "New Password", required: true }}
-      />
-
-      <InputPassword
-        errorMessage={changePasswordErrorAxios && getFieldError(changePasswordErrorAxios, "confirmPassword")}
-        labelProps={{ htmlFor: "confirmPassword" }}
-        inputProps={{
-          id: "confirmPassword",
-          name: "confirmPassword",
-          placeholder: "Confirm New Password",
-          required: true,
-        }}
-      />
-
-      <Button
-        variant="info"
-        className="w-full font-bold"
-        isLoading={isButtonSubmitLoading}
-        disabled={isButtonSubmitLoading}
+      <Restricted
+        mode={isContainsCredentials ? "hidden" : "visible"}
+        infoMessage="Password can only be changed for Credentials provider."
+        className="flex flex-col gap-4"
       >
-        Edit Password
-      </Button>
+        <Activity mode={message ? "visible" : "hidden"}>
+          <MessageBox type={message?.type as "success" | "error"}>{message?.message}</MessageBox>
+        </Activity>
+
+        <InputPassword
+          errorMessage={changePasswordErrorAxios && getFieldError(changePasswordErrorAxios, "currentPassword")}
+          labelProps={{ htmlFor: "currentPassword" }}
+          inputProps={{
+            id: "currentPassword",
+            name: "currentPassword",
+            placeholder: "Current Password",
+            required: true,
+          }}
+        />
+
+        <InputPassword
+          errorMessage={changePasswordErrorAxios && getFieldError(changePasswordErrorAxios, "password")}
+          labelProps={{ htmlFor: "password" }}
+          inputProps={{ id: "password", name: "password", placeholder: "New Password", required: true }}
+        />
+
+        <InputPassword
+          errorMessage={changePasswordErrorAxios && getFieldError(changePasswordErrorAxios, "confirmPassword")}
+          labelProps={{ htmlFor: "confirmPassword" }}
+          inputProps={{
+            id: "confirmPassword",
+            name: "confirmPassword",
+            placeholder: "Confirm New Password",
+            required: true,
+          }}
+        />
+
+        <Button
+          variant="info"
+          className="w-full font-bold"
+          isLoading={isButtonSubmitLoading}
+          disabled={isButtonSubmitLoading}
+        >
+          Edit Password
+        </Button>
+      </Restricted>
     </Form>
   );
 }
