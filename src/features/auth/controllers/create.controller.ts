@@ -5,8 +5,8 @@ import { errorResponse, internalServerError } from "@/shared/utils/response-help
 import { NextResponse } from "next/server";
 import { CookieHttp } from "../http/cookie.http";
 
-export type HttpResponse<T> = NextResponse<ApiResponse<T>>;
-export type HttpResponseOrNull<T> = NextResponse<ApiResponse<T | null>>;
+type HttpResponse<T> = NextResponse<ApiResponse<T>>;
+type HttpResponseOrNull<T> = NextResponse<ApiResponse<T | null>>;
 
 export const CreateController = {
   create<T, C = undefined>(handler: (req: Request, context: C) => Promise<HttpResponse<T> | NextResponse>) {
