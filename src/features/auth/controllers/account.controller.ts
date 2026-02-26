@@ -21,7 +21,7 @@ export const AccountController = {
   changeEmailRequest: CreateController.create(async (req: Request) => {
     const { userId, sessionId } = await AccessTokenHttp.requiredAccessToken(req);
     const input = await AccountHttp.validateFormData(req, "CHANGE_EMAIL");
-    await TwoFaHttp.requiredTwoFaToken(req, "CHANGE_EMAIL");
+    await TwoFaHttp.requiredTwoFaToken(req, "CHANGE_EMAIL", userId);
 
     await SessionService.validateSessionForAccessToken(sessionId);
     await AccountService.changeEmailRequest(input, userId);
@@ -71,7 +71,7 @@ export const AccountController = {
     const { userId, sessionId } = await AccessTokenHttp.requiredAccessToken(req);
 
     const input = await AccountHttp.validateFormData(req, "CHANGE_PASSWORD");
-    await TwoFaHttp.requiredTwoFaToken(req, "CHANGE_PASSWORD");
+    await TwoFaHttp.requiredTwoFaToken(req, "CHANGE_PASSWORD", userId);
 
     await SessionService.validateSessionForAccessToken(sessionId);
     await AccountService.changePassword({ input, userId, vercelTlsFingerprint, sessionId });

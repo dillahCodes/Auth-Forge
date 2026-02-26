@@ -45,7 +45,7 @@ export const AuthCredentialsController = {
 
   connect: CreateController.create(async (req: Request) => {
     const { userId, sessionId, provider } = await AccessTokenHttp.requiredAccessToken(req);
-    await TwoFaHttp.requiredTwoFaToken(req, "TOGGLE_CREDENTIALS_CONNECTION");
+    await TwoFaHttp.requiredTwoFaToken(req, "TOGGLE_CREDENTIALS_CONNECTION", userId);
     const result = await AuthCredentialsHttp.validateFormData(req, "CONNECT");
 
     await AuthCredentialsService.connect({ input: result, userId, sessionId, currentProvider: provider });

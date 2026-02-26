@@ -36,8 +36,8 @@ export const AuthGoogleController = {
   }),
 
   toggleConnection: CreateController.create(async (req: Request) => {
-    await AccessTokenHttp.requiredAccessToken(req);
-    await TwoFaHttp.requiredTwoFaToken(req, "TOGGLE_GOOGLE_CONNECTION");
+    const { userId } = await AccessTokenHttp.requiredAccessToken(req);
+    await TwoFaHttp.requiredTwoFaToken(req, "TOGGLE_GOOGLE_CONNECTION", userId);
 
     const config = AuthGoogleService.generateoAuthUrlConfig({
       redirectAfterAuthTo: ClientRouters.EDIT_PROFILE,
