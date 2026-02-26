@@ -1,4 +1,4 @@
-import { TwoFaInvalidScope, TwoFaRequired } from "@/shared/errors/auth-error";
+import { TwoFaInvalidOwner, TwoFaInvalidScope, TwoFaRequired } from "@/shared/errors/auth-error";
 import { ResourceUnprocessableEntity } from "@/shared/errors/resource-error";
 import { TwoFaSchema, TwoFaScopeSchema, validateTwoFaForm } from "../schemas/2fa.schema";
 import { TokenService, TwoFaTokenPayload } from "../services/token.service";
@@ -15,7 +15,7 @@ interface TwoFaHttpContract {
   validateFormData(req: Request, forEndpoint: "send"): Promise<TwoFaScopeSchema>;
   validateFormData(req: Request, forEndpoint: "verify"): Promise<TwoFaSchema>;
   validateFormData(req: Request, forEndpoint: "status"): Promise<TwoFaScopeSchema>;
-  requiredTwoFaToken(req: Request, scopeTarget: TwoFaScopeSchema["scope"]): Promise<void>;
+  requiredTwoFaToken(req: Request, scopeTarget: TwoFaScopeSchema["scope"], ownerUserId: string): Promise<void>;
   statusTwoFaToken(req: Request, scopeTarget: TwoFaScopeSchema["scope"]): Promise<StatusTwoFaTokenReturn>;
 }
 
@@ -31,14 +31,18 @@ export const TwoFaHttp: TwoFaHttpContract = {
   },
 
   // DOC: Validate incoming 2fa token
-  async requiredTwoFaToken(req: Request, scopeTarget: TwoFaScopeSchema["scope"]) {
+  async requiredTwoFaToken(req: Request, scopeTarget: TwoFaScopeSchema["scope"], ownerUserId: string) {
     const twoFaToken = CookieHttp.getCookie(req, "2fa_token");
     if (!twoFaToken) throw new TwoFaRequired();
 
     const result = await TokenService.verify<TwoFaTokenPayload>(twoFaToken);
     if (!result.valid) throw new TwoFaRequired();
 
-    if (result.payload.scope !== scopeTarget) throw new TwoFaInvalidScope();
+    const isScopeNotMatch = result.payload.scope !== scopeTarget;
+    if (isScopeNotMatch) throw new TwoFaInvalidScope();
+
+    const isOwnerNotMatch = result.payload.userId !== ownerUserId;
+    if (isOwnerNotMatch) throw new TwoFaInvalidOwner();
   },
 
   // DOC: Get status of 2fa token

@@ -49,6 +49,12 @@ export class TwoFaInvalidScope extends AppError {
   }
 }
 
+export class TwoFaInvalidOwner extends AppError {
+  constructor(message = "Invalid two-factor authentication owner") {
+    super(message, HttpStatusCode.FORBIDDEN, ErrorCode.AUTH_UNAUTHORIZED);
+  }
+}
+
 export class GoogleAuthMissingCode extends AppError {
   constructor(message = "Missing code") {
     super(message, HttpStatusCode.BAD_REQUEST, ErrorCode.AUTH_GOOGLE_MISSING_CODE);
