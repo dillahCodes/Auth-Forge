@@ -93,8 +93,12 @@ export const RevertAccountService: RevertAccountServiceContract = {
 
     // DOC: Hash password, update and revoke all sessions
     const hashedPassword = await bcrypt.hash(password, 10);
-    await UserRepository.updatePassword({ userId: user.id, hashedPassword });
-    await SessionRepository.revokeSessionsByUserId(user.id);
+
+    await prisma.$transaction(async (transaction) => {
+      await UserRepository.updatePassword({ userId: user.id, hashedPassword, options: { transaction } });
+      await SessionRepository.revokeSessionsByUserId(user.id, { transaction });
+    });
+
     await SessionRepository.revokeAllAccessTokenByUserIdRedis(user.id);
 
     // DOC: Cleanup redis keys
