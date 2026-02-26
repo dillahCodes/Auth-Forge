@@ -209,8 +209,8 @@ export const SessionRepository = {
     const db = options?.transaction ?? prisma;
 
     return db.sessions.updateMany({
-      where: { userId, revoked: false, deletedAt: null },
-      data: { deletedAt: new Date(), revoked: true },
+      where: { userId, deletedAt: null },
+      data: { deletedAt: new Date() },
     });
   },
 };
