@@ -64,6 +64,9 @@ export const AccountService = {
       throw new OperationNotAllowed("Email can only be changed for accounts with credentials provider");
     }
 
+    const emailHasUsed = await UserRepository.getByEmail({ email: input.newEmail });
+    if (emailHasUsed) throw new ResourceConflict("Email already used");
+
     const isEmailSame = isUserExist.email.toLocaleLowerCase() === input.newEmail.toLocaleLowerCase();
     const emailSameError = { newEmail: ["new email cannot be the same"] };
     if (isEmailSame) throw new ResourceUnprocessableEntity("please check your input", emailSameError);
@@ -89,6 +92,9 @@ export const AccountService = {
     if (!isOnlyCredentialsProvider) {
       throw new OperationNotAllowed("Email can only be changed for accounts with credentials provider");
     }
+
+    const emailHasUsed = await UserRepository.getByEmail({ email: input.newEmail });
+    if (emailHasUsed) throw new ResourceConflict("Email already used");
 
     const isEmailSame = isUserExist.email.toLocaleLowerCase() === newEmail.toLocaleLowerCase();
     const emailSameError = { newEmail: ["new email cannot be the same"] };
