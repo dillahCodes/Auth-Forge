@@ -1,7 +1,7 @@
 "use client";
 
-import { useEmailSendVerify } from "@/features/auth/hooks/use-email-send-verify";
-import { useEmailVerify } from "@/features/auth/hooks/use-email-verify";
+import { useEmailSendVerify } from "@/features/auth/hooks/auth-email-verification/use-email-send-verify";
+import { useEmailVerify } from "@/features/auth/hooks/auth-email-verification/use-email-verify";
 import { useOtp } from "@/features/auth/hooks/use-otp";
 import { Button } from "@/shared/components/ui/button";
 import { Form } from "@/shared/components/ui/form/form";
