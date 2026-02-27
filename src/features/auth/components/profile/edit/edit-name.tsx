@@ -8,8 +8,8 @@ import { getFieldError } from "@/shared/utils/response-helper";
 import { AxiosError } from "axios";
 import { Activity } from "react";
 import { LuIdCard } from "react-icons/lu";
-import { useChangeName } from "../../../hooks/use-change-name";
 import { ChangeNameSchema } from "../../../schemas/account.schema";
+import { useChangeName } from "@/features/auth/hooks/profile-name/use-change-name";
 
 export default function EditName({ defaultValue }: { defaultValue?: string }) {
   const { mutate, status, data, reset, error } = useChangeName();
