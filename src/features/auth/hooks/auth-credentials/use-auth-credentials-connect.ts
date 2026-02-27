@@ -2,7 +2,7 @@ import { ApiRouters } from "@/routers/api-router";
 import { axiosInstance } from "@/shared/lib/axios/axios";
 import { ApiResponse } from "@/shared/types/response";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ConnectCredentialsSchema } from "../schemas/auth-credentials.schema";
+import { ConnectCredentialsSchema } from "../../schemas/auth-credentials.schema";
 
 interface UseAuthCredentialsConnectParams {
   onSuccessParams?: () => void;
