@@ -1,10 +1,10 @@
 "use client";
 
+import { ApiRouters } from "@/routers/api-router";
 import { axiosInstance } from "@/shared/lib/axios/axios";
 import { ApiResponse } from "@/shared/types/response";
 import { useMutation } from "@tanstack/react-query";
-import { RevertAccountSchema } from "../schemas/revert-account.schema";
-import { ApiRouters } from "@/routers/api-router";
+import { RevertAccountSchema } from "../../schemas/revert-account.schema";
 
 export function useRevertAccountPasswordChange() {
   const mutation = useMutation({
