@@ -1,8 +1,8 @@
 import { axiosInstance } from "@/shared/lib/axios/axios";
 import { ApiResponse } from "@/shared/types/response";
 import { useMutation } from "@tanstack/react-query";
-import { GoogleAuthUrl } from "../types/google-auth";
 import { ApiRouters } from "@/routers/api-router";
+import { GoogleAuthUrl } from "../../types/google-auth";
 
 export const useGoogleAuth = () => {
   return useMutation({
