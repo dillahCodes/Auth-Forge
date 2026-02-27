@@ -22,8 +22,8 @@ import {
 } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { MdOutlineMarkEmailRead } from "react-icons/md";
-import { useChangeEmailVerificationSend } from "../../hooks/use-change-email-verification-send";
-import { useChangeEmailVerificationVerify } from "../../hooks/use-change-email-verification-verify";
+import { useChangeEmailVerificationSend } from "../../hooks/profile-email/use-change-email-verification-send";
+import { useChangeEmailVerificationVerify } from "../../hooks/profile-email/use-change-email-verification-verify";
 
 export type VerifyChangeEmailConfig = {
   featureKey: string;

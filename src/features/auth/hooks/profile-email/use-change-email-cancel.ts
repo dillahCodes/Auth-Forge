@@ -1,15 +1,13 @@
+import { ApiRouters } from "@/routers/api-router";
 import { axiosInstance } from "@/shared/lib/axios/axios";
 import { ApiResponse } from "@/shared/types/response";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChangeEmailVerifySchema } from "../schemas/account.schema";
-import { ApiRouters } from "@/routers/api-router";
 
-export function useChangeEmailVerificationVerify() {
+export function useChangeEmailCancel() {
   const queryClient = useQueryClient();
-
   const mutation = useMutation({
-    mutationFn: async (payload: ChangeEmailVerifySchema) => {
-      const res = await axiosInstance.post(ApiRouters.CHANGE_EMAIL_VERIFICATION_VERIFY, payload, {
+    mutationFn: async () => {
+      const res = await axiosInstance.delete(ApiRouters.CHANGE_EMAIL_CANCEL, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data as ApiResponse<null>;

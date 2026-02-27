@@ -1,15 +1,15 @@
 import { axiosInstance } from "@/shared/lib/axios/axios";
 import { ApiResponse } from "@/shared/types/response";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChangeEmailSchema } from "../schemas/account.schema";
 import { ApiRouters } from "@/routers/api-router";
+import { ChangeEmailUpdateSchema } from "../../schemas/account.schema";
 
-export function useChangeEmailRequest() {
+export function useChangeEmailUpdate() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (payload: ChangeEmailSchema) => {
-      const res = await axiosInstance.post(ApiRouters.CHANGE_EMAIL_REQUEST, payload, {
+    mutationFn: async (payload: ChangeEmailUpdateSchema) => {
+      const res = await axiosInstance.patch(ApiRouters.CHANGE_EMAIL_UPDATE, payload, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data as ApiResponse<null>;
