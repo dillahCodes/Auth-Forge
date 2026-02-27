@@ -1,4 +1,4 @@
-import { useTwoFaStatus } from "@/features/auth/hooks/use-2fa-status";
+import { useTwoFaStatus } from "@/features/auth/hooks/auth-2fa/use-2fa-status";
 import { ConnectCredentialsSchema } from "@/features/auth/schemas/auth-credentials.schema";
 import { StatusTwoFaToken } from "@/features/auth/types/2fa";
 import { Button } from "@/shared/components/ui/button";

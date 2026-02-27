@@ -10,7 +10,7 @@ import { AxiosError } from "axios";
 import { Activity, useEffect, useEffectEvent, useState } from "react";
 import { useChangePassword } from "../../../hooks/use-change-password";
 import { ChangePasswordSchema } from "../../../schemas/account.schema";
-import { useTwoFaStatus } from "@/features/auth/hooks/use-2fa-status";
+import { useTwoFaStatus } from "@/features/auth/hooks/auth-2fa/use-2fa-status";
 import { StatusTwoFaToken } from "@/features/auth/types/2fa";
 import { Restricted } from "@/shared/components/ui/restricted";
 

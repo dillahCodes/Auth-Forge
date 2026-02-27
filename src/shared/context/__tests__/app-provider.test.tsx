@@ -4,9 +4,7 @@ import { AppProvider } from "../app-provider";
 
 // Mock all complex modal providers to avoid their internal hook/API dependencies
 vi.mock("@/features/auth/components/modal/edit-email-verify.modal", () => ({
-  VerifyChangeEmailModalProvider: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
+  VerifyChangeEmailModalProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 vi.mock("@/shared/components/ui/modal/modal", () => ({
@@ -17,12 +15,26 @@ vi.mock("@/shared/components/ui/modal/modal-2fa", () => ({
   TwoFaModalProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-vi.mock("@/features/auth/hooks/use-2fa-send", () => ({
-  useTwoFaSend: () => ({ mutateAsync: vi.fn(), isPending: false, error: null, status: "idle", data: null, reset: vi.fn() }),
+vi.mock("@/features/auth/hooks/auth-2fa/use-2fa-send", () => ({
+  useTwoFaSend: () => ({
+    mutateAsync: vi.fn(),
+    isPending: false,
+    error: null,
+    status: "idle",
+    data: null,
+    reset: vi.fn(),
+  }),
 }));
 
-vi.mock("@/features/auth/hooks/use-2fa-verify", () => ({
-  useTwoFaVerify: () => ({ mutateAsync: vi.fn(), isPending: false, error: null, status: "idle", data: null, reset: vi.fn() }),
+vi.mock("@/features/auth/hooks/auth-2fa/use-2fa-verify", () => ({
+  useTwoFaVerify: () => ({
+    mutateAsync: vi.fn(),
+    isPending: false,
+    error: null,
+    status: "idle",
+    data: null,
+    reset: vi.fn(),
+  }),
 }));
 
 describe("AppProvider", () => {

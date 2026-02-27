@@ -1,13 +1,13 @@
 import { axiosInstance } from "@/shared/lib/axios/axios";
 import { ApiResponse } from "@/shared/types/response";
 import { useMutation } from "@tanstack/react-query";
-import { TwoFaSchema } from "../schemas/2fa.schema";
 import { ApiRouters } from "@/routers/api-router";
+import { TwoFaScopeSchema } from "../../schemas/2fa.schema";
 
-export function useTwoFaVerify() {
+export function useTwoFaSend() {
   const mutation = useMutation({
-    mutationFn: async (payload: TwoFaSchema) => {
-      const res = await axiosInstance.post(ApiRouters.TWOFA_VERIFY, payload, {
+    mutationFn: async (payload: TwoFaScopeSchema) => {
+      const res = await axiosInstance.post(ApiRouters.TWOFA_SEND, payload, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data as ApiResponse<null>;

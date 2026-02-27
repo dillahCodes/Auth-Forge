@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { TwoFaModalProvider, useTwoFaModal } from "../modal-2fa";
 
 // Mock all external hooks the 2FA modal depends on
-vi.mock("@/features/auth/hooks/use-2fa-send", () => ({
+vi.mock("@/features/auth/hooks/auth-2fa/use-2fa-send", () => ({
   useTwoFaSend: () => ({
     mutateAsync: vi.fn().mockResolvedValue({}),
     isPending: false,
@@ -15,7 +15,7 @@ vi.mock("@/features/auth/hooks/use-2fa-send", () => ({
   }),
 }));
 
-vi.mock("@/features/auth/hooks/use-2fa-verify", () => ({
+vi.mock("@/features/auth/hooks/auth-2fa/use-2fa-verify", () => ({
   useTwoFaVerify: () => ({
     mutateAsync: vi.fn().mockResolvedValue({}),
     isPending: false,
