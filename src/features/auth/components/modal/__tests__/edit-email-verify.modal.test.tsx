@@ -1,10 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, renderHook } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import {
-  VerifyChangeEmailModalProvider,
-  useVerifyChangeEmailModal,
-} from "../edit-email-verify.modal";
+import { VerifyChangeEmailModalProvider, useVerifyChangeEmailModal } from "../edit-email-verify.modal";
 
 // Mock all external hooks the modal depends on
 vi.mock("@/features/auth/hooks/use-change-email-verification-send", () => ({
@@ -126,19 +123,17 @@ describe("VerifyChangeEmailModalProvider & useVerifyChangeEmailModal", () => {
   });
 
   it("useVerifyChangeEmailModal returns open and close functions", () => {
-    const captured: { modal: ReturnType<typeof useVerifyChangeEmailModal> | null } = { modal: null };
-    function Inspector() {
-      captured.modal = useVerifyChangeEmailModal();
-      return null;
-    }
-    render(
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
       <Wrapper>
-        <VerifyChangeEmailModalProvider>
-          <Inspector />
-        </VerifyChangeEmailModalProvider>
+        <VerifyChangeEmailModalProvider>{children}</VerifyChangeEmailModalProvider>
       </Wrapper>
     );
-    expect(typeof captured.modal?.open).toBe("function");
-    expect(typeof captured.modal?.close).toBe("function");
+
+    const { result } = renderHook(() => useVerifyChangeEmailModal(), {
+      wrapper,
+    });
+
+    expect(typeof result.current.open).toBe("function");
+    expect(typeof result.current.close).toBe("function");
   });
 });
