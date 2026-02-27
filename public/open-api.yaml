@@ -1,0 +1,1772 @@
+openapi: 3.0.3
+info:
+  title: AuthForge API
+  description: |
+    A comprehensive authentication API built with Next.js featuring credentials-based auth,
+    Google OAuth, Two-Factor Authentication (2FA), session management, and account management.
+
+    ## Authentication
+    This API uses **HTTP-only cookies** for authentication. After a successful login or session refresh, the server sets the following cookies automatically:
+    - `access_token` — Short-lived JWT for authorizing API requests
+    - `refresh_token` — Long-lived token for obtaining a new access token
+    - `2fa_token` — Scoped token required for sensitive operations
+
+    ## Request Format
+    All request bodies use `multipart/form-data` (FormData).
+
+    ## Response Format
+    All responses follow a consistent structure:
+    ```json
+    {
+      "isSuccess": true | false,
+      "message": "Human-readable message",
+      "messageCode": "MACHINE_READABLE_CODE | null",
+      "data": { ... } | null,
+      "errors": { "field": ["error message"] } | null
+    }
+    ```
+  version: "1.0.0"
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local Development Server
+
+tags:
+  - name: Auth — Credentials
+    description: Register, login, and logout using email/password credentials
+  - name: Auth — Google OAuth
+    description: Sign in and connect accounts via Google OAuth
+  - name: Auth — Email Verification
+    description: Send and verify email verification OTPs
+  - name: Auth — Forgot Password
+    description: Send and complete forgot-password flows
+  - name: Two-Factor Authentication
+    description: Send, verify, and check status of 2FA OTPs for sensitive scopes
+  - name: Sessions
+    description: View, refresh, and revoke user sessions
+  - name: Profile — Name
+    description: Change user display name
+  - name: Profile — Email
+    description: Request and complete email change flow
+  - name: Profile — Password
+    description: Change account password
+  - name: Revert Account
+    description: Revert account after a password or email change (via emailed token)
+  - name: Me
+    description: Get the currently authenticated user's profile
+
+# ─────────────────────────────────────────
+# REUSABLE COMPONENTS
+# ─────────────────────────────────────────
+components:
+  securitySchemes:
+    AccessTokenCookie:
+      type: apiKey
+      in: cookie
+      name: access_token
+      description: HTTP-only cookie containing a short-lived JWT access token. Set automatically after login or token refresh.
+    RefreshTokenCookie:
+      type: apiKey
+      in: cookie
+      name: refresh_token
+      description: HTTP-only cookie containing a long-lived refresh token. Set automatically after login.
+    TwoFaTokenCookie:
+      type: apiKey
+      in: cookie
+      name: 2fa_token
+      description: Scoped HTTP-only cookie set after a successful 2FA OTP verification. Required for sensitive operations.
+
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Operation successful"
+        messageCode:
+          type: string
+          nullable: true
+          example: null
+        data:
+          nullable: true
+          description: Payload varies per endpoint
+        errors:
+          type: object
+          nullable: true
+          example: null
+
+    ErrorResponse:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "An error occurred"
+        messageCode:
+          type: string
+          nullable: true
+          example: "UNAUTHORIZED"
+        data:
+          nullable: true
+          example: null
+        errors:
+          type: object
+          nullable: true
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            email: ["Invalid email address"]
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: "Please check your form"
+        messageCode:
+          type: string
+          nullable: true
+          example: "UNPROCESSABLE_ENTITY"
+        data:
+          nullable: true
+          example: null
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            email: ["Invalid email address"]
+            password: ["Password must be at least 8 characters long"]
+
+    UserData:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        verifiedAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2025-01-15T10:00:00Z"
+        pendingEmailChange:
+          nullable: true
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            newEmail:
+              type: string
+              format: email
+            expiresAt:
+              type: string
+              format: date-time
+        providers:
+          type: array
+          items:
+            type: object
+            properties:
+              provider:
+                type: string
+                enum: [CREDENTIALS, GOOGLE]
+                example: "CREDENTIALS"
+              providerAccountId:
+                type: string
+                nullable: true
+              isCurrentProvider:
+                type: boolean
+                example: true
+              id:
+                type: string
+                format: uuid
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+        device:
+          type: object
+          properties:
+            browser:
+              type: string
+              example: "Chrome"
+            os:
+              type: string
+              example: "Windows"
+            type:
+              type: string
+              example: "desktop"
+        location:
+          type: object
+          properties:
+            country:
+              type: string
+              nullable: true
+              example: "Indonesia"
+            countryRegion:
+              type: string
+              nullable: true
+              example: "Java"
+            city:
+              type: string
+              nullable: true
+              example: "Bandung"
+        isCurrent:
+          type: boolean
+          example: true
+        loggedInAt:
+          type: string
+          format: date-time
+          example: "2025-01-10T08:30:00Z"
+        status:
+          type: string
+          example: "Active"
+
+    SessionCount:
+      type: object
+      properties:
+        active:
+          type: integer
+          example: 3
+        revoked:
+          type: integer
+          example: 1
+
+    TwoFaStatusResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [AVAILABLE, MISSING, EXPIRED, INVALID_SCOPE]
+          example: "AVAILABLE"
+        scopeTarget:
+          type: string
+          enum: [CHANGE_EMAIL, CHANGE_PASSWORD, TOGGLE_GOOGLE_CONNECTION, TOGGLE_CREDENTIALS_CONNECTION]
+          example: "CHANGE_EMAIL"
+        scopePayload:
+          type: string
+          nullable: true
+          enum: [CHANGE_EMAIL, CHANGE_PASSWORD, TOGGLE_GOOGLE_CONNECTION, TOGGLE_CREDENTIALS_CONNECTION]
+          example: "CHANGE_EMAIL"
+
+    TwoFaScope:
+      type: string
+      enum:
+        - CHANGE_EMAIL
+        - CHANGE_PASSWORD
+        - TOGGLE_GOOGLE_CONNECTION
+        - TOGGLE_CREDENTIALS_CONNECTION
+      description: |
+        - `CHANGE_EMAIL` — Required before requesting an email change
+        - `CHANGE_PASSWORD` — Required before changing password
+        - `TOGGLE_GOOGLE_CONNECTION` — Required before connecting/disconnecting Google
+        - `TOGGLE_CREDENTIALS_CONNECTION` — Required before connecting/disconnecting credentials
+
+# ─────────────────────────────────────────
+# PATHS
+# ─────────────────────────────────────────
+paths:
+
+  # ── Auth — Credentials ──────────────────
+  /auth/providers/account/credentials/register:
+    post:
+      tags: [Auth — Credentials]
+      summary: Register with credentials
+      description: |
+        Creates a new user account with email and password.
+        Returns the created user's basic info. A verification email should be sent after registration.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [name, email, password, confirmPassword]
+              properties:
+                name:
+                  type: string
+                  minLength: 10
+                  maxLength: 20
+                  example: "John Doe Here"
+                email:
+                  type: string
+                  format: email
+                  maxLength: 255
+                  example: "john@example.com"
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: "strongpassword123"
+                confirmPassword:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: "strongpassword123"
+      responses:
+        "200":
+          description: Account registered successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Register successfully"
+                      data:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          email:
+                            type: string
+                            format: email
+                          name:
+                            type: string
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        "409":
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/providers/account/credentials/login:
+    post:
+      tags: [Auth — Credentials]
+      summary: Login with credentials
+      description: |
+        Authenticates a user with email and password.
+        On success, sets `access_token` and `refresh_token` cookies.
+        Returns the logged-in user's ID, email, and name.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: "strongpassword123"
+      responses:
+        "200":
+          description: Login successful. Cookies are set.
+          headers:
+            Set-Cookie:
+              description: Sets `access_token` and `refresh_token` HTTP-only cookies
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Login successfully"
+                      data:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                          email:
+                            type: string
+                            format: email
+                          name:
+                            type: string
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+  /auth/providers/account/logout:
+    post:
+      tags: [Auth — Credentials]
+      summary: Logout
+      description: |
+        Logs out the current user by invalidating the current session and clearing auth cookies.
+        Requires a valid `refresh_token` cookie.
+      security:
+        - RefreshTokenCookie: []
+      responses:
+        "200":
+          description: Logged out successfully. Cookies are cleared.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Logout successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "401":
+          description: Invalid or missing refresh token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/providers/connection/credentials:
+    post:
+      tags: [Auth — Credentials]
+      summary: Connect or disconnect credentials provider
+      description: |
+        Bind or unbind the credentials (email/password) provider to/from the current account.
+        - **BIND**: Add a password to allow credentials login. Requires `password` and `confirmPassword`.
+        - **UNBIND**: Remove the credentials provider (requires Google to already be connected).
+        
+        ⚠️ Requires a scoped **`2fa_token`** cookie for scope `TOGGLE_CREDENTIALS_CONNECTION`.
+      security:
+        - AccessTokenCookie: []
+        - TwoFaTokenCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [mode]
+              properties:
+                mode:
+                  type: string
+                  enum: [BIND, UNBIND]
+                  example: "BIND"
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: "newpassword123"
+                  description: Required when mode is BIND
+                confirmPassword:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: "newpassword123"
+                  description: Required when mode is BIND
+      responses:
+        "200":
+          description: Credentials provider connected or disconnected
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Connect credentials successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: 2FA token missing, expired, or invalid scope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+  # ── Auth — Google OAuth ─────────────────
+  /auth/providers/account/google:
+    get:
+      tags: [Auth — Google OAuth]
+      summary: Get Google OAuth sign-in URL
+      description: |
+        Returns the Google OAuth authorization URL for user sign-in.
+        Redirect the user to this URL to initiate Google login.
+      responses:
+        "200":
+          description: Google OAuth URL generated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Get google auth url successfully"
+                      data:
+                        type: object
+                        properties:
+                          authUrl:
+                            type: string
+                            format: uri
+                            example: "https://accounts.google.com/o/oauth2/v2/auth?..."
+
+  /auth/providers/account/google/{...callback}:
+    get:
+      tags: [Auth — Google OAuth]
+      summary: Google OAuth callback (Sign-in)
+      description: |
+        OAuth callback endpoint handled by Google. Exchanges the authorization code for tokens,
+        creates or retrieves the user account, and sets auth cookies.
+        Redirects to the app after authentication.
+      parameters:
+        - name: code
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Authorization code from Google
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+          description: State parameter for CSRF protection
+        - name: error
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Error returned by Google if authorization failed
+      responses:
+        "302":
+          description: Redirect to app after successful authentication
+          headers:
+            Set-Cookie:
+              description: Sets `access_token` and `refresh_token` HTTP-only cookies
+              schema:
+                type: string
+            Location:
+              schema:
+                type: string
+
+  /auth/providers/connection/google:
+    get:
+      tags: [Auth — Google OAuth]
+      summary: Get Google OAuth URL to connect/disconnect Google
+      description: |
+        Returns the Google OAuth URL for toggling the Google provider connection on an existing account.
+        
+        ⚠️ Requires a scoped **`2fa_token`** cookie for scope `TOGGLE_GOOGLE_CONNECTION`.
+      security:
+        - AccessTokenCookie: []
+        - TwoFaTokenCookie: []
+      responses:
+        "200":
+          description: Google OAuth connection URL generated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Get google auth url successfully"
+                      data:
+                        type: object
+                        properties:
+                          authUrl:
+                            type: string
+                            format: uri
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: 2FA token required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/providers/connection/google/{...callback}:
+    get:
+      tags: [Auth — Google OAuth]
+      summary: Google OAuth callback (Connect/Disconnect)
+      description: |
+        OAuth callback for toggling Google provider connection.
+        Connects or disconnects Google from the user's account and redirects to the app.
+      security:
+        - AccessTokenCookie: []
+      parameters:
+        - name: code
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: error
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Redirect to profile page after toggle
+          headers:
+            Location:
+              schema:
+                type: string
+
+  # ── Auth — Email Verification ───────────
+  /auth/email/send:
+    post:
+      tags: [Auth — Email Verification]
+      summary: Send email verification OTP
+      description: |
+        Sends a 6-digit OTP to the user's registered email for account verification.
+        Requires a valid access token. The user does **not** need to be verified yet.
+      security:
+        - AccessTokenCookie: []
+      responses:
+        "200":
+          description: Verification email sent
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Verification email sent successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/email/verify:
+    post:
+      tags: [Auth — Email Verification]
+      summary: Verify email OTP
+      description: |
+        Verifies the 6-digit OTP sent to the user's email.
+        On success, marks the email as verified and refreshes the access token cookie.
+      security:
+        - AccessTokenCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [otp]
+              properties:
+                otp:
+                  type: string
+                  pattern: "^\\d{6}$"
+                  example: "123456"
+                  description: 6-digit numeric OTP
+      responses:
+        "200":
+          description: Email verified successfully
+          headers:
+            Set-Cookie:
+              description: Refreshed `access_token` cookie
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Verification email successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "400":
+          description: Invalid OTP
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+  # ── Auth — Forgot Password ──────────────
+  /auth/forgot-password/send:
+    post:
+      tags: [Auth — Forgot Password]
+      summary: Send forgot-password email
+      description: |
+        Sends a password-reset email to the given email address (if the account exists).
+        The email contains a reset token and link.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+      responses:
+        "200":
+          description: Reset email sent (always succeeds to prevent email enumeration)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Forgot password email sent successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+  /auth/forgot-password/verify:
+    post:
+      tags: [Auth — Forgot Password]
+      summary: Reset password using forgot-password token
+      description: |
+        Verifies the reset token and sets a new password for the account.
+        The `token` is the UUID from the password-reset email link.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [token, email, password, confirmPassword]
+              properties:
+                token:
+                  type: string
+                  format: uuid
+                  example: "550e8400-e29b-41d4-a716-446655440000"
+                  description: UUID token from the password-reset email
+                email:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: "newstrongpassword123"
+                confirmPassword:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: "newstrongpassword123"
+      responses:
+        "200":
+          description: Password reset successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Password reset successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "400":
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+  # ── Two-Factor Authentication ───────────
+  /auth/2fa/send:
+    post:
+      tags: [Two-Factor Authentication]
+      summary: Send 2FA OTP
+      description: |
+        Sends a 6-digit OTP to the user's email for a specific 2FA scope.
+        The scope determines what sensitive action the OTP authorizes.
+      security:
+        - AccessTokenCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [scope]
+              properties:
+                scope:
+                  $ref: "#/components/schemas/TwoFaScope"
+      responses:
+        "200":
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Send otp successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+  /auth/2fa/verify:
+    post:
+      tags: [Two-Factor Authentication]
+      summary: Verify 2FA OTP
+      description: |
+        Verifies the 6-digit OTP for a specific scope.
+        On success, sets a scoped `2fa_token` cookie which authorizes the corresponding sensitive operation.
+      security:
+        - AccessTokenCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [scope, otp]
+              properties:
+                scope:
+                  $ref: "#/components/schemas/TwoFaScope"
+                otp:
+                  type: string
+                  pattern: "^\\d{6}$"
+                  example: "654321"
+                  description: 6-digit numeric OTP
+      responses:
+        "200":
+          description: OTP verified. Scoped `2fa_token` cookie is set.
+          headers:
+            Set-Cookie:
+              description: Sets the scoped `2fa_token` HTTP-only cookie
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Verify otp successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "400":
+          description: Invalid OTP
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+  /auth/2fa/status:
+    post:
+      tags: [Two-Factor Authentication]
+      summary: Get 2FA token status
+      description: |
+        Returns the current status of the `2fa_token` cookie relative to the requested scope.
+        Use this to determine if a 2FA OTP must first be completed before a sensitive operation.
+
+        **Status values:**
+        - `AVAILABLE` — Token is valid and matches the requested scope
+        - `MISSING` — No token is present
+        - `EXPIRED` — Token has expired
+        - `INVALID_SCOPE` — Token exists but is for a different scope
+      security:
+        - AccessTokenCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [scope]
+              properties:
+                scope:
+                  $ref: "#/components/schemas/TwoFaScope"
+      responses:
+        "200":
+          description: 2FA status returned
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Get status 2fa successfully"
+                      data:
+                        $ref: "#/components/schemas/TwoFaStatusResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ── Sessions ────────────────────────────
+  /auth/sessions:
+    get:
+      tags: [Sessions]
+      summary: Get all active sessions
+      description: |
+        Returns all active sessions for the current user, including device, location, and login time.
+        The current session is marked with `isCurrent: true`.
+      security:
+        - AccessTokenCookie: []
+      responses:
+        "200":
+          description: Active sessions retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Get active sessions successfully"
+                      data:
+                        type: object
+                        properties:
+                          currentSessionId:
+                            type: string
+                            format: uuid
+                          sessions:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/Session"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      tags: [Sessions]
+      summary: Revoke all other sessions
+      description: |
+        Revokes all active sessions for the current user **except** the current session.
+      security:
+        - AccessTokenCookie: []
+      responses:
+        "200":
+          description: All other sessions revoked
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Revoke all sessions successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/sessions/refresh:
+    post:
+      tags: [Sessions]
+      summary: Refresh access token
+      description: |
+        Uses the `refresh_token` cookie to obtain a fresh `access_token`.
+        Also rotates the `refresh_token` for enhanced security.
+        Use this when the access token has expired.
+      security:
+        - RefreshTokenCookie: []
+      responses:
+        "200":
+          description: Token refreshed. New cookies are set.
+          headers:
+            Set-Cookie:
+              description: New `access_token` and rotated `refresh_token` cookies
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Refresh token successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "401":
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/sessions/count:
+    get:
+      tags: [Sessions]
+      summary: Get session count by status
+      description: Returns a count of active and revoked sessions for the current user.
+      security:
+        - AccessTokenCookie: []
+      responses:
+        "200":
+          description: Session counts returned
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Get session count successfully"
+                      data:
+                        $ref: "#/components/schemas/SessionCount"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/sessions/revoke:
+    delete:
+      tags: [Sessions]
+      summary: Revoke all sessions (including current)
+      description: |
+        Revokes **all** sessions for the current user including the current one.
+        Use this for a full sign-out from all devices.
+      security:
+        - AccessTokenCookie: []
+      responses:
+        "200":
+          description: All sessions revoked
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Revoke all sessions successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/sessions/{sessionId}:
+    delete:
+      tags: [Sessions]
+      summary: Revoke session by ID
+      description: |
+        Revokes a specific session by its ID. The session must belong to the current user.
+        Also revokes any chained sessions derived from it.
+      security:
+        - AccessTokenCookie: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+          description: The ID of the session to revoke
+      responses:
+        "200":
+          description: Session revoked
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Revoke session successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Session does not belong to the current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ── Me ──────────────────────────────────
+  /auth/me:
+    get:
+      tags: [Me]
+      summary: Get current user profile
+      description: |
+        Returns the full profile of the currently authenticated user, including:
+        - Basic info (id, name, email, verification status)
+        - Pending email change request (if any)
+        - Connected providers (Google, Credentials)
+      security:
+        - AccessTokenCookie: []
+      responses:
+        "200":
+          description: User profile returned
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Get my user data successfully"
+                      data:
+                        $ref: "#/components/schemas/UserData"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ── Profile — Name ───────────────────────
+  /auth/change-profile/name:
+    patch:
+      tags: [Profile — Name]
+      summary: Change display name
+      description: Updates the current user's display name.
+      security:
+        - AccessTokenCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  minLength: 10
+                  maxLength: 20
+                  example: "Jane Doe Here"
+      responses:
+        "200":
+          description: Name changed successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Change name successfully"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+  # ── Profile — Email ──────────────────────
+  /auth/change-profile/email/request:
+    post:
+      tags: [Profile — Email]
+      summary: Request email change
+      description: |
+        Initiates an email change request. Stores the pending new email for verification.
+        
+        ⚠️ Requires a scoped **`2fa_token`** cookie for scope `CHANGE_EMAIL`.
+      security:
+        - AccessTokenCookie: []
+        - TwoFaTokenCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [email, newEmail]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "current@example.com"
+                  description: Current email address for confirmation
+                newEmail:
+                  type: string
+                  format: email
+                  example: "new@example.com"
+                  description: New email address to change to
+      responses:
+        "200":
+          description: Email change requested. `2fa_token` cookie cleared.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Request Change email successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: 2FA token required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+  /auth/change-profile/email/update:
+    patch:
+      tags: [Profile — Email]
+      summary: Update pending email change
+      description: |
+        Updates the new email on an existing pending email change request.
+        Requires the `requestId` from the pending change and the new email address.
+      security:
+        - AccessTokenCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [requestId, newEmail]
+              properties:
+                requestId:
+                  type: string
+                  format: uuid
+                  example: "550e8400-e29b-41d4-a716-446655440000"
+                  description: UUID of the pending email change request
+                newEmail:
+                  type: string
+                  format: email
+                  example: "updated-new@example.com"
+      responses:
+        "200":
+          description: Pending email change updated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Update request change email successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Pending email change request not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+  /auth/change-profile/email/cancel:
+    delete:
+      tags: [Profile — Email]
+      summary: Cancel pending email change request
+      description: Cancels and deletes the current user's pending email change request.
+      security:
+        - AccessTokenCookie: []
+      responses:
+        "200":
+          description: Email change cancelled
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Cancel change email successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/change-profile/email/verification/send:
+    post:
+      tags: [Profile — Email]
+      summary: Send email verification for email change
+      description: |
+        Sends a 6-digit verification OTP to the **new** email address in the pending change request.
+        Must have an active pending email change request.
+      security:
+        - AccessTokenCookie: []
+      responses:
+        "200":
+          description: Verification email sent to new address
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Verification email sent successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: No pending email change request found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/change-profile/email/verification/verify:
+    post:
+      tags: [Profile — Email]
+      summary: Verify OTP and complete email change
+      description: |
+        Verifies the 6-digit OTP sent to the new email address and finalizes the email change.
+        All existing sessions are invalidated and a revert email is sent to the old address.
+      security:
+        - AccessTokenCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [otp]
+              properties:
+                otp:
+                  type: string
+                  pattern: "^\\d{6}$"
+                  example: "789012"
+                  description: 6-digit numeric OTP sent to the new email
+      responses:
+        "200":
+          description: Email changed successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Change email successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "400":
+          description: Invalid OTP
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+  # ── Profile — Password ───────────────────
+  /auth/change-profile/password:
+    patch:
+      tags: [Profile — Password]
+      summary: Change account password
+      description: |
+        Changes the user's account password. Requires the current password for verification.
+        All existing sessions are invalidated after a successful change.
+        A revert email is sent to the account's email for recovery.
+
+        ⚠️ Requires a scoped **`2fa_token`** cookie for scope `CHANGE_PASSWORD`.
+      security:
+        - AccessTokenCookie: []
+        - TwoFaTokenCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [currentPassword, password, confirmPassword]
+              properties:
+                currentPassword:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: "oldpassword123"
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: "newpassword456"
+                confirmPassword:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: "newpassword456"
+      responses:
+        "200":
+          description: Password changed. `2fa_token` cookie cleared.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Change password successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "401":
+          description: Unauthorized or wrong current password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: 2FA token required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+  # ── Revert Account ───────────────────────
+  /auth/revert-account/password-change:
+    post:
+      tags: [Revert Account]
+      summary: Revert account after password change
+      description: |
+        Reverts a recent password change using the token sent to the user's email.
+        The `token` and `tokenId` are provided in the revert email link.
+        Requires a new password to set on revert (since the old one was hashed).
+        All sessions are cleared after revert.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [token, tokenId, email, password, confirmPassword]
+              properties:
+                token:
+                  type: string
+                  format: uuid
+                  example: "550e8400-e29b-41d4-a716-446655440000"
+                  description: UUID revert token from the email link
+                tokenId:
+                  type: string
+                  format: uuid
+                  example: "660e8400-e29b-41d4-a716-446655441111"
+                  description: UUID identifying the revert record
+                email:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: "revertedpassword123"
+                confirmPassword:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: "revertedpassword123"
+      responses:
+        "200":
+          description: Account reverted. All cookies cleared.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Revert account successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "400":
+          description: Invalid or expired revert token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+  /auth/revert-account/email-change:
+    post:
+      tags: [Revert Account]
+      summary: Revert account after email change
+      description: |
+        Reverts a recent email change using the token sent to the user's old email address.
+        The `token` and `tokenId` are provided in the revert email link.
+        Requires a new password for re-authentication after the revert.
+        All sessions are cleared after revert.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [token, tokenId, password, confirmPassword]
+              properties:
+                token:
+                  type: string
+                  format: uuid
+                  example: "770e8400-e29b-41d4-a716-446655442222"
+                  description: UUID revert token from the email link
+                tokenId:
+                  type: string
+                  format: uuid
+                  example: "880e8400-e29b-41d4-a716-446655443333"
+                  description: UUID identifying the revert record
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: "revertedpassword123"
+                confirmPassword:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: "revertedpassword123"
+      responses:
+        "200":
+          description: Email reverted. All cookies cleared.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      message:
+                        example: "Revert account successfully"
+                      data:
+                        nullable: true
+                        example: null
+        "400":
+          description: Invalid or expired revert token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
