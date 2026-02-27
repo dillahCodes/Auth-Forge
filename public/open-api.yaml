@@ -292,7 +292,6 @@ components:
 # PATHS
 # ─────────────────────────────────────────
 paths:
-
   # ── Auth — Credentials ──────────────────
   /auth/providers/account/credentials/register:
     post:
@@ -470,7 +469,7 @@ paths:
         Bind or unbind the credentials (email/password) provider to/from the current account.
         - **BIND**: Add a password to allow credentials login. Requires `password` and `confirmPassword`.
         - **UNBIND**: Remove the credentials provider (requires Google to already be connected).
-        
+
         ⚠️ Requires a scoped **`2fa_token`** cookie for scope `TOGGLE_CREDENTIALS_CONNECTION`.
       security:
         - AccessTokenCookie: []
@@ -606,7 +605,7 @@ paths:
       summary: Get Google OAuth URL to connect/disconnect Google
       description: |
         Returns the Google OAuth URL for toggling the Google provider connection on an existing account.
-        
+
         ⚠️ Requires a scoped **`2fa_token`** cookie for scope `TOGGLE_GOOGLE_CONNECTION`.
       security:
         - AccessTokenCookie: []
@@ -1063,35 +1062,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-    delete:
-      tags: [Sessions]
-      summary: Revoke all other sessions
-      description: |
-        Revokes all active sessions for the current user **except** the current session.
-      security:
-        - AccessTokenCookie: []
-      responses:
-        "200":
-          description: All other sessions revoked
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/SuccessResponse"
-                  - type: object
-                    properties:
-                      message:
-                        example: "Revoke all sessions successfully"
-                      data:
-                        nullable: true
-                        example: null
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
   /auth/sessions/refresh:
     post:
       tags: [Sessions]
@@ -1160,9 +1130,9 @@ paths:
   /auth/sessions/revoke:
     delete:
       tags: [Sessions]
-      summary: Revoke all sessions (including current)
+      summary: Revoke all sessions (except current)
       description: |
-        Revokes **all** sessions for the current user including the current one.
+        Revokes **all** sessions for the current user except the current one.
         Use this for a full sign-out from all devices.
       security:
         - AccessTokenCookie: []
@@ -1326,7 +1296,7 @@ paths:
       summary: Request email change
       description: |
         Initiates an email change request. Stores the pending new email for verification.
-        
+
         ⚠️ Requires a scoped **`2fa_token`** cookie for scope `CHANGE_EMAIL`.
       security:
         - AccessTokenCookie: []

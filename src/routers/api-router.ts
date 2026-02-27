@@ -16,9 +16,9 @@ export enum ApiRouters {
   // SESSIONS
   SESSIONS = "/api/auth/sessions",
   SESSIONS_REFRESH = "/api/auth/sessions/refresh",
+  SESSION_COUNT = "/api/auth/sessions/count",
   SESSIONS_REVOKE = "/api/auth/sessions/revoke",
   SESSIONS_REVOKE_BYID = "/api/auth/sessions/:sessionId",
-  SESSION_COUNT = "/api/auth/sessions/count",
 
   // 2FA
   TWOFA_SEND = "/api/auth/2fa/send",

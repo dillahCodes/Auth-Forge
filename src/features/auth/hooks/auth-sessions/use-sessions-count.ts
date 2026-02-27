@@ -1,15 +1,15 @@
 import { axiosInstance } from "@/shared/lib/axios/axios";
 import { ApiResponse } from "@/shared/types/response";
 import { useQuery } from "@tanstack/react-query";
-import { GetSessions } from "../types/sessions";
 import { ApiRouters } from "@/routers/api-router";
+import { GetSessionsCount } from "../../types/sessions";
 
-export const useSessions = () => {
+export const useSessionsCount = () => {
   return useQuery({
-    queryKey: ["sessions"],
+    queryKey: ["sessions-count"],
     queryFn: async () => {
-      const res = await axiosInstance.get(ApiRouters.SESSIONS);
-      return res.data as ApiResponse<GetSessions>;
+      const res = await axiosInstance.get(ApiRouters.SESSION_COUNT);
+      return res.data as ApiResponse<GetSessionsCount>;
     },
   });
 };
