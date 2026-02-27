@@ -4,10 +4,10 @@ import Link from "next/link";
 import { Activity } from "react";
 import { FaCircleCheck } from "react-icons/fa6";
 import { LuPencil } from "react-icons/lu";
-import { useMe } from "../../hooks/use-me";
 import { useRouter } from "next/navigation";
 import { ProviderHelpers } from "@/shared/utils/providers-helper";
 import { CurrentProvider } from "@/shared/components/ui/current-provider";
+import { useMe } from "../../hooks/profile-me/use-me";
 
 export default function UserInfo() {
   const router = useRouter();

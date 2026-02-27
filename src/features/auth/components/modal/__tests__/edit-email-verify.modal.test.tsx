@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { VerifyChangeEmailModalProvider, useVerifyChangeEmailModal } from "../edit-email-verify.modal";
 
 // Mock all external hooks the modal depends on
-vi.mock("@/features/auth/hooks/use-change-email-verification-send", () => ({
+vi.mock("@/features/auth/hooks/profile-email/use-change-email-verification-send", () => ({
   useChangeEmailVerificationSend: () => ({
     mutateAsync: vi.fn().mockResolvedValue({}),
     isPending: false,
@@ -15,7 +15,7 @@ vi.mock("@/features/auth/hooks/use-change-email-verification-send", () => ({
   }),
 }));
 
-vi.mock("@/features/auth/hooks/use-change-email-verification-verify", () => ({
+vi.mock("@/features/auth/hooks/profile-email/use-change-email-verification-verify", () => ({
   useChangeEmailVerificationVerify: () => ({
     mutateAsync: vi.fn().mockResolvedValue({}),
     isPending: false,
