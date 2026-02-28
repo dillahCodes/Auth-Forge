@@ -21,10 +21,16 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <head>
+        {/* AOS */}
+        <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"></link>
+      </head>
       <body>
-        <main className="min-h-screen antialiased p-4 flex flex-col justify-center items-center">
+        <main className="min-h-screen antialiased flex flex-col justify-center items-center">
           <AppProvider>{children}</AppProvider>
         </main>
+        {/* AOS */}
+        <script src="https://unpkg.com/aos@2.3.1/dist/aos.js" async />
       </body>
     </html>
   );

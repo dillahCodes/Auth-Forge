@@ -1,5 +1,4 @@
-import { useTwoFaStatus } from "@/features/auth/hooks/use-2fa-status";
-import { useAuthCredentialsConnect } from "@/features/auth/hooks/use-auth-credentials-connect";
+import { useTwoFaStatus } from "@/features/auth/hooks/auth-2fa/use-2fa-status";
 import { ConnectCredentialsSchema } from "@/features/auth/schemas/auth-credentials.schema";
 import { StatusTwoFaToken } from "@/features/auth/types/2fa";
 import { Button } from "@/shared/components/ui/button";
@@ -15,6 +14,7 @@ import { AxiosError } from "axios";
 import { Activity, Fragment, useEffect, useEffectEvent, useState } from "react";
 import { IoKeyOutline } from "react-icons/io5";
 import { AuthProvider } from "../../../../../../prisma/generated/enums";
+import { useAuthCredentialsConnect } from "@/features/auth/hooks/auth-credentials/use-auth-credentials-connect";
 
 interface EditProviderCredentialsProps {
   isConnected: boolean;

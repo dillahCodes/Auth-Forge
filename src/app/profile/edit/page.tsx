@@ -4,7 +4,7 @@ import EditEmail from "@/features/auth/components/profile/edit/edit-email";
 import EditName from "@/features/auth/components/profile/edit/edit-name";
 import EditPassword from "@/features/auth/components/profile/edit/edit-password";
 import EditProvider from "@/features/auth/components/profile/edit/edit-provider";
-import { useMe } from "@/features/auth/hooks/use-me";
+import { useMe } from "@/features/auth/hooks/profile-me/use-me";
 import { ProviderHelpers } from "@/shared/utils/providers-helper";
 
 export default function EditProfile() {

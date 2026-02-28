@@ -1,6 +1,6 @@
 "use client";
 
-import { useRevertAccountEmailChange } from "@/features/auth/hooks/use-revert-account-email-change";
+import { useRevertAccountEmailChange } from "@/features/auth/hooks/profile-revert-account/use-revert-account-email-change";
 import { RevertAccountSchema } from "@/features/auth/schemas/revert-account.schema";
 import { Button } from "@/shared/components/ui/button";
 import { Form } from "@/shared/components/ui/form/form";

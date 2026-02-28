@@ -3,8 +3,8 @@
 import { Button } from "@/shared/components/ui/button";
 import iso3166 from "iso-3166-2";
 import { Activity, useState } from "react";
-import { useRevokeSession } from "../../hooks/use-revoke-session";
-import { useRevokeSessions } from "../../hooks/use-revoke-sessions";
+import { useRevokeSession } from "../../hooks/auth-sessions/use-revoke-session";
+import { useRevokeSessions } from "../../hooks/auth-sessions/use-revoke-sessions";
 import { Session } from "../../types/sessions";
 
 interface OtherSessionsProps {

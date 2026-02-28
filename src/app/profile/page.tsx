@@ -3,7 +3,7 @@
 import CurrentSession from "@/features/auth/components/profile/current-session";
 import OtherSessions from "@/features/auth/components/profile/other-sessions";
 import UserInfo from "@/features/auth/components/profile/user-info";
-import { useSessions } from "@/features/auth/hooks/use-sessions";
+import { useSessions } from "@/features/auth/hooks/auth-sessions/use-sessions";
 
 export default function Profile() {
   const { data: sessionData, isLoading } = useSessions();

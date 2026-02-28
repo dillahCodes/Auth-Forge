@@ -1,6 +1,6 @@
 "use client";
 
-import { useSessionsCount } from "@/features/auth/hooks/use-sessions-count";
+import { useSessionsCount } from "@/features/auth/hooks/auth-sessions/use-sessions-count";
 import { LuCookie } from "react-icons/lu";
 
 export default function Dashboard() {

@@ -18,10 +18,6 @@ describe("Button", () => {
 
   it("hides children when isLoading is true", () => {
     render(<Button variant="info" isLoading>Save</Button>);
-    // The content activity should be in hidden mode, so the text is not visible
-    const content = screen.queryByText("Save");
-    // It renders in the DOM but within a hidden Activity
-    // We verify the loading indicator is shown instead
     expect(screen.getByText("Loading...")).toBeInTheDocument();
   });
 

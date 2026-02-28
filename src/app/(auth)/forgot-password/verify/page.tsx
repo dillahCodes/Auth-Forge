@@ -1,6 +1,6 @@
 "use client";
 
-import { useForgotPasswordVerify } from "@/features/auth/hooks/use-forgot-password-verify";
+import { useForgotPasswordVerify } from "@/features/auth/hooks/auth-forgot-password/use-forgot-password-verify";
 import { forgotPasswordSchema } from "@/features/auth/schemas/forgot-password.schema";
 import { Button } from "@/shared/components/ui/button";
 import { Form } from "@/shared/components/ui/form/form";

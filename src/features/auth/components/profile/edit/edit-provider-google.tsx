@@ -1,12 +1,12 @@
-import { useAuthGoogleConnect } from "@/features/auth/hooks/use-auth-google-connect";
 import { Button } from "@/shared/components/ui/button";
 import { IconWithText } from "@/shared/components/ui/icon-text";
 import { Activity, useEffect, useEffectEvent } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { AuthProvider } from "../../../../../../prisma/generated/enums";
-import { useTwoFaStatus } from "@/features/auth/hooks/use-2fa-status";
+import { useTwoFaStatus } from "@/features/auth/hooks/auth-2fa/use-2fa-status";
 import { TwoFaConfig, useTwoFaModal } from "@/shared/components/ui/modal/modal-2fa";
 import { StatusTwoFaToken } from "@/features/auth/types/2fa";
+import { useAuthGoogleConnect } from "@/features/auth/hooks/auth-google/use-auth-google-connect";
 
 interface EditProviderGoogleProps {
   isConnected: boolean;

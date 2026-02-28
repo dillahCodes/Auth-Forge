@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { fireEvent, render, renderHook, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { TwoFaModalProvider, useTwoFaModal } from "../modal-2fa";
 
 // Mock all external hooks the 2FA modal depends on
-vi.mock("@/features/auth/hooks/use-2fa-send", () => ({
+vi.mock("@/features/auth/hooks/auth-2fa/use-2fa-send", () => ({
   useTwoFaSend: () => ({
     mutateAsync: vi.fn().mockResolvedValue({}),
     isPending: false,
@@ -15,7 +15,7 @@ vi.mock("@/features/auth/hooks/use-2fa-send", () => ({
   }),
 }));
 
-vi.mock("@/features/auth/hooks/use-2fa-verify", () => ({
+vi.mock("@/features/auth/hooks/auth-2fa/use-2fa-verify", () => ({
   useTwoFaVerify: () => ({
     mutateAsync: vi.fn().mockResolvedValue({}),
     isPending: false,
@@ -116,19 +116,17 @@ describe("TwoFaModalProvider & useTwoFaModal", () => {
   });
 
   it("useTwoFaModal returns open and close functions inside provider", () => {
-    const captured: { modal: ReturnType<typeof useTwoFaModal> | null } = { modal: null };
-    function Inspector() {
-      captured.modal = useTwoFaModal();
-      return null;
-    }
-    render(
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
       <Wrapper>
-        <TwoFaModalProvider>
-          <Inspector />
-        </TwoFaModalProvider>
+        <TwoFaModalProvider>{children}</TwoFaModalProvider>
       </Wrapper>
     );
-    expect(typeof captured.modal?.open).toBe("function");
-    expect(typeof captured.modal?.close).toBe("function");
+
+    const { result } = renderHook(() => useTwoFaModal(), {
+      wrapper,
+    });
+
+    expect(typeof result.current.open).toBe("function");
+    expect(typeof result.current.close).toBe("function");
   });
 });

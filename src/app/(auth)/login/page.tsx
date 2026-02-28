@@ -1,7 +1,7 @@
 "use client";
 
-import { useGoogleAuth } from "@/features/auth/hooks/use-google-auth";
-import { useLogin } from "@/features/auth/hooks/use-login";
+import { useLogin } from "@/features/auth/hooks/auth-credentials/use-login";
+import { useGoogleAuth } from "@/features/auth/hooks/auth-google/use-google-auth";
 import { Button } from "@/shared/components/ui/button";
 import { Form } from "@/shared/components/ui/form/form";
 import { FormHeader } from "@/shared/components/ui/form/form-header";

@@ -1,7 +1,7 @@
 import { Activity } from "react";
 import { Session } from "../../types/sessions";
 import iso3166 from "iso-3166-2";
-import { useLogout } from "../../hooks/use-logout";
+import { useLogout } from "../../hooks/auth-credentials/use-logout";
 import { Button } from "@/shared/components/ui/button";
 
 export default function CurrentSession({

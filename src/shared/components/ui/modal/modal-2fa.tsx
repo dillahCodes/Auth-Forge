@@ -1,5 +1,5 @@
-import { useTwoFaSend } from "@/features/auth/hooks/use-2fa-send";
-import { useTwoFaVerify } from "@/features/auth/hooks/use-2fa-verify";
+import { useTwoFaSend } from "@/features/auth/hooks/auth-2fa/use-2fa-send";
+import { useTwoFaVerify } from "@/features/auth/hooks/auth-2fa/use-2fa-verify";
 import { useOtp } from "@/features/auth/hooks/use-otp";
 import { TwoFaScopeSchema } from "@/features/auth/schemas/2fa.schema";
 import { Button } from "@/shared/components/ui/button";
