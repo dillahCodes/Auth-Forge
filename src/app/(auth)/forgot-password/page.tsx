@@ -1,6 +1,6 @@
 "use client";
 
-import { useForgotPasswordSend } from "@/features/auth/hooks/use-forgot-password-send";
+import { useForgotPasswordSend } from "@/features/auth/hooks/auth-forgot-password/use-forgot-password-send";
 import { Button } from "@/shared/components/ui/button";
 import { Form } from "@/shared/components/ui/form/form";
 import { FormHeader } from "@/shared/components/ui/form/form-header";

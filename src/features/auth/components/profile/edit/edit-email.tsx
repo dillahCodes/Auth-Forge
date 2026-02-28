@@ -1,4 +1,4 @@
-import { useTwoFaStatus } from "@/features/auth/hooks/use-2fa-status";
+import { useTwoFaStatus } from "@/features/auth/hooks/auth-2fa/use-2fa-status";
 import { StatusTwoFaToken } from "@/features/auth/types/2fa";
 import { StatusBadge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
@@ -17,11 +17,11 @@ import { Activity, useEffect, useEffectEvent, useState } from "react";
 import { BsPencilSquare } from "react-icons/bs";
 import { MdOutlineEmail } from "react-icons/md";
 import { EmailChangeRequest } from "../../../../../../prisma/generated/client";
-import { useChangeEmailCancel } from "../../../hooks/use-change-email-cancel";
-import { useChangeEmailRequest } from "../../../hooks/use-change-email-request";
-import { useChangeEmailUpdate } from "../../../hooks/use-change-email-update";
+import { useChangeEmailCancel } from "../../../hooks/profile-email/use-change-email-cancel";
 import { ChangeEmailSchema, ChangeEmailUpdateSchema } from "../../../schemas/account.schema";
 import { useVerifyChangeEmailModal, VerifyChangeEmailConfig } from "../../modal/edit-email-verify.modal";
+import { useChangeEmailRequest } from "@/features/auth/hooks/profile-email/use-change-email-request";
+import { useChangeEmailUpdate } from "@/features/auth/hooks/profile-email/use-change-email-update";
 
 interface ChangeEmailProps {
   defaultEmail?: string;
