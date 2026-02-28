@@ -46,4 +46,21 @@ body {
   input[type="password"]::-webkit-textfield-decoration-container > * {
     display: none !important;
   }
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-marquee {
+    animation: marquee 24s linear infinite;
+  }
+
+  .animate-marquee-reverse {
+    animation: marquee 24s linear infinite reverse;
+  }
 }

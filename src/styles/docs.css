@@ -43,6 +43,16 @@ main:has(.docs-swagger-wrapper) {
   background: #f8f7f7 !important;
 }
 
+/* hide margin */
+.docs-swagger-wrapper .info {
+  margin: 0 !important;
+}
+
+/* hide version  */
+.docs-swagger-wrapper .title span {
+  display: none !important;
+}
+
 /* Prevent the response/live response containers from going white */
 .docs-swagger-wrapper .swagger-ui .live-responses-wrap,
 .docs-swagger-wrapper .swagger-ui .responses-inner,
@@ -74,10 +84,10 @@ main:has(.docs-swagger-wrapper) {
 
 .docs-swagger-wrapper .swagger-ui .info .title {
   color: #111928 !important;
-  font-size: 22px !important;
-  font-weight: 900 !important;
-  text-transform: uppercase !important;
+  font-size: 30px !important;
+  font-weight: 700 !important;
   letter-spacing: -0.5px !important;
+  text-align: center !important;
 }
 
 .docs-swagger-wrapper .swagger-ui .info p,

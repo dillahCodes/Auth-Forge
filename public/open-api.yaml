@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: AuthForge API
+  title: API Docs
   description: |
     A comprehensive authentication API built with Next.js featuring credentials-based auth,
     Google OAuth, Two-Factor Authentication (2FA), session management, and account management.
