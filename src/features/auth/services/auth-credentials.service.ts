@@ -54,7 +54,7 @@ export const AuthCredentialsService = {
     const providerAccountId = userId;
 
     // DOC: if user login with credentials, check user have credentials account or not, if not create credentials account for user
-    const hasCredentialsAccount = await UserRepository.getAccountByProviderId({ provider, providerAccountId });
+    const hasCredentialsAccount = await UserRepository.getUserByProvider({ provider, providerAccountId });
 
     if (!hasCredentialsAccount) {
       const payloadAccount = { provider, providerAccountId: userId };
@@ -149,7 +149,7 @@ export const AuthCredentialsService = {
 
     const provider = AuthProvider.CREDENTIALS;
     const providerAccountId = userId;
-    const hasCredentials = await UserRepository.getAccountByProviderId({ provider, providerAccountId });
+    const hasCredentials = await UserRepository.getUserByProvider({ provider, providerAccountId });
 
     hasCredentials
       ? await AuthCredentialsService.unbindCredentials({ user, provider, sessionId, input, currentProvider })

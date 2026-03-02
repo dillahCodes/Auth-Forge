@@ -136,10 +136,7 @@ export const AuthGoogleService = {
     }
 
     const isOnlyGoogleProvider = ProviderHelpers.isOnlyGoogleProvider(accounts);
-
-    if (isOnlyGoogleProvider) {
-      return createUrlParams({ ErrorMessage: "can't unbind account with single provider" });
-    }
+    if (isOnlyGoogleProvider) return createUrlParams({ ErrorMessage: "can't unbind account with single provider" });
 
     const isSameProvider = ProviderHelpers.isCurrentProviderSame(currentProvider, provider);
     if (isSameProvider) return createUrlParams({ ErrorMessage: "can't unbind account with same provider" });
@@ -176,7 +173,7 @@ export const AuthGoogleService = {
     const provider = AuthProvider.GOOGLE;
 
     // DOC: handle existing account (login)
-    const existingGoogleAccount = await UserRepository.getAccountByProviderId({ provider, providerAccountId: sub });
+    const existingGoogleAccount = await UserRepository.getUserByProvider({ provider, providerAccountId: sub });
 
     if (existingGoogleAccount) {
       const args = { user: existingGoogleAccount.user, geo, clientInfo, googleTokens: tokens };
@@ -184,13 +181,12 @@ export const AuthGoogleService = {
     }
 
     // DOC: handle existing account (register)
-    const existingUser = await UserRepository.getByEmail({ email: email as string });
+    const getByEmailArgs = { email: email as string, options: { withAccounts: true } };
+    const existingUser = await UserRepository.getByEmail(getByEmailArgs);
 
     if (existingUser) {
       const { id: userId } = existingUser;
-
-      const userAccounts = await UserRepository.getAccountsByUserId(userId);
-      const hasGoogle = ProviderHelpers.findGoogleProvider(userAccounts);
+      const hasGoogle = ProviderHelpers.findGoogleProvider(existingUser.accounts);
 
       const argsGenerateToken = { user: existingUser, geo, clientInfo, googleTokens: tokens };
       const argsAccountData = { provider, providerAccountId: sub };
@@ -215,7 +211,7 @@ export const AuthGoogleService = {
     const { sub } = tokenPayload;
     const provider = AuthProvider.GOOGLE;
 
-    const hasConnected = await UserRepository.getAccountByProviderName({ provider, userId: currentUserId });
+    const hasConnected = await UserRepository.getUserByProviderName({ provider, userId: currentUserId });
 
     const unbindArgs = { userId: currentUserId, provider, providerAccountId: sub, currentProvider, currentSessionId };
     const bindArgs = { userId: currentUserId, provider, providerAccountId: sub, currentSessionId };
