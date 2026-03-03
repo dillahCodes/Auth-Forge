@@ -186,7 +186,7 @@ export const AccountService = {
       await SessionRepository.revokeSessionsByUserId(userId, { transaction, exceptSessionId: sessionId });
     });
 
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(userId, { exceptSessionId: sessionId });
+    await SessionRepository.revokeAccessTokensByUserIdRedis(userId, { exceptSessionId: sessionId });
 
     await OtpRepository.deleteOtp(redisVerifyKey);
     await OtpRepository.deleteOtp(redisSendOtpKey);
@@ -227,7 +227,7 @@ export const AccountService = {
       await SessionRepository.revokeSessionsByUserId(userId, { transaction, exceptSessionId: sessionId });
     });
 
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(userId, { exceptSessionId: sessionId });
+    await SessionRepository.revokeAccessTokensByUserIdRedis(userId, { exceptSessionId: sessionId });
     await RevertAccountService.sendRevertAccountPasswordChange({ email: user.email, vercelTlsFingerprint });
   },
 };

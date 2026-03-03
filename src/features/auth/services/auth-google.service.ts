@@ -144,7 +144,7 @@ export const AuthGoogleService = {
     await UserRepository.deleteAccount({ provider, providerAccountId });
 
     await SessionRepository.revokeSessionsByUserId(userId, { exceptSessionId: currentSessionId });
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(userId, { exceptSessionId: currentSessionId });
+    await SessionRepository.revokeAccessTokensByUserIdRedis(userId, { exceptSessionId: currentSessionId });
 
     return createUrlParams({ SuccessMessage: "unbind Google account successfully" });
   },
@@ -157,7 +157,7 @@ export const AuthGoogleService = {
     await UserRepository.createAccount({ userId, accountData: argsAccountData });
 
     await SessionRepository.revokeSessionsByUserId(userId, { exceptSessionId: currentSessionId });
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(userId, { exceptSessionId: currentSessionId });
+    await SessionRepository.revokeAccessTokensByUserIdRedis(userId, { exceptSessionId: currentSessionId });
 
     return createUrlParams({ SuccessMessage: "bind Google account successfully" });
   },

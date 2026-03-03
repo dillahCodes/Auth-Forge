@@ -52,7 +52,7 @@ interface RevokeSessionBySessionIdOptions {
   transaction?: Prisma.TransactionClient;
 }
 
-interface RevokeAllAccessTokenByUserIdRedisOptions {
+interface RevokeAccessTokensByUserIdRedisOptions {
   exceptSessionId?: string;
 }
 
@@ -174,7 +174,7 @@ export const SessionRepository = {
    * DELETE (SOFT)
    * ======================= */
 
-  async revokeAllAccessTokenByUserIdRedis(userId: string, options?: RevokeAllAccessTokenByUserIdRedisOptions) {
+  async revokeAccessTokensByUserIdRedis(userId: string, options?: RevokeAccessTokensByUserIdRedisOptions) {
     const { exceptSessionId } = options ?? {};
 
     const redis = await getRedis();

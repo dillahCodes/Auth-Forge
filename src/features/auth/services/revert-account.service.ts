@@ -99,7 +99,7 @@ export const RevertAccountService: RevertAccountServiceContract = {
       await SessionRepository.revokeSessionsByUserId(user.id, { transaction });
     });
 
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(user.id);
+    await SessionRepository.revokeAccessTokensByUserIdRedis(user.id);
 
     // DOC: Cleanup redis keys
     await VerificationTokenRepository.deleteToken(redisRevertTokenKey);
@@ -159,7 +159,7 @@ export const RevertAccountService: RevertAccountServiceContract = {
     });
 
     // DOC: revoke all access token
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(userId);
+    await SessionRepository.revokeAccessTokensByUserIdRedis(userId);
   },
 
   generateUrl<T extends RevertUrlParams>(path: string, params: T) {

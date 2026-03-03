@@ -120,7 +120,7 @@ export const AuthCredentialsService = {
       await SessionRepository.revokeSessionsByUserId(user.id, { exceptSessionId: sessionId, transaction });
     });
 
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(user.id, { exceptSessionId: sessionId });
+    await SessionRepository.revokeAccessTokensByUserIdRedis(user.id, { exceptSessionId: sessionId });
   },
 
   async unbindCredentials({ provider, sessionId, user, currentProvider }: ConnectBindUnbindParams) {
@@ -140,7 +140,7 @@ export const AuthCredentialsService = {
       await SessionRepository.revokeSessionsByUserId(user.id, { exceptSessionId: sessionId, transaction });
     });
 
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(user.id, { exceptSessionId: sessionId });
+    await SessionRepository.revokeAccessTokensByUserIdRedis(user.id, { exceptSessionId: sessionId });
   },
 
   async connect({ input, userId, sessionId, currentProvider }: ConnectParams) {

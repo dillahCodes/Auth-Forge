@@ -8,6 +8,7 @@ import { ForgotPasswordSchema } from "../schemas/forgot-password.schema";
 import { EmailService } from "./email.service";
 import { RateLimiterService } from "./rate-limit.service";
 import { RevertAccountService } from "./revert-account.service";
+import { prisma } from "@/shared/lib/prisma";
 
 interface SendForgotPasswordEmailParams {
   vercelTlsFingerprint: string | null;
@@ -71,13 +72,15 @@ export const ForgotPasswordService = {
     const user = await UserRepository.getByEmail({ email });
     if (!user) throw new ResourceUnprocessableEntity("User not found");
 
-    // DOC: Hash password, update and revoke all sessions
     const hashedPassword = await bcrypt.hash(password, 10);
-    await UserRepository.updatePassword({ userId: user.id, hashedPassword });
-    await SessionRepository.revokeSessionsByUserId(user.id);
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(user.id);
 
-    // DOC: Cleanup redis keys
+    await prisma.$transaction(async (transaction) => {
+      await UserRepository.updatePassword({ userId: user.id, hashedPassword, options: { transaction } });
+      await SessionRepository.revokeSessionsByUserId(user.id, { transaction });
+    });
+
+    // DOC: Cleanup redis keys and revoke all access tokens
+    await SessionRepository.revokeAccessTokensByUserIdRedis(user.id);
     await VerificationTokenRepository.deleteToken(redisSendTokenKey);
     await VerificationTokenRepository.deleteToken(redisVerifyLimiterKey);
 
