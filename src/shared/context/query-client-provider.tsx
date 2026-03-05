@@ -7,7 +7,7 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       refetchOnReconnect: false,
-      retry: 0, // Disable automatic retries, we using axios-retry instead
+      retry: 0, // Doc: Disable automatic retries, we using axios-retry instead
     },
   },
 });

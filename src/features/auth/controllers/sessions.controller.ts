@@ -22,8 +22,6 @@ export const SessionsController = {
     const { accessToken, refreshToken } = await SessionService.refreshToken(args);
 
     const response = sendSuccess(null, "Refresh token successfully");
-
-    // DOC: set auth cookies in client browser
     CookieHttp.set({ response, accessToken, refreshToken });
     return response;
   }),
