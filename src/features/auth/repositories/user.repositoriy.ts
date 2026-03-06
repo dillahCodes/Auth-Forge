@@ -43,7 +43,7 @@ interface UpdatePasswordParams {
 
 interface GetUserByIdParams {
   userId: string;
-  options?: { withPassword?: boolean };
+  options?: { withPassword?: boolean; withAccounts?: boolean };
 }
 
 interface GetUserByEmailParams {
@@ -89,7 +89,7 @@ export const UserRepository = {
     const { withPassword } = options ?? {};
     return prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, email: true, verifiedAt: true, password: withPassword ?? false },
+      select: { id: true, name: true, email: true, verifiedAt: true, password: withPassword ?? false, accounts: true },
     });
   },
 

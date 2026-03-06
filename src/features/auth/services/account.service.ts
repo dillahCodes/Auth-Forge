@@ -1,4 +1,3 @@
-import { AuthInvalidCredentials } from "@/shared/errors/auth-error";
 import {
   NotFound,
   OperationNotAllowed,
@@ -6,6 +5,7 @@ import {
   ResourceUnprocessableEntity,
 } from "@/shared/errors/resource-error";
 import { prisma } from "@/shared/lib/prisma";
+import { ProviderHelpers } from "@/shared/utils/providers-helper";
 import bcrypt from "bcrypt";
 import { EmailChangeRequestRepository } from "../repositories/email-change-request.repository";
 import { OtpRepository } from "../repositories/otp.repository";
@@ -20,7 +20,6 @@ import {
 import { EmailService } from "./email.service";
 import { RateLimiterService } from "./rate-limit.service";
 import { RevertAccountService } from "./revert-account.service";
-import { ProviderHelpers } from "@/shared/utils/providers-helper";
 
 interface ChangePasswordProps {
   sessionId: string;
@@ -198,27 +197,21 @@ export const AccountService = {
 
   async changePassword({ input, userId, vercelTlsFingerprint, sessionId }: ChangePasswordProps) {
     const { confirmPassword, currentPassword } = input;
+    const errorMessage = "Password can only be changed for accounts with credentials provider";
 
     const redisLimiterKey = `profile:change-password|uid:${userId}`;
     const cfgLimiter = { key: redisLimiterKey, limit: 5, windowSeconds: 60 * 15 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    const user = await UserRepository.getById({ userId, options: { withPassword: true } });
+    const user = await UserRepository.getById({ userId, options: { withPassword: true, withAccounts: true } });
     if (!user) throw new NotFound("user not found");
+    if (!user.password) throw new OperationNotAllowed(errorMessage);
 
-    if (!user.password) {
-      throw new OperationNotAllowed("Password can only be changed for accounts with credentials provider");
-    }
+    const hasCredentials = ProviderHelpers.isContainsCredentials(user.accounts);
+    if (!hasCredentials) throw new OperationNotAllowed(errorMessage);
 
-    const accounts = await UserRepository.getAccountsByUserId(userId);
-    const isContainsCredentials = ProviderHelpers.isContainsCredentials(accounts);
-
-    if (!isContainsCredentials) {
-      throw new OperationNotAllowed("Password can only be changed for accounts with credentials provider");
-    }
-
-    const validCurrentPassword = await bcrypt.compare(currentPassword, user.password);
-    if (!validCurrentPassword) throw new AuthInvalidCredentials();
+    const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+    if (!isValidPassword) throw new OperationNotAllowed("Invalid password");
 
     const hashedNewPassword = await bcrypt.hash(confirmPassword, 10);
 
