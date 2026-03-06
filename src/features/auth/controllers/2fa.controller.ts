@@ -18,7 +18,7 @@ export const TwoFaController = {
     await SessionService.validateSessionForAccessToken(sessionId);
 
     await TwoFaService.sendOtp({ location, userId, input });
-    return sendSuccess(null, "Send otp successfully");
+    return sendSuccess(null, "Send 2fa OTP successfully");
   }),
 
   verifyOtp: CreateController.create(async (req: Request) => {
@@ -28,7 +28,7 @@ export const TwoFaController = {
     await SessionService.validateSessionForAccessToken(sessionId);
     const { twoFaToken } = await TwoFaService.verifyOtp({ userId, sessionId, input });
 
-    const response = sendSuccess(null, "Verify otp successfully");
+    const response = sendSuccess(null, "Verify 2fa OTP successfully");
     CookieHttp.set({ response, twoFaToken });
     return response;
   }),
