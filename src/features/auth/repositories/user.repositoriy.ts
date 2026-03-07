@@ -79,17 +79,24 @@ export const UserRepository = {
         email: true,
         verifiedAt: true,
         password: withPassword ?? false,
-        ...(withAccounts && { accounts: true }),
+        accounts: withAccounts ?? false,
       },
     });
   },
 
   // DOC: Find user by id
   getById({ userId, options }: GetUserByIdParams) {
-    const { withPassword } = options ?? {};
+    const { withPassword, withAccounts } = options ?? {};
     return prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, email: true, verifiedAt: true, password: withPassword ?? false, accounts: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        verifiedAt: true,
+        password: withPassword ?? false,
+        accounts: withAccounts ?? false,
+      },
     });
   },
 

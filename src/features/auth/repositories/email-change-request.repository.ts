@@ -36,13 +36,8 @@ export const EmailChangeRequestRepository = {
    */
   findPendingByUserId(userId: string) {
     return prisma.emailChangeRequest.findFirst({
-      where: {
-        userId,
-        reqStatus: ReqStatus.PENDING,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+      where: { userId, reqStatus: ReqStatus.PENDING },
+      orderBy: { createdAt: "desc" },
     });
   },
 
@@ -51,13 +46,8 @@ export const EmailChangeRequestRepository = {
    */
   findPendingById(requestId: string) {
     return prisma.emailChangeRequest.findFirst({
-      where: {
-        id: requestId,
-        reqStatus: ReqStatus.PENDING,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+      where: { id: requestId, reqStatus: ReqStatus.PENDING },
+      orderBy: { createdAt: "desc" },
     });
   },
 
