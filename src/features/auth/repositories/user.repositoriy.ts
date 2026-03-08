@@ -62,11 +62,6 @@ interface DeleteAccount {
   options?: RespositoryOptions;
 }
 
-interface GetProviderByNameParams {
-  provider: AuthProvider;
-  userId: string;
-}
-
 export const UserRepository = {
   // DOC: Find user by email
   getByEmail({ email, options }: GetUserByEmailParams) {
@@ -104,14 +99,6 @@ export const UserRepository = {
   getUserByProvider({ provider, providerAccountId }: GetAccount) {
     return prisma.account.findUnique({
       where: { provider_providerAccountId: { provider, providerAccountId } },
-      select: { user: { omit: { password: true } }, userId: true },
-    });
-  },
-
-  // DOC: Find account by provider name
-  getUserByProviderName({ provider, userId }: GetProviderByNameParams) {
-    return prisma.account.findFirst({
-      where: { provider: provider, userId },
       select: { user: { omit: { password: true } }, userId: true },
     });
   },

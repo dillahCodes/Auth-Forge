@@ -26,7 +26,7 @@ export const AuthGoogleController = {
 
     const code = await AuthGoogleHttp.validateUrlCode(req);
     const tokens = await AuthGoogleService.callbackAuth({ code, geo: geolocation, clientInfo });
-    
+
     const redirectTo = AuthGoogleHttp.getRedirectUrlAfterAuth(req);
     const response = NextResponse.redirect(redirectTo);
 

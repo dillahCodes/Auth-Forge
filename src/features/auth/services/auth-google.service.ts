@@ -1,8 +1,8 @@
 import { AuthUnauthorized } from "@/shared/errors/auth-error";
-import { NotFound } from "@/shared/errors/resource-error";
 import { ClientInfo } from "@/shared/lib/client-info";
 import { Geolocation } from "@/shared/lib/geolocation/geo-vercel";
 import { googleClient } from "@/shared/lib/oauth/google.oauth";
+import { prisma } from "@/shared/lib/prisma";
 import { createUrlParams } from "@/shared/utils/create-url-params";
 import { ProviderHelpers } from "@/shared/utils/providers-helper";
 import { Credentials, GenerateAuthUrlOpts } from "google-auth-library";
@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from "uuid";
 import { AuthProvider } from "../../../../prisma/generated/enums";
 import { SessionRepository } from "../repositories/session.repository";
 import { UserRepository } from "../repositories/user.repositoriy";
-import { UserData } from "../types/user";
+import { UserAccount, UserData } from "../types/user";
 import { AccessTokenPayload, RefreshTokenPayload, TokenService } from "./token.service";
 
 interface CallbackParams {
@@ -44,15 +44,9 @@ export interface GenerateoAuthUrlConfigParams {
   forEndpoint: "AUTH" | "CONNECT";
 }
 
-interface BindParams {
+interface ConnectionParams {
   userId: string;
-  provider: AuthProvider;
-  providerAccountId: string;
-  currentSessionId: string;
-}
-
-interface UnbindParams {
-  userId: string;
+  userAccounts: Omit<UserAccount, "isCurrentProvider">[];
   provider: AuthProvider;
   providerAccountId: string;
   currentProvider: AuthProvider;
@@ -121,44 +115,53 @@ export const AuthGoogleService = {
     return { accessToken, refreshToken, googleTokens };
   },
 
-  async unbindGoogleAccount({ provider, providerAccountId, userId, currentProvider, currentSessionId }: UnbindParams) {
-    const accounts = await UserRepository.getAccountsByUserId(userId);
-    const googleProvider = ProviderHelpers.findGoogleProvider(accounts);
+  async unbindGoogleAccount(params: ConnectionParams) {
+    const { provider, providerAccountId, userId, currentProvider, currentSessionId, userAccounts } = params;
 
-    if (!googleProvider) return createUrlParams({ ErrorMessage: "can't unbind, missing google provider" });
+    const googleProvider = ProviderHelpers.findGoogleProvider(userAccounts);
+    if (!googleProvider) return createUrlParams({ ErrorMessage: "missing google provider" });
     const { provider: googleProviderName, providerAccountId: googleProviderAccountId } = googleProvider;
 
-    const targetForUnbind = { targetProvider: googleProviderName, targetProviderAccountId: googleProviderAccountId };
-    const isMatchedAccount = ProviderHelpers.isMatchedProvider({ provider, providerAccountId, ...targetForUnbind });
+    const targetTobeUnbind = { targetProvider: googleProviderName, targetProviderAccountId: googleProviderAccountId };
+    const incomingTobeUnbind = { provider, providerAccountId };
+    const isMatchedAccount = ProviderHelpers.isMatchedProvider({ ...incomingTobeUnbind, ...targetTobeUnbind });
 
     if (!isMatchedAccount) {
       return createUrlParams({ ErrorMessage: "This Google account does not match your linked account." });
     }
 
-    const isOnlyGoogleProvider = ProviderHelpers.isOnlyGoogleProvider(accounts);
+    const isOnlyGoogleProvider = ProviderHelpers.isOnlyGoogleProvider(userAccounts);
     if (isOnlyGoogleProvider) return createUrlParams({ ErrorMessage: "can't unbind account with single provider" });
 
     const isSameProvider = ProviderHelpers.isCurrentProviderSame(currentProvider, provider);
-    if (isSameProvider) return createUrlParams({ ErrorMessage: "can't unbind account with same provider" });
+    if (isSameProvider) return createUrlParams({ ErrorMessage: "Cannot unbind the currently active sign-in provider" });
 
-    await UserRepository.deleteAccount({ provider, providerAccountId });
+    await prisma.$transaction(async (transaction) => {
+      await UserRepository.deleteAccount({ ...incomingTobeUnbind, options: { transaction } });
+      await SessionRepository.revokeSessionsByUserId(userId, { exceptSessionId: currentSessionId, transaction });
+    });
 
-    await SessionRepository.revokeSessionsByUserId(userId, { exceptSessionId: currentSessionId });
     await SessionRepository.revokeAccessTokensByUserIdRedis(userId, { exceptSessionId: currentSessionId });
-
     return createUrlParams({ SuccessMessage: "unbind Google account successfully" });
   },
 
-  async bindGoogleAccount({ provider, providerAccountId, userId, currentSessionId }: BindParams) {
-    const userData = await UserRepository.getById({ userId });
-    if (!userData) throw new NotFound("User not found");
+  async bindGoogleAccount(params: ConnectionParams) {
+    const { provider, providerAccountId, userId, currentSessionId, currentProvider, userAccounts } = params;
+
+    const isContainGoogleProvider = ProviderHelpers.isContainGoogle(userAccounts);
+    if (isContainGoogleProvider) return createUrlParams({ ErrorMessage: "Google account already linked" });
+
+    const isSameProvider = ProviderHelpers.isCurrentProviderSame(currentProvider, provider);
+    if (isSameProvider) return createUrlParams({ ErrorMessage: "Cannot bind the currently active sign-in provider" });
 
     const argsAccountData = { provider, providerAccountId };
-    await UserRepository.createAccount({ userId, accountData: argsAccountData });
 
-    await SessionRepository.revokeSessionsByUserId(userId, { exceptSessionId: currentSessionId });
+    await prisma.$transaction(async (transaction) => {
+      await UserRepository.createAccount({ userId, accountData: argsAccountData, options: { transaction } });
+      await SessionRepository.revokeSessionsByUserId(userId, { exceptSessionId: currentSessionId, transaction });
+    });
+
     await SessionRepository.revokeAccessTokensByUserIdRedis(userId, { exceptSessionId: currentSessionId });
-
     return createUrlParams({ SuccessMessage: "bind Google account successfully" });
   },
 
@@ -211,11 +214,15 @@ export const AuthGoogleService = {
     const { sub } = tokenPayload;
     const provider = AuthProvider.GOOGLE;
 
-    const hasConnected = await UserRepository.getUserByProviderName({ provider, userId: currentUserId });
+    const userData = await UserRepository.getById({ userId: currentUserId, options: { withAccounts: true } });
+    if (!userData) return createUrlParams({ ErrorMessage: "User not found" });
 
-    const unbindArgs = { userId: currentUserId, provider, providerAccountId: sub, currentProvider, currentSessionId };
-    const bindArgs = { userId: currentUserId, provider, providerAccountId: sub, currentSessionId };
+    const userAccounts = userData.accounts;
+    const providerData = { provider, providerAccountId: sub };
+    const currentData = { currentProvider, userId: currentUserId, currentSessionId };
 
-    return hasConnected ? await unbindGoogleAccount(unbindArgs) : await bindGoogleAccount(bindArgs);
+    const connectionArgs = { ...currentData, ...providerData, userAccounts };
+    const isConnected = ProviderHelpers.findGoogleProvider(userAccounts);
+    return isConnected ? await unbindGoogleAccount(connectionArgs) : await bindGoogleAccount(connectionArgs);
   },
 };

@@ -210,7 +210,7 @@ export const SessionRepository = {
 
     return db.sessions.updateMany({
       where: { userId, deletedAt: null },
-      data: { deletedAt: new Date() },
+      data: { deletedAt: new Date(), revoked: true },
     });
   },
 };
