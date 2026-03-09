@@ -19,6 +19,7 @@ type ModalOptions = {
   withCancelButton?: boolean;
   cancelContent?: ReactNode;
   onCancel?: () => void;
+  wraperClassName?: string;
 };
 
 type ModalController = {
@@ -113,7 +114,7 @@ const Modal = forwardRef<ModalHandle>(function Modal(_, ref) {
       onClick={modalButtonsHandler.cancel}
     >
       <div
-        className="w-full max-w-md border-2 border-dark shadow-strong bg-dark-2 p-6"
+        className={`w-full max-w-md border-2 border-dark shadow-strong bg-dark-2 p-6 ${options.wraperClassName}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

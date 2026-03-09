@@ -1,5 +1,5 @@
 <mxfile host="65bd71144e">
-    <diagram name="Register" id="nFQO6QU7f0ocosumcNUD">
+    <diagram name="Register" id="Register">
         <mxGraphModel dx="1865" dy="795" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="VQ2KD4KmZKqf6UZaac1Z-0"/>
@@ -175,8 +175,8 @@
             </root>
         </mxGraphModel>
     </diagram>
-    <diagram id="RaV1J5gQYYZsekvbw7gq" name="Login">
-        <mxGraphModel dx="580" dy="454" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <diagram id="Login" name="Login">
+        <mxGraphModel dx="1015" dy="795" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -485,8 +485,8 @@
             </root>
         </mxGraphModel>
     </diagram>
-    <diagram id="toA3TqFM--djCj3Wl18g" name="Google Oauth">
-        <mxGraphModel dx="846" dy="663" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <diagram id="Google Oauth" name="Google Oauth">
+        <mxGraphModel dx="1015" dy="795" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -864,8 +864,8 @@
             </root>
         </mxGraphModel>
     </diagram>
-    <diagram id="mKAlyysb0A0JP5uYA0f6" name="Forgot Password: Send">
-        <mxGraphModel dx="1015" dy="795" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <diagram id="Forgot Password: Send" name="Forgot Password: Send">
+        <mxGraphModel dx="1845" dy="782" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -1054,8 +1054,8 @@
             </root>
         </mxGraphModel>
     </diagram>
-    <diagram name="Forgot Password: Verify" id="96ZJR2y773f_L6Vc_87Z">
-        <mxGraphModel dx="967" dy="795" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <diagram name="Forgot Password: Verify" id="Forgot Password: Verify">
+        <mxGraphModel dx="1015" dy="795" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="_Wx4mNRcsTsLxji1hCNM-0"/>
                 <mxCell id="_Wx4mNRcsTsLxji1hCNM-1" parent="_Wx4mNRcsTsLxji1hCNM-0"/>
@@ -1365,8 +1365,8 @@
             </root>
         </mxGraphModel>
     </diagram>
-    <diagram id="yVpcAiIobwRcVBuW3RRF" name="Revert Password: Send">
-        <mxGraphModel dx="1060" dy="-305" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <diagram id="Revert Password: Send" name="Revert Password: Send">
+        <mxGraphModel dx="1015" dy="-305" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -1482,8 +1482,8 @@
             </root>
         </mxGraphModel>
     </diagram>
-    <diagram name="Revert Password: Verify" id="cbBauLVN_Ouiv1TFeGqO">
-        <mxGraphModel dx="3533" dy="2650" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <diagram name="Revert Password: Verify" id="Revert Password: Verify">
+        <mxGraphModel dx="1015" dy="795" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="mE5XcCo0d1tR3oPQGlfK-0"/>
                 <mxCell id="mE5XcCo0d1tR3oPQGlfK-1" parent="mE5XcCo0d1tR3oPQGlfK-0"/>
@@ -1779,8 +1779,8 @@
             </root>
         </mxGraphModel>
     </diagram>
-    <diagram name="Email Verification: Pre-Send" id="SUin7diZvRqoi00Sv1Cg">
-        <mxGraphModel dx="967" dy="795" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <diagram name="Email Verification: Pre-Send" id="Email Verification: Pre-Send">
+        <mxGraphModel dx="1015" dy="795" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="gI_QC_82Ioa_HyL0lemi-0"/>
                 <mxCell id="gI_QC_82Ioa_HyL0lemi-1" parent="gI_QC_82Ioa_HyL0lemi-0"/>
@@ -1863,7 +1863,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="k9Ljg0fYXI5InqqyWIbl" name="Email Verification: Send">
-        <mxGraphModel dx="967" dy="795" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="1015" dy="795" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -4373,7 +4373,7 @@
         </mxGraphModel>
     </diagram>
     <diagram name="Change Email: Send Verification" id="6WlWHVF7NZlHwwGyYFPx">
-        <mxGraphModel dx="731" dy="548" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="2538" dy="1988" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="O5dAvDC7Pk7W4Z0YJU18-0"/>
                 <mxCell id="O5dAvDC7Pk7W4Z0YJU18-1" parent="O5dAvDC7Pk7W4Z0YJU18-0"/>
@@ -4381,10 +4381,10 @@
                     <mxGeometry x="300" y="460" width="2035" height="1920" as="geometry"/>
                 </mxCell>
                 <mxCell id="O5dAvDC7Pk7W4Z0YJU18-3" value="" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;strokeColor=#b85450;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=default;fillColor=#f8cecc;" parent="O5dAvDC7Pk7W4Z0YJU18-1" vertex="1">
-                    <mxGeometry x="570" y="530" width="30" height="2430" as="geometry"/>
+                    <mxGeometry x="570" y="530" width="30" height="1850" as="geometry"/>
                 </mxCell>
                 <mxCell id="O5dAvDC7Pk7W4Z0YJU18-4" value="Form" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#b85450;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fillColor=none;" parent="O5dAvDC7Pk7W4Z0YJU18-1" vertex="1">
-                    <mxGeometry x="850" y="530" width="100" height="2430" as="geometry"/>
+                    <mxGeometry x="850" y="530" width="100" height="1850" as="geometry"/>
                 </mxCell>
                 <mxCell id="O5dAvDC7Pk7W4Z0YJU18-5" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#b85450;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=default;fillColor=#f8cecc;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" parent="O5dAvDC7Pk7W4Z0YJU18-4" vertex="1">
                     <mxGeometry x="45" y="80" width="10" height="100" as="geometry"/>
@@ -4412,7 +4412,7 @@
                     <mxGeometry x="45" y="1011" width="10" height="70" as="geometry"/>
                 </mxCell>
                 <mxCell id="O5dAvDC7Pk7W4Z0YJU18-10" value="Server" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#b85450;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fillColor=none;" parent="O5dAvDC7Pk7W4Z0YJU18-1" vertex="1">
-                    <mxGeometry x="1220" y="530" width="100" height="2430" as="geometry"/>
+                    <mxGeometry x="1220" y="530" width="100" height="1850" as="geometry"/>
                 </mxCell>
                 <mxCell id="O5dAvDC7Pk7W4Z0YJU18-11" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#b85450;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=default;fillColor=#f8cecc;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" parent="O5dAvDC7Pk7W4Z0YJU18-10" vertex="1">
                     <mxGeometry x="45" y="120" width="10" height="320" as="geometry"/>
@@ -4421,7 +4421,7 @@
                     <mxGeometry x="45" y="550" width="10" height="1200" as="geometry"/>
                 </mxCell>
                 <mxCell id="O5dAvDC7Pk7W4Z0YJU18-13" value="Database" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlEntity;strokeColor=#82b366;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=default;fillColor=#d5e8d4;" parent="O5dAvDC7Pk7W4Z0YJU18-1" vertex="1">
-                    <mxGeometry x="1610" y="530" width="70" height="2430" as="geometry"/>
+                    <mxGeometry x="1610" y="530" width="70" height="1850" as="geometry"/>
                 </mxCell>
                 <mxCell id="O5dAvDC7Pk7W4Z0YJU18-14" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#82b366;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fillColor=#d5e8d4;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" parent="O5dAvDC7Pk7W4Z0YJU18-13" vertex="1">
                     <mxGeometry x="30" y="222" width="10" height="100" as="geometry"/>
@@ -4462,7 +4462,7 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="i3dHPPv1QRzYrZcIP6WS-0" value="Redis" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlEntity;strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fillColor=#dae8fc;" parent="O5dAvDC7Pk7W4Z0YJU18-1" vertex="1">
-                    <mxGeometry x="1878" y="530" width="70" height="2430" as="geometry"/>
+                    <mxGeometry x="1878" y="530" width="70" height="1850" as="geometry"/>
                 </mxCell>
                 <mxCell id="AWDFFhw5zkl3EDtuGyfS-0" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#6c8ebf;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fillColor=#dae8fc;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" parent="i3dHPPv1QRzYrZcIP6WS-0" vertex="1">
                     <mxGeometry x="30" y="1150" width="10" height="230" as="geometry"/>
@@ -4471,7 +4471,7 @@
                     <mxGeometry x="30" y="1520" width="10" height="80" as="geometry"/>
                 </mxCell>
                 <mxCell id="i3dHPPv1QRzYrZcIP6WS-2" value="SMTP" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlBoundary;strokeColor=#d6b656;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fillColor=#fff2cc;" parent="O5dAvDC7Pk7W4Z0YJU18-1" vertex="1">
-                    <mxGeometry x="2135" y="530" width="70" height="2430" as="geometry"/>
+                    <mxGeometry x="2135" y="530" width="70" height="1850" as="geometry"/>
                 </mxCell>
                 <mxCell id="11jOCWYwkQyavWb7QO7o-8" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};strokeColor=#d6b656;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fillColor=#fff2cc;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" parent="i3dHPPv1QRzYrZcIP6WS-2" vertex="1">
                     <mxGeometry x="30" y="1610" width="10" height="80" as="geometry"/>
