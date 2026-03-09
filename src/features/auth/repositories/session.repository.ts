@@ -213,4 +213,12 @@ export const SessionRepository = {
       data: { deletedAt: new Date(), revoked: true },
     });
   },
+
+  // DOC: Soft Delete all expired sessions
+  softDeleteExpiredSessions() {
+    return prisma.sessions.updateMany({
+      where: { expiresAt: { lte: new Date() }, deletedAt: null, revoked: false },
+      data: { deletedAt: new Date(), revoked: true },
+    });
+  },
 };
