@@ -1,0 +1,12 @@
+{
+  "cron": [
+    {
+      "path": "/api/cron/keepalive",
+      "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/cleanup-sessions",
+      "schedule": "0 * * * *"
+    }
+  ]
+}
