@@ -48,11 +48,10 @@ export const AuthCredentialsController = {
     await TwoFaHttp.requiredTwoFaToken(req, "TOGGLE_CREDENTIALS_CONNECTION", userId);
     const result = await AuthCredentialsHttp.validateFormData(req, "CONNECT");
 
-    await AuthCredentialsService.connect({ input: result, userId, sessionId, currentProvider: provider });
+    const connectArgs = { input: result, userId, sessionId, currentProvider: provider };
+    const resultMessage = await AuthCredentialsService.connect(connectArgs);
 
-    const resultMessage = result.mode === "UNBIND" ? "Unbind credentials successfully" : "Connect credentials successfully";
     const respose = sendSuccess(null, resultMessage);
-
     await CookieHttp.clearByName(respose, "2fa_token");
     return respose;
   }),
