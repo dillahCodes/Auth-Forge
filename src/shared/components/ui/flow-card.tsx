@@ -1,25 +1,22 @@
 "use client";
 
-import Link from "next/link";
 import { Button } from "./button";
+import { useModal } from "./modal/modal";
 
 export interface FlowStep {
   step: string;
   title: string;
   description: string[];
   side: "left" | "right";
-  detailUrl: string;
 }
 
 interface FlowCardProps {
   step: FlowStep;
-  detailUrl: string;
 }
 
 interface FlowCardContentProps {
   step: FlowStep;
   isLeft: boolean;
-  detailUrl: string;
 }
 
 interface FlowCardHeaderProps {
@@ -35,7 +32,7 @@ interface FlowCardMobileDotProps {
   step: string;
 }
 
-export function FlowCard({ step, detailUrl }: FlowCardProps) {
+export function FlowCard({ step }: FlowCardProps) {
   const isLeft = step.side === "left";
 
   return (
@@ -46,7 +43,7 @@ export function FlowCard({ step, detailUrl }: FlowCardProps) {
         isLeft ? "md:flex-row" : "md:flex-row-reverse"
       }`}
     >
-      <FlowCardContent step={step} isLeft={isLeft} detailUrl={detailUrl} />
+      <FlowCardContent step={step} isLeft={isLeft} />
       <FlowCardDesktopDot />
       <FlowCardMobileDot step={step.step} />
       <div className="hidden md:block w-full" />
@@ -54,19 +51,36 @@ export function FlowCard({ step, detailUrl }: FlowCardProps) {
   );
 }
 
-function FlowCardContent({ step, isLeft, detailUrl }: FlowCardContentProps) {
+function IframeDiagram() {
+  return (
+    <iframe
+      className="max-w-5xl! w-full min-h-[85dvh]! h-full"
+      style={{ width: "100%", height: "100%" }}
+      src="https://viewer.diagrams.net/?lightbox=1&layers=1&nav=1&url=https://raw.githubusercontent.com/dillahCodes/Auth-Forge/main/public/docs/docs.drawio"
+    ></iframe>
+  );
+}
+
+function FlowCardContent({ step, isLeft }: FlowCardContentProps) {
+  const modal = useModal();
+
+  const onDetailClick = () => {
+    modal.open({
+      content: <IframeDiagram />,
+      withConfirmButton: false,
+      wraperClassName: "max-w-5xl! w-full min-h-dvh! h-full",
+    });
+  };
+
   return (
     <div className="w-fullock w-full">
       <div
         className={`bg-primary-bg-300 border-2 border-dark p-6 shadow-strong ${isLeft ? "md:mr-auto" : "md:ml-auto"}`}
       >
-        <FlowCardImage />
         <FlowCardHeader step={step.step} title={step.title} />
         <FlowCardDescription description={step.description} />
-        <Button variant="info" className="font-bold w-full mt-4">
-          <Link href={detailUrl} target="_blank" rel="noopener noreferrer">
-            Detail
-          </Link>
+        <Button variant="info" className="font-bold w-full mt-4" onClick={onDetailClick}>
+          Detail
         </Button>
       </div>
     </div>
@@ -91,14 +105,6 @@ function FlowCardDescription({ description }: FlowCardDescriptionProps) {
         <li key={index}>{item}</li>
       ))}
     </ul>
-  );
-}
-
-function FlowCardImage() {
-  return (
-    <div className="w-full h-36 bg-dark-3 border-2 border-dark mb-4 flex items-center justify-center">
-      <span className="text-dark-5 text-sm font-bold tracking-widest uppercase">Image</span>
-    </div>
   );
 }
 

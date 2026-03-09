@@ -12,7 +12,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "Duplicate email registration is rejected",
     ],
     side: "left",
-    detailUrl: "",
   },
   {
     step: "02",
@@ -26,7 +25,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "Invalid credentials return a generic error to prevent enumeration",
     ],
     side: "right",
-    detailUrl: "",
   },
   {
     step: "03",
@@ -40,7 +38,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "Old session is marked as replaced by the new session ID",
     ],
     side: "left",
-    detailUrl: "",
   },
   {
     step: "04",
@@ -55,7 +52,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "OTP keys are deleted from Redis after verification",
     ],
     side: "right",
-    detailUrl: "",
   },
   {
     step: "05",
@@ -68,7 +64,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "Session chain traversal ensures all descendant sessions are revoked",
     ],
     side: "left",
-    detailUrl: "",
   },
   {
     step: "06",
@@ -80,7 +75,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "User must exist to perform the name change",
     ],
     side: "right",
-    detailUrl: "",
   },
   {
     step: "07",
@@ -94,7 +88,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "Rate-limited to 5 requests per 15 minutes",
     ],
     side: "left",
-    detailUrl: "",
   },
   {
     step: "08",
@@ -108,7 +101,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "On success, a short-lived 2FA token is issued",
     ],
     side: "right",
-    detailUrl: "",
   },
   {
     step: "09",
@@ -121,7 +113,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "Rate-limited to 3 requests per 15 minutes",
     ],
     side: "left",
-    detailUrl: "",
   },
   {
     step: "10",
@@ -134,7 +125,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "Revert token keys are cleaned up from Redis after use",
     ],
     side: "right",
-    detailUrl: "",
   },
   {
     step: "11",
@@ -148,7 +138,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "User can update or cancel a pending email change request",
     ],
     side: "left",
-    detailUrl: "",
   },
   {
     step: "12",
@@ -162,7 +151,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "On success, the email change request is marked as verified",
     ],
     side: "right",
-    detailUrl: "",
   },
   {
     step: "13",
@@ -176,7 +164,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "A revert account email is sent to the old email address",
     ],
     side: "left",
-    detailUrl: "",
   },
   {
     step: "14",
@@ -189,7 +176,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "Rate-limited to 3 requests per 15 minutes",
     ],
     side: "right",
-    detailUrl: "",
   },
   {
     step: "15",
@@ -203,7 +189,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "All active sessions are revoked after account revert",
     ],
     side: "left",
-    detailUrl: "",
   },
   {
     step: "16",
@@ -218,7 +203,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "All other sessions are revoked after connecting or disconnecting a provider",
     ],
     side: "right",
-    detailUrl: "",
   },
   {
     step: "17",
@@ -232,7 +216,6 @@ export const FLOW_STEPS: FlowStep[] = [
       "On success, a short-lived 2FA token is issued to authorize the action",
     ],
     side: "left",
-    detailUrl: "",
   },
   {
     step: "18",
@@ -244,6 +227,5 @@ export const FLOW_STEPS: FlowStep[] = [
       "Auth cookies are cleared from the browser",
     ],
     side: "right",
-    detailUrl: "",
   },
 ];

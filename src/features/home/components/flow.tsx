@@ -25,7 +25,7 @@ export function AppFlow() {
 
         <div className="flex flex-col gap-10 md:gap-16 relative">
           {FLOW_STEPS.map((step) => (
-            <FlowCard key={step.step} detailUrl={step.detailUrl} step={step} />
+            <FlowCard key={step.step} step={step} />
           ))}
         </div>
       </div>
