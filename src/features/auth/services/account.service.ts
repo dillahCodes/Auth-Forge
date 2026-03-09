@@ -1,4 +1,3 @@
-import { AuthInvalidCredentials } from "@/shared/errors/auth-error";
 import {
   NotFound,
   OperationNotAllowed,
@@ -6,6 +5,7 @@ import {
   ResourceUnprocessableEntity,
 } from "@/shared/errors/resource-error";
 import { prisma } from "@/shared/lib/prisma";
+import { ProviderHelpers } from "@/shared/utils/providers-helper";
 import bcrypt from "bcrypt";
 import { EmailChangeRequestRepository } from "../repositories/email-change-request.repository";
 import { OtpRepository } from "../repositories/otp.repository";
@@ -20,7 +20,6 @@ import {
 import { EmailService } from "./email.service";
 import { RateLimiterService } from "./rate-limit.service";
 import { RevertAccountService } from "./revert-account.service";
-import { ProviderHelpers } from "@/shared/utils/providers-helper";
 
 interface ChangePasswordProps {
   sessionId: string;
@@ -54,27 +53,24 @@ export const AccountService = {
   },
 
   async changeEmailRequest(input: ChangeEmailSchema, userId: string) {
-    const isUserExist = await UserRepository.getById({ userId });
-    if (!isUserExist) throw new NotFound("user not found");
+    const user = await UserRepository.getById({ userId, options: { withAccounts: true } });
+    if (!user) throw new NotFound("user not found");
 
-    const accounts = await UserRepository.getAccountsByUserId(userId);
-    const isOnlyCredentialsProvider = ProviderHelpers.isOnlyCredentialsProvider(accounts);
-
-    if (!isOnlyCredentialsProvider) {
-      throw new OperationNotAllowed("Email can only be changed for accounts with credentials provider");
-    }
+    const isOnlyCredentialsProvider = ProviderHelpers.isOnlyCredentialsProvider(user.accounts);
+    const onlyCredentialsError = "Email can only be changed for accounts with credentials provider";
+    if (!isOnlyCredentialsProvider) throw new OperationNotAllowed(onlyCredentialsError);
 
     const emailHasUsed = await UserRepository.getByEmail({ email: input.newEmail });
     if (emailHasUsed) throw new ResourceConflict("Email already used");
 
-    const isEmailSame = isUserExist.email.toLocaleLowerCase() === input.newEmail.toLocaleLowerCase();
+    const isEmailSame = user.email.toLocaleLowerCase() === input.newEmail.toLocaleLowerCase();
     const emailSameError = { newEmail: ["new email cannot be the same"] };
     if (isEmailSame) throw new ResourceUnprocessableEntity("please check your input", emailSameError);
 
     const hasRequestedChangeEmail = await EmailChangeRequestRepository.findPendingByUserId(userId);
     if (hasRequestedChangeEmail) throw new ResourceConflict("Email change already requested");
 
-    const emailChangeArgs = { userId, oldEmail: isUserExist.email, newEmail: input.newEmail };
+    const emailChangeArgs = { userId, oldEmail: user.email, newEmail: input.newEmail };
     const resultCreateRequest = await EmailChangeRequestRepository.create(emailChangeArgs);
 
     return resultCreateRequest;
@@ -83,20 +79,17 @@ export const AccountService = {
   async changeEmailRequestUpdate(input: ChangeEmailUpdateSchema, userId: string) {
     const { newEmail, requestId } = input;
 
-    const isUserExist = await UserRepository.getById({ userId });
-    if (!isUserExist) throw new NotFound("user not found");
+    const user = await UserRepository.getById({ userId, options: { withAccounts: true } });
+    if (!user) throw new NotFound("user not found");
 
-    const accounts = await UserRepository.getAccountsByUserId(userId);
-    const isOnlyCredentialsProvider = ProviderHelpers.isOnlyCredentialsProvider(accounts);
-
-    if (!isOnlyCredentialsProvider) {
-      throw new OperationNotAllowed("Email can only be changed for accounts with credentials provider");
-    }
+    const isOnlyCredentialsProvider = ProviderHelpers.isOnlyCredentialsProvider(user.accounts);
+    const onlyCredentialsError = "Email can only be changed for accounts with credentials provider";
+    if (!isOnlyCredentialsProvider) throw new OperationNotAllowed(onlyCredentialsError);
 
     const emailHasUsed = await UserRepository.getByEmail({ email: input.newEmail });
     if (emailHasUsed) throw new ResourceConflict("Email already used");
 
-    const isEmailSame = isUserExist.email.toLocaleLowerCase() === newEmail.toLocaleLowerCase();
+    const isEmailSame = user.email.toLocaleLowerCase() === newEmail.toLocaleLowerCase();
     const emailSameError = { newEmail: ["new email cannot be the same"] };
     if (isEmailSame) throw new ResourceUnprocessableEntity("please check your input", emailSameError);
 
@@ -124,15 +117,12 @@ export const AccountService = {
     const cfgLimiter = { key: redisSendOtpKey, limit: 3, windowSeconds: 60 * 30 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    const isUserExist = await UserRepository.getById({ userId });
-    if (!isUserExist) throw new NotFound("user not found");
+    const user = await UserRepository.getById({ userId, options: { withAccounts: true } });
+    if (!user) throw new NotFound("user not found");
 
-    const accounts = await UserRepository.getAccountsByUserId(userId);
-    const isOnlyCredentialsProvider = ProviderHelpers.isOnlyCredentialsProvider(accounts);
-
-    if (!isOnlyCredentialsProvider) {
-      throw new OperationNotAllowed("Email can only be changed for accounts with credentials provider");
-    }
+    const isOnlyCredentialsProvider = ProviderHelpers.isOnlyCredentialsProvider(user.accounts);
+    const onlyCredentialsError = "Email can only be changed for accounts with credentials provider";
+    if (!isOnlyCredentialsProvider) throw new OperationNotAllowed(onlyCredentialsError);
 
     const requestedEmailChange = await EmailChangeRequestRepository.findPendingByUserId(userId);
     if (!requestedEmailChange) throw new NotFound("Email change request not found");
@@ -145,10 +135,7 @@ export const AccountService = {
     const cfg = { key: redisSendOtpKey, otp, ttlSeconds: 15 * 60 };
     await OtpRepository.storeOtp(cfg);
 
-    const userData = await UserRepository.getById({ userId });
-    if (!userData) throw new ResourceUnprocessableEntity("User not found");
-
-    const verifyEmailArgs = { name: userData.name, email: requestedEmailChange.newEmail, otp };
+    const verifyEmailArgs = { name: user.name, email: requestedEmailChange.newEmail, otp };
     await EmailService.sendVerifyEmail(verifyEmailArgs);
   },
 
@@ -159,25 +146,23 @@ export const AccountService = {
     const cfgLimiter = { key: redisVerifyKey, limit: 5, windowSeconds: 60 * 10 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    const isUserExist = await UserRepository.getById({ userId });
-    if (!isUserExist) throw new NotFound("user not found");
+    const user = await UserRepository.getById({ userId, options: { withAccounts: true } });
+    if (!user) throw new NotFound("user not found");
 
-    const accounts = await UserRepository.getAccountsByUserId(userId);
-    const isOnlyCredentialsProvider = ProviderHelpers.isOnlyCredentialsProvider(accounts);
-
-    if (!isOnlyCredentialsProvider) {
-      throw new OperationNotAllowed("Email can only be changed for accounts with credentials provider");
-    }
+    const isOnlyCredentialsProvider = ProviderHelpers.isOnlyCredentialsProvider(user.accounts);
+    const onlyCredentialsError = "Email can only be changed for accounts with credentials provider";
+    if (!isOnlyCredentialsProvider) throw new OperationNotAllowed(onlyCredentialsError);
 
     const requestedEmailChange = await EmailChangeRequestRepository.findPendingByUserId(userId);
     if (!requestedEmailChange) throw new NotFound("Email change request not found");
 
     const redisSendOtpKey = `profile:change-email-otp-send|type:send|uid:${userId}`;
     const { existingOtp } = await OtpRepository.getExistingOtp(redisSendOtpKey);
+    const otpErrorMessage = "OTP invalid or expired, please try again";
 
-    if (!existingOtp) throw new ResourceUnprocessableEntity("OTP invalid or expired, please try again");
+    if (!existingOtp) throw new ResourceUnprocessableEntity(otpErrorMessage);
     const isSame = OtpRepository.isOtpSame(existingOtp, inputOtp);
-    if (!isSame) throw new ResourceUnprocessableEntity("OTP invalid or expired, please try again");
+    if (!isSame) throw new ResourceUnprocessableEntity(otpErrorMessage);
 
     await prisma.$transaction(async (transaction) => {
       await EmailChangeRequestRepository.markVerified(requestedEmailChange.id, { transaction });
@@ -186,7 +171,7 @@ export const AccountService = {
       await SessionRepository.revokeSessionsByUserId(userId, { transaction, exceptSessionId: sessionId });
     });
 
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(userId, { exceptSessionId: sessionId });
+    await SessionRepository.revokeAccessTokensByUserIdRedis(userId, { exceptSessionId: sessionId });
 
     await OtpRepository.deleteOtp(redisVerifyKey);
     await OtpRepository.deleteOtp(redisSendOtpKey);
@@ -198,27 +183,21 @@ export const AccountService = {
 
   async changePassword({ input, userId, vercelTlsFingerprint, sessionId }: ChangePasswordProps) {
     const { confirmPassword, currentPassword } = input;
+    const errorMessage = "Password can only be changed for accounts with credentials provider";
 
     const redisLimiterKey = `profile:change-password|uid:${userId}`;
     const cfgLimiter = { key: redisLimiterKey, limit: 5, windowSeconds: 60 * 15 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    const user = await UserRepository.getById({ userId, options: { withPassword: true } });
+    const user = await UserRepository.getById({ userId, options: { withPassword: true, withAccounts: true } });
     if (!user) throw new NotFound("user not found");
+    if (!user.password) throw new OperationNotAllowed(errorMessage);
 
-    if (!user.password) {
-      throw new OperationNotAllowed("Password can only be changed for accounts with credentials provider");
-    }
+    const hasCredentials = ProviderHelpers.isContainsCredentials(user.accounts);
+    if (!hasCredentials) throw new OperationNotAllowed(errorMessage);
 
-    const accounts = await UserRepository.getAccountsByUserId(userId);
-    const isContainsCredentials = ProviderHelpers.isContainsCredentials(accounts);
-
-    if (!isContainsCredentials) {
-      throw new OperationNotAllowed("Password can only be changed for accounts with credentials provider");
-    }
-
-    const validCurrentPassword = await bcrypt.compare(currentPassword, user.password);
-    if (!validCurrentPassword) throw new AuthInvalidCredentials();
+    const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+    if (!isValidPassword) throw new OperationNotAllowed("Invalid password");
 
     const hashedNewPassword = await bcrypt.hash(confirmPassword, 10);
 
@@ -227,7 +206,7 @@ export const AccountService = {
       await SessionRepository.revokeSessionsByUserId(userId, { transaction, exceptSessionId: sessionId });
     });
 
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(userId, { exceptSessionId: sessionId });
+    await SessionRepository.revokeAccessTokensByUserIdRedis(userId, { exceptSessionId: sessionId });
     await RevertAccountService.sendRevertAccountPasswordChange({ email: user.email, vercelTlsFingerprint });
   },
 };

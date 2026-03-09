@@ -43,12 +43,12 @@ interface UpdatePasswordParams {
 
 interface GetUserByIdParams {
   userId: string;
-  options?: { withPassword: boolean };
+  options?: { withPassword?: boolean; withAccounts?: boolean };
 }
 
 interface GetUserByEmailParams {
   email: string;
-  options?: { withPassword: boolean };
+  options?: { withPassword?: boolean; withAccounts?: boolean };
 }
 
 interface GetAccount {
@@ -62,15 +62,10 @@ interface DeleteAccount {
   options?: RespositoryOptions;
 }
 
-interface GetProviderByNameParams {
-  provider: AuthProvider;
-  userId: string;
-}
-
 export const UserRepository = {
   // DOC: Find user by email
   getByEmail({ email, options }: GetUserByEmailParams) {
-    const { withPassword = false } = options ?? {};
+    const { withPassword, withAccounts } = options ?? {};
     return prisma.user.findUnique({
       where: { email },
       select: {
@@ -78,32 +73,32 @@ export const UserRepository = {
         name: true,
         email: true,
         verifiedAt: true,
-        password: withPassword,
+        password: withPassword ?? false,
+        accounts: withAccounts ?? false,
       },
     });
   },
 
   // DOC: Find user by id
   getById({ userId, options }: GetUserByIdParams) {
-    const { withPassword = false } = options ?? {};
+    const { withPassword, withAccounts } = options ?? {};
     return prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, email: true, verifiedAt: true, password: withPassword },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        verifiedAt: true,
+        password: withPassword ?? false,
+        accounts: withAccounts ?? false,
+      },
     });
   },
 
   // DOC: Find account by provider id
-  getAccountByProviderId({ provider, providerAccountId }: GetAccount) {
+  getUserByProvider({ provider, providerAccountId }: GetAccount) {
     return prisma.account.findUnique({
       where: { provider_providerAccountId: { provider, providerAccountId } },
-      select: { user: { omit: { password: true } }, userId: true },
-    });
-  },
-
-  // DOC: Find account by provider name
-  getAccountByProviderName({ provider, userId }: GetProviderByNameParams) {
-    return prisma.account.findFirst({
-      where: { provider: provider, userId },
       select: { user: { omit: { password: true } }, userId: true },
     });
   },

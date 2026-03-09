@@ -80,10 +80,6 @@ export const RevertAccountService: RevertAccountServiceContract = {
     const cfgLimiter = { key: redisSendRevertPasswordKey, limit: 3, windowSeconds: 60 * 15 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    const user = await UserRepository.getByEmail({ email });
-    if (!user) throw new ResourceUnprocessableEntity("User not found");
-
-    // DOC: Get existing token and validate
     const redisRevertTokenKey = `token:password-change|type:revert|email:${email}:tokenId:${tokenId}`;
     const { existingToken } = await VerificationTokenRepository.getExistingToken(redisRevertTokenKey);
     if (!existingToken) throw new ResourceUnprocessableEntity("Token invalid or expired, please try again");
@@ -91,7 +87,9 @@ export const RevertAccountService: RevertAccountServiceContract = {
     const isSame = VerificationTokenRepository.isTokenSame(existingToken, token);
     if (!isSame) throw new ResourceUnprocessableEntity("Token invalid or expired, please try again");
 
-    // DOC: Hash password, update and revoke all sessions
+    const user = await UserRepository.getByEmail({ email });
+    if (!user) throw new ResourceUnprocessableEntity("User not found");
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await prisma.$transaction(async (transaction) => {
@@ -99,9 +97,7 @@ export const RevertAccountService: RevertAccountServiceContract = {
       await SessionRepository.revokeSessionsByUserId(user.id, { transaction });
     });
 
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(user.id);
-
-    // DOC: Cleanup redis keys
+    await SessionRepository.revokeAccessTokensByUserIdRedis(user.id);
     await VerificationTokenRepository.deleteToken(redisRevertTokenKey);
     await VerificationTokenRepository.deleteToken(redisSendRevertPasswordKey);
   },
@@ -137,7 +133,6 @@ export const RevertAccountService: RevertAccountServiceContract = {
     const cfgLimiter = { key: redisSendRevertEmailKey, limit: 3, windowSeconds: 60 * 15 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    // DOC: Get existing token and validate
     const redisRevertTokenKey = `token:email-change|type:revert|tokenId:${tokenId}`;
     const { existingToken } = await VerificationTokenRepository.getExistingToken(redisRevertTokenKey);
     if (!existingToken) throw new ResourceUnprocessableEntity("Token invalid or expired, please try again");
@@ -158,8 +153,9 @@ export const RevertAccountService: RevertAccountServiceContract = {
       await SessionRepository.revokeSessionsByUserId(userId, { transaction });
     });
 
-    // DOC: revoke all access token
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(userId);
+    await SessionRepository.revokeAccessTokensByUserIdRedis(userId);
+    await VerificationTokenRepository.deleteToken(redisRevertTokenKey);
+    await VerificationTokenRepository.deleteToken(redisSendRevertEmailKey);
   },
 
   generateUrl<T extends RevertUrlParams>(path: string, params: T) {

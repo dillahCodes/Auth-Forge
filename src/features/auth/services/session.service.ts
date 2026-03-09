@@ -48,7 +48,7 @@ export const SessionService = {
     // DOC: security decision, legit user and hacker will be force logout
     if (isReplayAttackAttempt) {
       await SessionRepository.softDeleteSessionChainByUserId(session.userId);
-      await SessionRepository.revokeAllAccessTokenByUserIdRedis(session.userId);
+      await SessionRepository.revokeAccessTokensByUserIdRedis(session.userId);
       throw new AuthSessionRevoked();
     }
 
@@ -108,7 +108,7 @@ export const SessionService = {
   // DOC: Revoke all sessions by user id
   async revokeAllByUserId(userId: string, options?: RevokeAllByUserIdOptions) {
     await SessionRepository.revokeSessionsByUserId(userId, options);
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(userId, options);
+    await SessionRepository.revokeAccessTokensByUserIdRedis(userId, options);
   },
 
   // DOC: revoke session by session id

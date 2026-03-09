@@ -116,7 +116,7 @@ function UserInfoAvatar({ name }: UserInfoAvatarProps) {
 function UserInfoDetails({ name, email, verifiedAt }: UserInfoDetailsProps) {
   return (
     <div className="h-full row-span-2 mx-auto md:ml-4 py-5">
-      <h1 className="font-bold text-lg text-center sm:text-left">{name}</h1>
+      <h1 className="font-bold text-lg text-center md:text-left">{name}</h1>
       <UserInfoEmail email={email} verifiedAt={verifiedAt} />
     </div>
   );

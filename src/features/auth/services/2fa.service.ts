@@ -44,6 +44,7 @@ export const TwoFaService = {
 
   async verifyOtp({ sessionId, userId, input }: VerifyOtpParams) {
     const { scope, otp: inputOtp } = input;
+    const invalidMessage = "OTP invalid or expired, please try again";
 
     const redisVerifyKey = `otp:2fa|type:verify|uid:${userId}:scope:${scope}`;
     const cfgLimiter = { key: redisVerifyKey, limit: 5, windowSeconds: 60 * 15 };
@@ -51,11 +52,10 @@ export const TwoFaService = {
 
     const redisSendOtpKey = `otp:2fa|type:send|uid:${userId}:scope:${scope}`;
     const { existingOtp } = await OtpRepository.getExistingOtp(redisSendOtpKey);
-
-    if (!existingOtp) throw new ResourceUnprocessableEntity("OTP invalid or expired, please try again");
+    if (!existingOtp) throw new ResourceUnprocessableEntity(invalidMessage);
 
     const isSame = OtpRepository.isOtpSame(existingOtp, inputOtp);
-    if (!isSame) throw new ResourceUnprocessableEntity("OTP invalid or expired, please try again");
+    if (!isSame) throw new ResourceUnprocessableEntity(invalidMessage);
 
     const twoFaToken = await TokenService.signTwoFaToken({ userId, scope, sessionId });
 

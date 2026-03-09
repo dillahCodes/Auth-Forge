@@ -7,20 +7,18 @@ interface RetryExecutor {
   readonly executor: () => Promise<boolean>;
 }
 
+const RETRY_EXECUTOR: RetryExecutor[] = [
+  { messageCode: [ErrorCode.AUTH_TOKEN_EXPIRED], executor: refreshSession },
+  // add more retry executor...
+];
+
 export async function retryCondition(error: AxiosError<unknown>) {
   const axiosError = error as AxiosError<ApiResponse>;
+
   const messageCode = axiosError.response?.data?.messageCode;
+  if (!messageCode) return false; // DOC: cancel retry failed request
 
-  const retryExecutor: RetryExecutor[] = [
-    // you can add more messageCode in single array...
-    { messageCode: [ErrorCode.AUTH_TOKEN_EXPIRED], executor: refreshSession },
-    // add more retry executor...
-  ];
-
-  // DOC: check and find first matching retry executor
-  const executor = retryExecutor.find(
-    (e) => messageCode && e.messageCode.includes(messageCode)
-  );
+  const executor = RETRY_EXECUTOR.find((e) => e.messageCode.includes(messageCode));
 
   // DOC: true = retry failed request, false = stop retry failed request
   if (executor) {
@@ -28,5 +26,5 @@ export async function retryCondition(error: AxiosError<unknown>) {
     return refreshed;
   }
 
-  return false; // cancel retry failed request
+  return false; // DOC: cancel retry failed request
 }

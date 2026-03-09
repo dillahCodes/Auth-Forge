@@ -13,63 +13,54 @@ interface VerifyEmailParams {
   provider: AuthProvider;
 }
 
+type OtpSendVerification = string | null;
+
 export const VerifyEmailService = {
   send: async (userId: string) => {
-    let otp = null;
+    let otp: OtpSendVerification = null;
 
-    // DOC: implement rate limiter
     const redisSendOtpKey = `otp:email|type:send|uid:${userId}`;
     const cfgLimiter = { key: redisSendOtpKey, limit: 3, windowSeconds: 60 * 30 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    // DOC: get existing otp
     const { existingOtp } = await OtpRepository.getExistingOtp(redisSendOtpKey);
     if (existingOtp) await OtpRepository.deleteOtp(redisSendOtpKey);
 
-    otp = OtpRepository.generateOtp(6);
-
-    // DOC: store new otp
-    const cfg = { key: redisSendOtpKey, otp, ttlSeconds: 15 * 60 };
-    await OtpRepository.storeOtp(cfg);
-
-    // DOC: get user by id
     const userData = await UserRepository.getById({ userId });
     if (!userData) throw new ResourceUnprocessableEntity("User not found");
 
-    // DOC: send email
+    otp = OtpRepository.generateOtp(6);
+    const cfg = { key: redisSendOtpKey, otp, ttlSeconds: 15 * 60 };
+    await OtpRepository.storeOtp(cfg);
+
     const verifyEmailArgs = { name: userData.name, email: userData.email, otp };
     await EmailService.sendVerifyEmail(verifyEmailArgs);
   },
 
   verify: async (params: VerifyEmailParams) => {
     const { userId, inputOtp, sessionId, provider } = params;
+    const invalidMessage = "OTP invalid or expired, please try again";
 
     const redisVerifyKey = `otp:email|type:verify|uid:${userId}`;
     const cfgLimiter = { key: redisVerifyKey, limit: 5, windowSeconds: 60 * 10 };
     await RateLimiterService.fixedWindow(cfgLimiter);
 
-    // DOC: get existing otp and validate
     const redisSendOtpKey = `otp:email|type:send|uid:${userId}`;
     const { existingOtp } = await OtpRepository.getExistingOtp(redisSendOtpKey);
-
-    if (!existingOtp) {
-      throw new ResourceUnprocessableEntity("OTP invalid or expired, please try again");
-    }
+    if (!existingOtp) throw new ResourceUnprocessableEntity(invalidMessage);
 
     const isSame = OtpRepository.isOtpSame(existingOtp, inputOtp);
+    if (!isSame) throw new ResourceUnprocessableEntity(invalidMessage);
 
-    if (!isSame) {
-      throw new ResourceUnprocessableEntity("OTP invalid or expired, please try again");
-    }
+    const userData = await UserRepository.getById({ userId });
+    if (!userData) throw new ResourceUnprocessableEntity("User not found");
 
     // DOC: update user and give new access token
     const { verifiedAt } = await UserRepository.updateVerifiedAt({ userId, verifiedAt: new Date() });
     const newAccessToken = await TokenService.signAccessToken({ userId, sessionId, verifiedAt, provider });
 
-    // DOC: Cleanup redis keys
     await OtpRepository.deleteOtp(redisVerifyKey);
     await OtpRepository.deleteOtp(redisSendOtpKey);
-
     return { accessToken: newAccessToken };
   },
 };

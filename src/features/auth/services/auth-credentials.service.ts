@@ -11,7 +11,7 @@ import { AuthProvider } from "../../../../prisma/generated/enums";
 import { SessionRepository } from "../repositories/session.repository";
 import { CreateUserPayload, UserRepository } from "../repositories/user.repositoriy";
 import { ConnectCredentialsSchema, LoginSchema, RegisterSchema } from "../schemas/auth-credentials.schema";
-import { UserData } from "../types/user";
+import { UserAccount } from "../types/user";
 import { AccessTokenPayload, RefreshTokenPayload, TokenService } from "./token.service";
 
 interface LoginContext {
@@ -26,12 +26,14 @@ interface ConnectParams {
   sessionId: string;
 }
 
-interface ConnectBindUnbindParams {
-  currentProvider: AuthProvider;
-  input: ConnectCredentialsSchema;
-  user: Pick<UserData, "id" | "verifiedAt" | "email" | "name">;
+interface ConnectionParams {
   provider: AuthProvider;
+  providerAccountId: string;
+  currentProvider: AuthProvider;
+  userAccounts: Omit<UserAccount, "isCurrentProvider">[];
+  input: ConnectCredentialsSchema;
   sessionId: string;
+  userId: string;
 }
 
 type userDataPayload = CreateUserPayload["userData"];
@@ -54,7 +56,7 @@ export const AuthCredentialsService = {
     const providerAccountId = userId;
 
     // DOC: if user login with credentials, check user have credentials account or not, if not create credentials account for user
-    const hasCredentialsAccount = await UserRepository.getAccountByProviderId({ provider, providerAccountId });
+    const hasCredentialsAccount = await UserRepository.getUserByProvider({ provider, providerAccountId });
 
     if (!hasCredentialsAccount) {
       const payloadAccount = { provider, providerAccountId: userId };
@@ -104,55 +106,69 @@ export const AuthCredentialsService = {
     return res;
   },
 
-  async bindCredentials({ input, provider, user, sessionId }: ConnectBindUnbindParams) {
-    const { id: userId } = user;
+  async bindCredentials(params: ConnectionParams) {
+    const { input, provider, providerAccountId, userId, sessionId, currentProvider, userAccounts } = params;
     const { password, confirmPassword } = input;
+
+    const isSameProvider = ProviderHelpers.isCurrentProviderSame(currentProvider, provider);
+    if (isSameProvider) throw new OperationNotAllowed("Cannot bind the currently active sign-in provider");
+
+    const hasCredentialsAccount = ProviderHelpers.isContainsCredentials(userAccounts);
+    if (hasCredentialsAccount) throw new OperationNotAllowed("Credentials account already linked");
 
     if (!password) throw new ValidationFailed({ password: ["Password is required"] });
     if (!confirmPassword) throw new ValidationFailed({ confirmPassword: ["Confirm Password is required"] });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const accountDataArgs = { provider, providerAccountId: user.id };
+    const accountDataArgs = { provider, providerAccountId };
 
     await prisma.$transaction(async (transaction) => {
-      await UserRepository.updatePassword({ userId: user.id, hashedPassword, options: { transaction } });
+      await UserRepository.updatePassword({ userId, hashedPassword, options: { transaction } });
       await UserRepository.createAccount({ accountData: accountDataArgs, userId, options: { transaction } });
-      await SessionRepository.revokeSessionsByUserId(user.id, { exceptSessionId: sessionId, transaction });
+      await SessionRepository.revokeSessionsByUserId(userId, { exceptSessionId: sessionId, transaction });
     });
 
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(user.id, { exceptSessionId: sessionId });
+    await SessionRepository.revokeAccessTokensByUserIdRedis(userId, { exceptSessionId: sessionId });
+    return "Connect credentials successfully";
   },
 
-  async unbindCredentials({ provider, sessionId, user, currentProvider }: ConnectBindUnbindParams) {
-    const accounts = await UserRepository.getAccountsByUserId(user.id);
+  async unbindCredentials(params: ConnectionParams) {
+    const { provider, userId, sessionId, currentProvider, userAccounts, providerAccountId } = params;
 
-    const credentialsProvider = ProviderHelpers.findCredentialsProvider(accounts);
-    const isOnlyCredentialsProvider = ProviderHelpers.isOnlyCredentialsProvider(accounts);
-    const isSameProvider = ProviderHelpers.isCurrentProviderSame(currentProvider, provider);
+    const hasCredentialsProvider = ProviderHelpers.findCredentialsProvider(userAccounts);
+    if (!hasCredentialsProvider) throw new NotFound("can't unbind, credentials provider not found");
 
-    if (!credentialsProvider) throw new NotFound("can't unbind, credentials provider not found");
+    const isOnlyCredentialsProvider = ProviderHelpers.isOnlyCredentialsProvider(userAccounts);
     if (isOnlyCredentialsProvider) throw new OperationNotAllowed("can't unbind account with single provider");
-    if (isSameProvider) throw new OperationNotAllowed("can't unbind account with same provider");
+
+    const isSameProvider = ProviderHelpers.isCurrentProviderSame(currentProvider, provider);
+    if (isSameProvider) throw new OperationNotAllowed("Cannot unbind the currently active sign-in provider");
 
     await prisma.$transaction(async (transaction) => {
-      await UserRepository.updatePassword({ userId: user.id, hashedPassword: null, options: { transaction } });
-      await UserRepository.deleteAccount({ provider, providerAccountId: user.id, options: { transaction } });
-      await SessionRepository.revokeSessionsByUserId(user.id, { exceptSessionId: sessionId, transaction });
+      await UserRepository.updatePassword({ userId, hashedPassword: null, options: { transaction } });
+      await UserRepository.deleteAccount({ provider, providerAccountId, options: { transaction } });
+      await SessionRepository.revokeSessionsByUserId(userId, { exceptSessionId: sessionId, transaction });
     });
 
-    await SessionRepository.revokeAllAccessTokenByUserIdRedis(user.id, { exceptSessionId: sessionId });
+    await SessionRepository.revokeAccessTokensByUserIdRedis(userId, { exceptSessionId: sessionId });
+    return "Unbind credentials successfully";
   },
 
   async connect({ input, userId, sessionId, currentProvider }: ConnectParams) {
-    const user = await UserRepository.getById({ userId });
+    const user = await UserRepository.getById({ userId, options: { withAccounts: true } });
     if (!user) throw new NotFound("user not found");
 
     const provider = AuthProvider.CREDENTIALS;
-    const providerAccountId = userId;
-    const hasCredentials = await UserRepository.getAccountByProviderId({ provider, providerAccountId });
+    const hasCredentials = ProviderHelpers.findCredentialsProvider(user.accounts);
 
-    hasCredentials
-      ? await AuthCredentialsService.unbindCredentials({ user, provider, sessionId, input, currentProvider })
-      : await AuthCredentialsService.bindCredentials({ user, provider, sessionId, input, currentProvider });
+    const providerData = { provider, providerAccountId: user.id };
+    const currentData = { currentProvider, sessionId };
+
+    const userData = { userId: user.id, userAccounts: user.accounts };
+    const connectionArgs: ConnectionParams = { input, ...providerData, ...currentData, ...userData };
+
+    return hasCredentials
+      ? await AuthCredentialsService.unbindCredentials(connectionArgs)
+      : await AuthCredentialsService.bindCredentials(connectionArgs);
   },
 };
