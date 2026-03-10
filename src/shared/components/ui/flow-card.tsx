@@ -68,7 +68,7 @@ function FlowCardContent({ step, isLeft }: FlowCardContentProps) {
     modal.open({
       content: <IframeDiagram />,
       withConfirmButton: false,
-      wraperClassName: "max-w-5xl! w-full min-h-dvh! h-full",
+      wraperClassName: "max-w-5xl! w-full min-h-dvh! h-full p-3!",
     });
   };
 
