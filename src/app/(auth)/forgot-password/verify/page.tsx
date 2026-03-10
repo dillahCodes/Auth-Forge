@@ -37,7 +37,7 @@ export default function ForgotPasswordVerifyPage() {
   };
 
   return (
-    <section className="flex flex-col gap-6 w-full max-w-md">
+    <section className="flex flex-col gap-6 w-full max-w-md p-3">
       <Form onSubmit={handleSubmit}>
         <FormHeader icon={RiRotateLockFill} title="Change Password" description="Enter your new password to continue" />
 

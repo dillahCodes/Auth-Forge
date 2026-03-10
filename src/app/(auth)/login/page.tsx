@@ -31,7 +31,7 @@ export default function Login() {
   };
 
   return (
-    <section className="flex flex-col gap-6 w-full max-w-md">
+    <section className="flex flex-col gap-6 w-full max-w-md p-3">
       <Form onSubmit={handleSubmit}>
         <FormHeader icon={FaRegUserCircle} title="Welcome Back" description="Login to continue where you left off" />
 
