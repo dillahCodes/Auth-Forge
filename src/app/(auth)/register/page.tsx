@@ -31,7 +31,7 @@ export default function Register() {
   };
 
   return (
-    <main className="flex flex-col gap-6 w-full max-w-md">
+    <main className="flex flex-col gap-6 w-full max-w-md p-3">
       <Form onSubmit={handleSubmit}>
         <FormHeader icon={LuIdCard} title="Create Account" description="Enter your details to get started" />
 

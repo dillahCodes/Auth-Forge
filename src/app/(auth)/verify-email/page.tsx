@@ -67,7 +67,7 @@ export default function VerifyEmailPage() {
   const resendButtonText = getResendButtonText({ isReqPending, isCountdownDone, remaining });
 
   return (
-    <section className="flex flex-col gap-6 w-full max-w-md">
+    <section className="flex flex-col gap-6 w-full max-w-md p-3">
       <Form onSubmit={handleVerifyEmail}>
         <FormHeader
           title="Verify Your Email Address"
