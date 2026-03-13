@@ -2,6 +2,7 @@ import { getClientInfo } from "@/shared/lib/client-info";
 import { rateLimiterTokenBucket } from "@/shared/lib/redis/rate-limiter-token-bucket";
 import { HttpStatusCode } from "@/shared/types/response";
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 
 export async function handleGlobalRateLimit(req: NextRequest): Promise<NextResponse | null> {
   const { vercelTlsFingerprint, ip } = getClientInfo(req);
@@ -10,7 +11,12 @@ export async function handleGlobalRateLimit(req: NextRequest): Promise<NextRespo
   const isApiRoute = path.startsWith("/api/");
   if (!isApiRoute) return null;
 
-  const key = `path:${path}:fg:${vercelTlsFingerprint ?? ip}`;
+  const identifier = crypto
+    .createHash("sha256")
+    .update(`${ip}:${vercelTlsFingerprint ?? "no-ja4"}`)
+    .digest("hex");
+
+  const key = `path:${path}:${identifier}`;
   const rateLimitConfig = { bucketCapacity: 15, refillRatePerSecond: 1, key };
   const rateLimit = await rateLimiterTokenBucket(rateLimitConfig);
 
