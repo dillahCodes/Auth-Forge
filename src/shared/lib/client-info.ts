@@ -5,8 +5,12 @@ export interface ClientInfo {
 }
 
 export function getClientInfo(req: Request): ClientInfo {
-  const forwarded = req.headers.get("x-forwarded-for");
-  const ip = forwarded ? forwarded.split(",")[0].trim() : null;
+  // IP ADDRESS, DOC: https://vercel.com/docs/headers/request-headers#x-real-ip
+  const realIp = req.headers.get("x-real-ip");
+  const forwardedFor = req.headers.get("x-forwarded-for")?.split(",")[0].trim();
+  const ip = realIp ?? forwardedFor ?? null;
+
+  // USER AGENT & JA4, DOC: https://vercel.com/docs/vercel-firewall/firewall-concepts#x-vercel-ja4-digest-preferred
   const userAgent = req.headers.get("user-agent") ?? null;
   const vercelTlsFingerprint = req.headers.get("x-vercel-ja4-digest") ?? null;
 
