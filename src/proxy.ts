@@ -3,6 +3,7 @@ import { CookieHttp } from "./features/auth/http/cookie.http";
 import { handleAuthProtection } from "./middlewares/handle-auth-protection";
 import { handleAuthRouting } from "./middlewares/handle-auth-routing";
 import { handleGlobalRateLimit } from "./middlewares/handle-global-rate-limit";
+import { handleCors } from "./middlewares/handle-cors";
 
 // DOC Main middleware entry
 // DOC: https://nextjs.org/docs/app/getting-started/proxy
@@ -10,16 +11,21 @@ import { handleGlobalRateLimit } from "./middlewares/handle-global-rate-limit";
 export default async function proxy(req: NextRequest) {
   const refreshToken = CookieHttp.getCookie(req, "refresh_token");
 
-  const rateLimitResult = await handleGlobalRateLimit(req);
-  if (rateLimitResult) return rateLimitResult;
+  const getResponse = async () => {
+    const rateLimitResult = await handleGlobalRateLimit(req);
+    if (rateLimitResult) return rateLimitResult;
 
-  const authRoutingResult = await handleAuthRouting(req, refreshToken);
-  if (authRoutingResult) return authRoutingResult;
+    const authRoutingResult = await handleAuthRouting(req, refreshToken);
+    if (authRoutingResult) return authRoutingResult;
 
-  const authProtectionResult = await handleAuthProtection(req, refreshToken);
-  if (authProtectionResult) return authProtectionResult;
+    const authProtectionResult = await handleAuthProtection(req, refreshToken);
+    if (authProtectionResult) return authProtectionResult;
 
-  return NextResponse.next();
+    return NextResponse.next();
+  };
+
+  const response = await getResponse();
+  return handleCors(req, response);
 }
 
 //  DOC: allow middleware for all routes except static files
