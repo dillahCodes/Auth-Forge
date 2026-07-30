@@ -1,0 +1,87 @@
+services:
+  # ==========================================
+  # DEVELOPMENT MODE (Hot-Reload)
+  # ==========================================
+  dev:
+    container_name: authforge-dev
+    build:
+      context: .
+      target: dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+    profiles: ["dev"]
+
+  # ==========================================
+  # PRODUCTION MODE (Standalone)
+  # ==========================================
+  prod:
+    container_name: authforge-prod
+    build:
+      context: .
+      target: prod
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
+    restart: unless-stopped
+    profiles: ["prod"]
+
+  # ==========================================
+  # Database Services
+  # ==========================================
+  postgres:
+    container_name: db
+    image: postgres:18.4-alpine
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - pgdata:/var/lib/postgresql
+    restart: unless-stopped
+
+  redis:
+    container_name: redis
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+    ports:
+      - "6379:6379"
+    env_file:
+      - .env
+    volumes:
+      - redisdata:/data
+    restart: unless-stopped
+
+  # ==========================================
+  # Database Services (only dev)
+  # ==========================================
+  redis-insight:
+    container_name: redis-insight
+    image: redis/redisinsight:latest
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+    profiles: ["dev"]
+
+  adminer:
+    container_name: adminer
+    image: adminer:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    profiles: ["dev"]
+
+volumes:
+  pgdata:
+  redisdata:

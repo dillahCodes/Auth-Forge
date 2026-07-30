@@ -316,14 +316,15 @@ src/
 
 ### Prerequisites
 
-- Node.js 18+
-- PostgreSQL database
-- Redis instance
+- [Docker](https://www.docker.com/) (Docker Desktop or Docker Engine)
+- GNU Make (Pre-installed on Linux/Mac, or `choco install make` on Windows)
 - Google OAuth credentials
 - Resend API key
 - MaxMind GeoIP2 database
 
-### Setup
+### 🚀 Quick Start (Dockerized)
+
+AuthForge is fully containerized. You do not need to manually install Node.js, PostgreSQL, or Redis on your local machine.
 
 1. **Clone the repository**
 
@@ -332,32 +333,41 @@ src/
    cd Auth-Forge
    ```
 
-2. **Install dependencies**
-
-   ```bash
-   npm install
-   ```
-
-3. **Configure environment variables**
+2. **Configure environment variables**
 
    ```bash
    cp .env.example .env
    # Fill in your values in .env
    ```
 
-4. **Run database migrations**
+3. **Start Development Server**
 
    ```bash
-   npx prisma migrate dev
+   make dev
    ```
+   
+   This single command will automatically pull the necessary database images, install NPM dependencies, and start the Next.js server with hot-reload.
+   
+   Open [http://localhost:3000](http://localhost:3000) to view the app!
+   - 🐘 **Adminer (DB UI):** http://localhost:8080
+   - 🔴 **RedisInsight (Cache UI):** http://localhost:5540
 
-5. **Start the development server**
-
+4. **Initialize Database Migrations (First Time Only)**
+   
+   Open a **new terminal tab** (while `make dev` is still running) and run:
    ```bash
-   npm run dev
+   make setup
    ```
+   This will run Prisma migrations and seed the database safely inside the Docker container.
 
-   Open [http://localhost:3000](http://localhost:3000) to view the app.
+### 🧰 Useful Commands
+
+- `make dev` — Start development environment (Next.js, Postgres, Redis, Adminer, RedisInsight)
+- `make setup` — Run Prisma migrations inside the dev container
+- `make prod` — Start production environment (Optimized build, detached mode)
+- `make down` — Stop and remove all containers gracefully
+- `make clean` — Stop containers and wipe all database/redis volumes (Fresh start)
+- `make logs` — View logs of the production container
 
 6. **Expose port 3000 to the public (required for OAuth & email redirects)**
 
