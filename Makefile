@@ -1,36 +1,64 @@
-.PHONY: dev prod down clean logs setup setup-prod
+.PHONY: setup dev dev-down build push pull start prod-down show
 
-# Run Prisma migration and seeder inside the container (Development Mode)
+# ==========================================
+# DEVELOPMENT
+# ==========================================
+
+# Start development environment
+dev:
+	@echo "Starting Development environment..."
+	docker compose --profile dev up -d
+
+# Initialize development database
 setup:
-	@echo "Running Development database migration..."
+	@echo "Starting Development environment..."
+	docker compose --profile dev up -d
+
+	@echo "Running Prisma migrations..."
 	docker exec -it authforge-dev npx prisma migrate dev
 
-# Run Prisma migration on VPS (Production Mode)
-setup-prod:
-	@echo "Running Production database migration..."
-	docker compose --profile dev run --rm dev npx prisma migrate deploy
+	@echo "Running database seeder..."
+	docker exec -it authforge-dev npx prisma db seed
 
-# Start development mode (Hot-Reload)
-dev:
-	@echo "Starting Development mode..."
-	docker compose --profile dev up --build
+# Stop development environment
+dev-down:
+	@echo "Stopping Development environment..."
+	docker compose --profile dev down
 
-# Start production mode in background (-d)
-prod:
-	@echo "Starting Production mode..."
-	docker compose --profile prod up -d --build
+# ==========================================
+# CI/CD - BUILD & RELEASE
+# ==========================================
 
-# Stop all running containers
-down:
-	@echo "Stopping containers..."
-	docker compose --profile dev --profile prod down
+# Build production image
+build:
+	@echo "Building production image..."
+	docker build --target prod -t $(USERNAME)/authforge:$(TAG) .
 
-# View logs from production mode
-logs:
-	docker compose --profile prod logs -f
+# Push image to Docker Hub
+push:
+	@echo "Pushing image to Docker Hub..."
+	docker push $(USERNAME)/authforge:$(TAG)
 
-# Stop and clean up Docker containers, volumes, and cache
-clean:
-	@echo "Cleaning up containers, volumes, and cache..."
-	docker compose --profile dev --profile prod down -v
-	docker system prune -f
+# ==========================================
+# PRODUCTION DEPLOYMENT
+# ==========================================
+
+# Pull latest image (server: no build, only pull & run)
+pull:
+	@echo "Pulling image..."
+	docker pull $(USERNAME)/authforge:$(TAG)
+
+# Start production application
+start:
+	@echo "Starting Production environment..."
+	docker compose --profile prod up -d
+
+# Show Production containers
+show:
+	@echo "Showing Production containers..."
+	docker ps -s --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Size}}"
+
+# Stop production application
+prod-down:
+	@echo "Stopping Production environment..."
+	docker compose --profile prod down

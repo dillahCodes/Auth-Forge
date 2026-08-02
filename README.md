@@ -346,30 +346,20 @@ AuthForge is fully containerized. You do not need to manually install Node.js, P
    make dev
    ```
    
-   This single command will automatically pull the necessary database images, install NPM dependencies, and start the Next.js server with hot-reload.
+   This command starts the development environment in detached mode (Next.js dev server with hot-reload, PostgreSQL, Redis, Adminer, and RedisInsight).
    
    Open [http://localhost:3000](http://localhost:3000) to view the app!
    - 🐘 **Adminer (DB UI):** http://localhost:8080
    - 🔴 **RedisInsight (Cache UI):** http://localhost:5540
 
-4. **Initialize Database Migrations (First Time Only)**
+4. **Initialize Database Migrations & Seeding (First Time Only)**
    
-   Open a **new terminal tab** (while `make dev` is still running) and run:
    ```bash
    make setup
    ```
-   This will run Prisma migrations and seed the database safely inside the Docker container.
+   This command starts the development environment, runs Prisma migrations (`prisma migrate dev`), and seeds the database (`prisma db seed`) inside the container.
 
-### 🧰 Useful Commands
-
-- `make dev` — Start development environment (Next.js, Postgres, Redis, Adminer, RedisInsight)
-- `make setup` — Run Prisma migrations inside the dev container
-- `make prod` — Start production environment (Optimized build, detached mode)
-- `make down` — Stop and remove all containers gracefully
-- `make clean` — Stop containers and wipe all database/redis volumes (Fresh start)
-- `make logs` — View logs of the production container
-
-6. **Expose port 3000 to the public (required for OAuth & email redirects)**
+5. **Expose port 3000 to the public (required for OAuth & email redirects)**
 
    Several features — such as **Google OAuth callbacks** and **email redirect links** (verification, revert account) — require a publicly accessible URL. In local development, you can use one of the options below to forward port `3000`:
 
@@ -390,6 +380,25 @@ AuthForge is fully containerized. You do not need to manually install Node.js, P
    4. Copy the forwarded URL and use it as your `NEXT_PUBLIC_BASE_URL` in `.env`.
 
    > **Note:** Remember to update your **Google Cloud Console** OAuth 2.0 redirect URIs with the new public URL whenever it changes.
+
+---
+
+### 🧰 Useful Commands
+
+#### 💻 Development
+- `make dev` — Start development environment (`docker compose --profile dev up -d`)
+- `make setup` — Run Prisma migrations and seed database inside the dev container
+- `make dev-down` — Stop development environment (`docker compose --profile dev down`)
+
+#### 📦 Build & Release (CI/CD)
+- `make build` — Build production Docker image (`docker build --target prod ...`)
+- `make push` — Push production Docker image to Docker Hub (`docker push ...`)
+
+#### 🚀 Production Deployment
+- `make pull` — Pull latest production Docker image (`docker pull ...`)
+- `make start` — Start production environment (`docker compose --profile prod up -d`)
+- `make show` — View running production containers and image sizes
+- `make prod-down` — Stop production environment (`docker compose --profile prod down`)
 
 ---
 
