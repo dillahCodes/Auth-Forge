@@ -10,9 +10,9 @@ on:
 env:
   TUNNEL_URL: ${{ secrets.TUNNEL_URL }}
   SSH_USER: ${{ secrets.SSH_USER }}
+  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
   DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
   PROJECT_NAME: authforge
   IMAGE_TAG: latest
 
