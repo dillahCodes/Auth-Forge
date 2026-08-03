@@ -1,0 +1,61 @@
+name: Deploy to Local Machine via Cloudflare
+
+on:
+  push:
+    branches: ["main"]
+
+# ==========================================
+# CONFIGURATION
+# ==========================================
+env:
+  TUNNEL_URL: ${{ secrets.TUNNEL_URL }}
+  SSH_USER: ${{ secrets.SSH_USER }}
+  DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+  PROJECT_NAME: authforge
+  IMAGE_TAG: latest
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # ==========================================
+      # BUILD & PUSH IMAGE
+      # ==========================================
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USER }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Build Docker Image
+        run: |
+          docker build --target prod -t ${{ env.DOCKER_USER }}/${{ env.PROJECT_NAME }}:${{ env.IMAGE_TAG }} .
+
+      - name: Push Docker Image
+        run: |
+          docker push ${{ env.DOCKER_USER }}/${{ env.PROJECT_NAME }}:${{ env.IMAGE_TAG }}
+
+      # ==========================================
+      # DEPLOY TO LOCAL MACHINE VIA CLOUDFLARED
+      # ==========================================
+      - name: Install Cloudflared
+        run: |
+          curl -L -o cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+          sudo dpkg -i cloudflared.deb
+
+      - name: Inject SSH Key to Agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ env.SSH_PRIVATE_KEY }}
+
+      - name: Execute Remote Deployment
+        run: >
+          ssh -o StrictHostKeyChecking=no
+          -o ProxyCommand="cloudflared access ssh --hostname %h"
+          ${{ env.SSH_USER }}@${{ env.TUNNEL_URL }}
+          "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USER }} TAG=${{ env.IMAGE_TAG }} && make start"
