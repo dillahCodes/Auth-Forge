@@ -58,6 +58,6 @@ jobs:
       - name: Execute Remote Deployment
         run: |
           ssh -o StrictHostKeyChecking=no \
-            -o ProxyCommand="cloudflared access ssh --hostname %h --id ${{ env.CF_CLIENT_ID }} --secret ${{ env.CF_CLIENT_SECRET }}" \
+            -o ProxyCommand="cloudflared access ssh --hostname https://%h --id ${{ env.CF_CLIENT_ID }} --secret ${{ env.CF_CLIENT_SECRET }}" \
             ${{ env.SSH_USER }}@${{ env.TUNNEL_URL }} \
             "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USERNAME }} TAG=${{ env.IMAGE_TAG }} && make start"
