@@ -55,6 +55,8 @@ jobs:
         env:
           CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
           CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+          TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_CLIENT_ID }}
+          TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
         run: |
           mkdir -p ~/.ssh
 
@@ -65,10 +67,10 @@ jobs:
                -H "CF-Access-Client-Secret: ${{ secrets.CF_CLIENT_SECRET }}" \
                "https://$TARGET_URL" 2>&1 || true
 
-          # SSH ProxyCommand menggunakan 'cloudflared access tcp' untuk raw SSH stream
+          # SSH ProxyCommand menggunakan env vars resmi TUNNEL_SERVICE_TOKEN_ID & TUNNEL_SERVICE_TOKEN_SECRET
           cat << EOF > ~/.ssh/config
           Host $TARGET_URL
-            ProxyCommand cloudflared access tcp --hostname %h --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}
+            ProxyCommand cloudflared access tcp --hostname %h
             StrictHostKeyChecking no
             ConnectTimeout 30
           EOF
