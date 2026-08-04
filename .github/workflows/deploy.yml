@@ -55,27 +55,27 @@ jobs:
         run: |
           mkdir -p ~/.ssh
 
-          # SSH Config menggunakan env vars resmi Cloudflare CLI: TUNNEL_SERVICE_TOKEN_ID & TUNNEL_SERVICE_TOKEN_SECRET
-          cat <<EOF > ~/.ssh/config
-          Host vps-simulator.dillahcodes.my.id
-            HostName vps-simulator.dillahcodes.my.id
-            User dillahcodes
-            IdentityFile ~/.ssh/deploy_key
-            ProxyCommand env TUNNEL_SERVICE_TOKEN_ID="$CF_CLIENT_ID" TUNNEL_SERVICE_TOKEN_SECRET="$CF_CLIENT_SECRET" cloudflared access ssh --hostname %h
-            StrictHostKeyChecking no
-            UserKnownHostsFile /dev/null
-            ServerAliveInterval 30
-            ConnectTimeout 30
-          EOF
-
-          echo "=== SSH Config ==="
-          cat ~/.ssh/config
-
           # Tulis SSH private key
           printf "%s\n" "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
-          # Deploy Auth-Forge
-          echo "=== Executing Deployment ==="
-          ssh vps-simulator.dillahcodes.my.id \
-            "make pull PROJECTNAME=$PROJECT_NAME USERNAME=$DOCKER_USERNAME TAG=$IMAGE_TAG && make start"
+          TARGET_HOST="vps-simulator.dillahcodes.my.id"
+
+          echo "=== Step 1: Start Cloudflare Access TCP Listener on 127.0.0.1:2222 ==="
+          cloudflared access tcp --hostname "$TARGET_HOST" --url "127.0.0.1:2222" --id "$CF_CLIENT_ID" --secret "$CF_CLIENT_SECRET" &
+          CF_PID=$!
+
+          # Tunggu listener siap
+          sleep 3
+
+          echo "=== Step 2: Executing SSH Deployment via Local Listener ==="
+          ssh -p 2222 \
+              -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              -o ConnectTimeout=30 \
+              -i ~/.ssh/deploy_key \
+              $SSH_USER@127.0.0.1 \
+              "make pull PROJECTNAME=$PROJECT_NAME USERNAME=$DOCKER_USERNAME TAG=$IMAGE_TAG && make start"
+
+          # Hentikan listener
+          kill $CF_PID 2>/dev/null || true
