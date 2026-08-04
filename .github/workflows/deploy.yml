@@ -55,50 +55,21 @@ jobs:
         with:
           ssh-private-key: ${{ env.SSH_PRIVATE_KEY }}
 
-      # ==========================================
-      # DEBUGGING SECTION
-      # ==========================================
-      - name: Debug 1 - Cek Ketersediaan Secrets (Tanpa Mengekspos Isi)
+      - name: Setup SSH Config & Deploy
+        env:
+          CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
+          CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
         run: |
-          echo "Memeriksa apakah secrets sudah terisi di repository..."
-          [ -n "${{ env.TUNNEL_URL }}" ] && echo "✅ TUNNEL_URL tersedia" || echo "❌ TUNNEL_URL KOSONG"
-          [ -n "${{ env.SSH_USER }}" ] && echo "✅ SSH_USER tersedia" || echo "❌ SSH_USER KOSONG"
-          [ -n "${{ secrets.CF_CLIENT_ID }}" ] && echo "✅ CF_CLIENT_ID tersedia" || echo "❌ CF_CLIENT_ID KOSONG"
-          [ -n "${{ secrets.SSH_PRIVATE_KEY }}" ] && echo "✅ SSH_PRIVATE_KEY tersedia" || echo "❌ SSH_PRIVATE_KEY KOSONG"
-
-      - name: Debug 2 - Setup SSH Config
-        run: |
+          # Tulis SSH config tanpa heredoc agar tidak ada masalah indentasi
           mkdir -p ~/.ssh
-          # Menambahkan --loglevel debug pada cloudflared
-          # Menambahkan ConnectTimeout agar tidak hang selamanya jika gagal
-          cat >> ~/.ssh/config << EOF
-          Host ${{ env.TUNNEL_URL }}
-            ProxyCommand cloudflared access ssh --loglevel debug --hostname %h
-            StrictHostKeyChecking no
-            ConnectTimeout 15
-          EOF
-          echo "Isi dari ~/.ssh/config:"
+          echo "Host ${{ env.TUNNEL_URL }}" >> ~/.ssh/config
+          echo "  ProxyCommand cloudflared access ssh --hostname https://${{ env.TUNNEL_URL }}" >> ~/.ssh/config
+          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+          echo "  ConnectTimeout 30" >> ~/.ssh/config
+
+          echo "=== SSH config ==="
           cat ~/.ssh/config
 
-      - name: Debug 3 - Tes Koneksi SSH (Verbose Mode)
-        env:
-          TUNNEL_SERVICE_AUTH_ID: ${{ secrets.CF_CLIENT_ID }}
-          TUNNEL_SERVICE_AUTH_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
-        run: |
-          echo "Mencoba melakukan ping SSH ke laptop lokal dengan flag -vvv..."
-          # Perintah ini hanya akan mengeksekusi 'whoami' dan 'hostname' lalu langsung keluar.
-          # Flag -vvv akan mencetak seluruh proses handshake SSH.
-          ssh -vvv ${{ env.SSH_USER }}@${{ env.TUNNEL_URL }} "echo '✅ KONEKSI SUKSES! Terhubung sebagai user: \$(whoami) di mesin: \$(hostname)'"
-
-      # ==========================================
-      # ACTUAL DEPLOYMENT
-      # ==========================================
-      - name: Execute Remote Deployment
-        # Step ini hanya berjalan jika 'Debug 3' berhasil
-        env:
-          TUNNEL_SERVICE_AUTH_ID: ${{ secrets.CF_CLIENT_ID }}
-          TUNNEL_SERVICE_AUTH_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
-        run: |
-          echo "Mengeksekusi perintah Makefile untuk deploy Auth-Forge..."
+          echo "=== Menjalankan deployment ==="
           ssh ${{ env.SSH_USER }}@${{ env.TUNNEL_URL }} \
             "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USERNAME }} TAG=${{ env.IMAGE_TAG }} && make start"
