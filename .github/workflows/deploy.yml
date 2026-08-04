@@ -52,20 +52,19 @@ jobs:
           cloudflared --version
 
       - name: Deploy via Cloudflare SSH Tunnel
-        env:
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
-          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
         run: |
           mkdir -p ~/.ssh
 
-          TARGET_HOST="vps-simulator.dillahcodes.my.id"
+          # Bersihkan https:// jika ada di dalam secret TUNNEL_URL
+          TARGET_HOST=$(echo "${{ env.TUNNEL_URL }}" | sed -e 's|^https://||' -e 's|^http://||')
 
-          # SSH Config cukup memanggil --hostname %h, tanpa flag token apa pun
+          # SSH Config lengkap dengan IdentityFile dan ProxyCommand dinamis
           cat <<EOF > ~/.ssh/config
           Host $TARGET_HOST
-            ProxyCommand cloudflared access ssh --hostname %h
+            HostName $TARGET_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/deploy_key
+            ProxyCommand cloudflared access ssh --hostname %h --id $CF_CLIENT_ID --secret $CF_CLIENT_SECRET
             StrictHostKeyChecking no
             UserKnownHostsFile /dev/null
             ServerAliveInterval 30
@@ -81,5 +80,5 @@ jobs:
 
           # Deploy Auth-Forge
           echo "=== Executing Deployment ==="
-          ssh -i ~/.ssh/deploy_key $SSH_USER@$TARGET_HOST \
+          ssh $TARGET_HOST \
             "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USERNAME }} TAG=${{ env.IMAGE_TAG }} && make start"
