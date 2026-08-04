@@ -61,7 +61,7 @@ jobs:
           TARGET_URL="vps-simulator.dillahcodes.my.id"
 
           echo "=== Step 1: Generate Access Token ==="
-          ACCESS_TOKEN=$(cloudflared access token -app "https://$TARGET_URL" --id "${{ secrets.CF_CLIENT_ID }}" --secret "${{ secrets.CF_CLIENT_SECRET }}" 2>&1)
+          ACCESS_TOKEN=$(cloudflared access token -app "https://$TARGET_URL")
           echo "Token generated successfully!"
 
           # SSH config menggunakan JWT token langsung (--token)
