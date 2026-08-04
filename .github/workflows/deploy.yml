@@ -63,13 +63,18 @@ jobs:
           echo "CF_CLIENT_ID_LEN=${#CF_CLIENT_ID}"
           echo "CF_CLIENT_SECRET_LEN=${#CF_CLIENT_SECRET}"
 
-          # SSH Config membaca dari ENV ($CF_CLIENT_ID & $CF_CLIENT_SECRET)
+          echo "=== Diagnostic HTTP Check ==="
+          curl -i -H "CF-Access-Client-Id: $CF_CLIENT_ID" \
+               -H "CF-Access-Client-Secret: $CF_CLIENT_SECRET" \
+               "https://$TARGET_HOST" || true
+
+          # SSH Config menggunakan env vars resmi CF_ACCESS_CLIENT_ID & CF_ACCESS_CLIENT_SECRET
           cat <<EOF > ~/.ssh/config
           Host $TARGET_HOST
             HostName $TARGET_HOST
             User $SSH_USER
             IdentityFile ~/.ssh/deploy_key
-            ProxyCommand cloudflared access ssh --hostname %h --id $CF_CLIENT_ID --secret $CF_CLIENT_SECRET
+            ProxyCommand env CF_ACCESS_CLIENT_ID="$CF_CLIENT_ID" CF_ACCESS_CLIENT_SECRET="$CF_CLIENT_SECRET" cloudflared access ssh --hostname %h
             StrictHostKeyChecking no
             UserKnownHostsFile /dev/null
             ServerAliveInterval 30
