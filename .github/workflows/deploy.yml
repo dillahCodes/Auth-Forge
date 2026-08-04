@@ -51,29 +51,30 @@ jobs:
           sudo dpkg -i cloudflared.deb
           cloudflared --version
 
-      - name: Inject SSH Key to Agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ env.SSH_PRIVATE_KEY }}
-
       - name: Setup SSH Config & Deploy
-        env:
-          CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
-          CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
         run: |
           mkdir -p ~/.ssh
 
           CLEAN_URL=$(echo "${{ env.TUNNEL_URL }}" | sed -e 's|^https://||' -e 's|^http://||')
 
-          # Tulis SSH config dengan printf (bebas masalah indentasi)
-          # PENTING: --hostname HARUS pakai https://%h agar cloudflared bisa parse URL
-          # CF_CLIENT_ID & CF_CLIENT_SECRET dibaca otomatis oleh cloudflared dari env
-          printf 'Host %s\n  ProxyCommand cloudflared access ssh --hostname https://%%h\n  StrictHostKeyChecking no\n  ConnectTimeout 30\n' \
-            "$CLEAN_URL" > ~/.ssh/config
+          # 1. Tulis SSH config (persis seperti referensi action)
+          echo "Host $CLEAN_URL" >> ~/.ssh/config
+          echo "  ProxyCommand cloudflared access ssh --hostname %h --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}" >> ~/.ssh/config
 
           echo "=== SSH config ==="
           cat ~/.ssh/config
 
+          # 2. Tulis SSH private key secara manual (tidak pakai webfactory/ssh-agent)
+          echo "${{ env.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          # 3. Populate known_hosts agar SSH tidak hang di prompt
+          ssh-keyscan $CLEAN_URL >> ~/.ssh/known_hosts 2>/dev/null || true
+
+          # 4. Test koneksi dulu (opsional, errors ditolerir)
+          ssh -T -q -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@$CLEAN_URL || true
+
+          # 5. Deploy
           echo "=== Deploy ==="
-          ssh ${{ env.SSH_USER }}@$CLEAN_URL \
+          ssh -i ~/.ssh/deploy_key ${{ env.SSH_USER }}@$CLEAN_URL -p 22 \
             "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USERNAME }} TAG=${{ env.IMAGE_TAG }} && make start"
