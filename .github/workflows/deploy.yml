@@ -51,7 +51,7 @@ jobs:
           sudo dpkg -i cloudflared.deb
           cloudflared --version
 
-      - name: Setup SSH Config & Deploy
+      - name: Deploy via Cloudflare SSH Tunnel
         env:
           CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
           CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
@@ -60,14 +60,10 @@ jobs:
 
           TARGET_URL="vps-simulator.dillahcodes.my.id"
 
-          echo "=== Step 1: Generate Access Token ==="
-          ACCESS_TOKEN=$(cloudflared access token -app "https://$TARGET_URL")
-          echo "Token generated successfully!"
-
-          # SSH config menggunakan JWT token langsung (--token)
+          # SSH config standar resmi dari dokumentasi Cloudflare Access
           cat << EOF > ~/.ssh/config
           Host $TARGET_URL
-            ProxyCommand cloudflared access ssh --hostname %h --token $ACCESS_TOKEN
+            ProxyCommand cloudflared access ssh --hostname %h --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}
             StrictHostKeyChecking no
             ConnectTimeout 30
           EOF
@@ -80,6 +76,6 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
 
           # Deploy
-          echo "=== Deploy ==="
+          echo "=== Executing Deployment ==="
           ssh -vvv -i ~/.ssh/deploy_key ${{ env.SSH_USER }}@$TARGET_URL -p 22 \
             "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USERNAME }} TAG=${{ env.IMAGE_TAG }} && make start"
