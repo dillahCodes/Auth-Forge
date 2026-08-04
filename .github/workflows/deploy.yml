@@ -65,7 +65,7 @@ jobs:
           # SSH Config standar resmi dari dokumentasi Cloudflare Access
           cat <<EOF > ~/.ssh/config
           Host $TARGET_HOST
-            ProxyCommand cloudflared access ssh --hostname %h --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}
+            ProxyCommand cloudflared access ssh --hostname %h --service-token-id $CF_CLIENT_ID --service-token-secret $CF_CLIENT_SECRET
             StrictHostKeyChecking no
             UserKnownHostsFile /dev/null
             ServerAliveInterval 30
@@ -79,7 +79,7 @@ jobs:
           printf "%s\n" "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
-          # Deploy
+          # Deploy Auth-Forge
           echo "=== Executing Deployment ==="
           ssh -i ~/.ssh/deploy_key $SSH_USER@$TARGET_HOST \
             "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USERNAME }} TAG=${{ env.IMAGE_TAG }} && make start"
