@@ -8,7 +8,7 @@ on:
 # CONFIGURATION
 # ==========================================
 env:
-  TUNNEL_URL: ${{ secrets.TUNNEL_URL }}
+  # TUNNEL_URL: ${{ secrets.TUNNEL_URL }}
   SSH_USER: ${{ secrets.SSH_USER }}
   SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -55,7 +55,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
 
-          cat << 'EOF' | sed 's/^[ \t]*//' > ~/.ssh/deploy_key
+          cat << 'EOF' > ~/.ssh/deploy_key
           -----BEGIN OPENSSH PRIVATE KEY-----
           b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
           QyNTUxOQAAACAMGXbkmM52fa9malw72/EPl604DCvdc0WTwOMAYpf7CwAAAKB2F5zydhec
@@ -67,8 +67,10 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
 
           echo "=== EXECUTING HARDCODED DEPLOYMENT VIA CLOUDFLARE TUNNEL ==="
+
+          # Hapus bash -c dan samakan persis dengan command lokal
           ssh \
-            -o ProxyCommand="bash -c 'cloudflared access tcp --hostname vps-simulator.dillahcodes.my.id --id 53a5e920bf8fbfcad8984e3745f8b68c.access --secret d259dd7f70f6c528abbc18f6cba83ef4938b114938bf6bfcc05304d398c4ae5d'" \
+            -o ProxyCommand="cloudflared access tcp --hostname vps-simulator.dillahcodes.my.id --id 53a5e920bf8fbfcad8984e3745f8b68c.access --secret d259dd7f70f6c528abbc18f6cba83ef4938b114938bf6bfcc05304d398c4ae5d" \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
             -o ConnectTimeout=30 \
