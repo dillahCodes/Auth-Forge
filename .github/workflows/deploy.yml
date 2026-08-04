@@ -56,23 +56,18 @@ jobs:
           mkdir -p ~/.ssh
 
           # Bersihkan https://, http://, trailing slash, dan trailing space dari TUNNEL_URL
-          TARGET_HOST=$(echo "${{ env.TUNNEL_URL }}" | sed -e 's|^https://||' -e 's|^http://||' -e 's|/*$||' | xargs)
+          TARGET_HOST=$(echo "$TUNNEL_URL" | sed -e 's|^https://||' -e 's|^http://||' -e 's|/*$||' | xargs)
 
           echo "=== Debug Info ==="
           echo "TARGET_HOST=['$TARGET_HOST']"
           echo "CF_CLIENT_ID_LEN=${#CF_CLIENT_ID}"
           echo "CF_CLIENT_SECRET_LEN=${#CF_CLIENT_SECRET}"
 
-          echo "=== Diagnostic HTTP Check ==="
-          curl -i -H "CF-Access-Client-Id: $CF_CLIENT_ID" \
-               -H "CF-Access-Client-Secret: $CF_CLIENT_SECRET" \
-               "https://$TARGET_HOST" || true
-
-          # SSH Config menggunakan --id dan --secret dengan tanda kutip (sama persis dengan config lokal)
-          cat <<EOF > ~/.ssh/config
-          Host $TARGET_HOST
-            HostName $TARGET_HOST
-            User $SSH_USER
+          # SSH Config menggunakan quoted EOF agar variabel dievaluasi langsung oleh shell ProxyCommand
+          cat <<'EOF' > ~/.ssh/config
+          Host vps-simulator.dillahcodes.my.id
+            HostName vps-simulator.dillahcodes.my.id
+            User dillahcodes
             IdentityFile ~/.ssh/deploy_key
             ProxyCommand cloudflared access ssh --hostname %h --id "$CF_CLIENT_ID" --secret "$CF_CLIENT_SECRET"
             StrictHostKeyChecking no
@@ -90,5 +85,5 @@ jobs:
 
           # Deploy Auth-Forge
           echo "=== Executing Deployment ==="
-          ssh $TARGET_HOST \
-            "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USERNAME }} TAG=${{ env.IMAGE_TAG }} && make start"
+          ssh vps-simulator.dillahcodes.my.id \
+            "make pull PROJECTNAME=$PROJECT_NAME USERNAME=$DOCKER_USERNAME TAG=$IMAGE_TAG && make start"
