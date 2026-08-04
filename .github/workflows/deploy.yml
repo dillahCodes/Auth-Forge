@@ -49,14 +49,15 @@ jobs:
         run: |
           mkdir -p ~/.ssh
 
-          # 1. Bersihkan variabel TUNNEL_URL dari prefix https:// atau http:// jika ada
-          CLEAN_URL=$(echo "${{ env.TUNNEL_URL }}" | sed -e 's|^https://||' -e 's|^http://||')
+          # 1. Cari tahu lokasi pasti dari binary cloudflared yang baru saja di-install
+          CLOUDFLARED_PATH=$(which cloudflared || echo "/usr/local/bin/cloudflared")
+          echo "Lokasi cloudflared berada di: $CLOUDFLARED_PATH"
 
-          # 2. Tulis SSH config menggunakan domain yang sudah bersih
+          # 2. Tulis SSH config menggunakan domain bersih
           echo "Host $CLEAN_URL" >> ~/.ssh/config
 
-          # 3. Masukkan Service Token secara eksplisit ke dalam ProxyCommand
-          echo "  ProxyCommand cloudflared access ssh --hostname %h --service-token-id $TUNNEL_SERVICE_AUTH_ID --service-token-secret $TUNNEL_SERVICE_AUTH_SECRET" >> ~/.ssh/config
+          # 4. Gunakan PATH ABSOLUT ($CLOUDFLARED_PATH) agar SSH bisa menemukannya tanpa masalah PATH env
+          echo "  ProxyCommand $CLOUDFLARED_PATH access ssh --hostname %h --service-token-id $TUNNEL_SERVICE_AUTH_ID --service-token-secret $TUNNEL_SERVICE_AUTH_SECRET" >> ~/.ssh/config
           echo "  StrictHostKeyChecking no" >> ~/.ssh/config
           echo "  ConnectTimeout 30" >> ~/.ssh/config
 
@@ -64,6 +65,5 @@ jobs:
           cat ~/.ssh/config
 
           echo "=== Menjalankan deployment Auth-Forge ke mesin Ubuntu lokal ==="
-          # Gunakan variabel $CLEAN_URL yang baru untuk koneksi SSH
           ssh ${{ env.SSH_USER }}@$CLEAN_URL \
             "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USERNAME }} TAG=${{ env.IMAGE_TAG }} && make start"
