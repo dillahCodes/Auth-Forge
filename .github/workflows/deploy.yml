@@ -60,13 +60,9 @@ jobs:
           CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
           CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
         run: |
-          # Write SSH config so cloudflared gets the full URL with https://
-          mkdir -p ~/.ssh
-          cat >> ~/.ssh/config << EOF
-          Host ${{ env.TUNNEL_URL }}
-            ProxyCommand cloudflared access ssh --hostname https://${{ env.TUNNEL_URL }}
-            StrictHostKeyChecking no
-          EOF
-
-          ssh ${{ env.SSH_USER }}@${{ env.TUNNEL_URL }} \
+          # Use bash variable so cloudflared receives full https:// URL
+          TUNNEL_HOST="${{ env.TUNNEL_URL }}"
+          ssh -o StrictHostKeyChecking=no \
+            -o "ProxyCommand=cloudflared access ssh --hostname https://${TUNNEL_HOST}" \
+            ${{ env.SSH_USER }}@${TUNNEL_HOST} \
             "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USERNAME }} TAG=${{ env.IMAGE_TAG }} && make start"
