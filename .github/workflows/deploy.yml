@@ -58,14 +58,14 @@ jobs:
           TARGET_URL="vps-simulator.dillahcodes.my.id"
           echo "DEBUG: Hardcoded TARGET_URL -> $TARGET_URL"
 
-          # 1. Direct test run cloudflared to see exact output
+          # 1. Direct test run cloudflared dengan prefix https://
           echo "=== Direct cloudflared execution test ==="
-          cloudflared access ssh --hostname "$TARGET_URL" --id "${{ secrets.CF_CLIENT_ID }}" --secret "${{ secrets.CF_CLIENT_SECRET }}" 2>&1 || true
+          cloudflared access ssh --hostname "https://$TARGET_URL" --id "${{ secrets.CF_CLIENT_ID }}" --secret "${{ secrets.CF_CLIENT_SECRET }}" 2>&1 || true
 
-          # 2. Tulis SSH config dengan hardcoded hostname langsung di ProxyCommand
+          # 2. Tulis SSH config dengan https:// di --hostname ProxyCommand
           cat << EOF > ~/.ssh/config
           Host $TARGET_URL
-            ProxyCommand cloudflared access ssh --hostname $TARGET_URL --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}
+            ProxyCommand cloudflared access ssh --hostname https://$TARGET_URL --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}
             StrictHostKeyChecking no
             ConnectTimeout 30
           EOF
