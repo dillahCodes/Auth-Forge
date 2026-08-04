@@ -55,10 +55,15 @@ jobs:
         run: |
           mkdir -p ~/.ssh
 
-          # Bersihkan https:// jika ada di dalam secret TUNNEL_URL
-          TARGET_HOST=$(echo "${{ env.TUNNEL_URL }}" | sed -e 's|^https://||' -e 's|^http://||')
+          # Bersihkan https://, http://, trailing slash, dan trailing space dari TUNNEL_URL
+          TARGET_HOST=$(echo "${{ env.TUNNEL_URL }}" | sed -e 's|^https://||' -e 's|^http://||' -e 's|/*$||' | xargs)
 
-          # SSH Config lengkap dengan IdentityFile dan ProxyCommand dinamis
+          echo "=== Debug Info ==="
+          echo "TARGET_HOST=['$TARGET_HOST']"
+          echo "CF_CLIENT_ID_LEN=${#CF_CLIENT_ID}"
+          echo "CF_CLIENT_SECRET_LEN=${#CF_CLIENT_SECRET}"
+
+          # SSH Config membaca dari ENV ($CF_CLIENT_ID & $CF_CLIENT_SECRET)
           cat <<EOF > ~/.ssh/config
           Host $TARGET_HOST
             HostName $TARGET_HOST
