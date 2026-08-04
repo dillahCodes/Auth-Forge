@@ -63,16 +63,20 @@ jobs:
           echo "CF_CLIENT_ID_LEN=${#CF_CLIENT_ID}"
           echo "CF_CLIENT_SECRET_LEN=${#CF_CLIENT_SECRET}"
 
-          echo "=== Direct Cloudflared Access Test ==="
+          echo "=== Direct Cloudflared Access Test (SSH vs TCP) ==="
+          echo "--- Testing access tcp ---"
+          cloudflared access tcp --hostname "vps-simulator.dillahcodes.my.id" --id "$CF_CLIENT_ID" --secret "$CF_CLIENT_SECRET" 2>&1 || true
+
+          echo "--- Testing access ssh ---"
           cloudflared access ssh --hostname "vps-simulator.dillahcodes.my.id" --id "$CF_CLIENT_ID" --secret "$CF_CLIENT_SECRET" 2>&1 || true
 
-          # SSH Config menggunakan --id dan --secret
+          # SSH Config menggunakan cloudflared access tcp
           cat <<EOF > ~/.ssh/config
           Host vps-simulator.dillahcodes.my.id
             HostName vps-simulator.dillahcodes.my.id
             User dillahcodes
             IdentityFile ~/.ssh/deploy_key
-            ProxyCommand cloudflared access ssh --hostname %h --id "${CF_CLIENT_ID}" --secret "${CF_CLIENT_SECRET}"
+            ProxyCommand cloudflared access tcp --hostname %h --id "${CF_CLIENT_ID}" --secret "${CF_CLIENT_SECRET}"
             StrictHostKeyChecking no
             UserKnownHostsFile /dev/null
             ServerAliveInterval 30
