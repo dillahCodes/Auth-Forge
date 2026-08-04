@@ -8,7 +8,7 @@ on:
 # CONFIGURATION
 # ==========================================
 env:
-  # TUNNEL_URL: ${{ secrets.TUNNEL_URL }}
+  SSH_HOST: ${{ secrets.SSH_HOST }}
   SSH_USER: ${{ secrets.SSH_USER }}
   SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -51,29 +51,20 @@ jobs:
           sudo dpkg -i cloudflared.deb
           cloudflared --version
 
-      - name: Hardcoded Test Deploy via Cloudflare SSH Tunnel
+      - name: Deploy via Cloudflare SSH Tunnel
         run: |
           mkdir -p ~/.ssh
 
-          cat << 'EOF' > ~/.ssh/deploy_key
-          -----BEGIN OPENSSH PRIVATE KEY-----
-          b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
-          QyNTUxOQAAACAMGXbkmM52fa9malw72/EPl604DCvdc0WTwOMAYpf7CwAAAKB2F5zydhec
-          8gAAAAtzc2gtZWQyNTUxOQAAACAMGXbkmM52fa9malw72/EPl604DCvdc0WTwOMAYpf7Cw
-          AAAEAbEJTcO8DA9o/7EUCzoAta83ZLu5hWipqoZooC/WrfngwZduSYznZ9r2ZqXDvb8Q+X
-          rTgMK91zRZPA4wBil/sLAAAAGmdpdGh1YiBDSS9DRCB2cHMtc2ltdWxhdG9yAQID
-          -----END OPENSSH PRIVATE KEY-----
-          EOF
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
-          echo "=== EXECUTING HARDCODED DEPLOYMENT VIA CLOUDFLARE TUNNEL ==="
+          echo "=== EXECUTING DEPLOYMENT VIA CLOUDFLARE TUNNEL ==="
 
-          # Hapus bash -c dan samakan persis dengan command lokal
           ssh \
-            -o ProxyCommand="cloudflared access tcp --hostname vps-simulator.dillahcodes.my.id --id 53a5e920bf8fbfcad8984e3745f8b68c.access --secret d259dd7f70f6c528abbc18f6cba83ef4938b114938bf6bfcc05304d398c4ae5d" \
+            -o ProxyCommand="cloudflared access tcp --hostname $SSH_HOST --id $CF_CLIENT_ID --secret $CF_CLIENT_SECRET" \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
             -o ConnectTimeout=30 \
             -i ~/.ssh/deploy_key \
-            dillahcodes@vps-simulator.dillahcodes.my.id \
-            "make pull PROJECTNAME=authforge USERNAME=dillahcodes TAG=latest && make start"
+            ${SSH_USER}@${SSH_HOST} \
+            "make pull PROJECTNAME=${PROJECT_NAME} USERNAME=${DOCKER_USERNAME} TAG=${IMAGE_TAG} && make start"
