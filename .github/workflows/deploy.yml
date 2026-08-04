@@ -63,7 +63,7 @@ jobs:
 
           echo "=== EXECUTING DEPLOYMENT VIA CLOUDFLARE TUNNEL ==="
           ssh \
-            -o ProxyCommand="cloudflared access tcp --hostname https://$TARGET_HOST --id $CF_CLIENT_ID --secret $CF_CLIENT_SECRET" \
+            -o ProxyCommand="cloudflared access tcp --hostname $TARGET_HOST --id $CF_CLIENT_ID --secret $CF_CLIENT_SECRET" \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
             -o ConnectTimeout=30 \
