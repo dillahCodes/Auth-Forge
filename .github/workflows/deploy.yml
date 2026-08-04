@@ -55,17 +55,17 @@ jobs:
         env:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
-          CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
+          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
         run: |
           mkdir -p ~/.ssh
 
           TARGET_HOST="vps-simulator.dillahcodes.my.id"
 
-          # SSH Config standar resmi dari dokumentasi Cloudflare Access
+          # SSH Config cukup memanggil --hostname %h, tanpa flag token apa pun
           cat <<EOF > ~/.ssh/config
           Host $TARGET_HOST
-            ProxyCommand cloudflared access ssh --hostname %h --service-token-id $CF_CLIENT_ID --service-token-secret $CF_CLIENT_SECRET
+            ProxyCommand cloudflared access ssh --hostname %h
             StrictHostKeyChecking no
             UserKnownHostsFile /dev/null
             ServerAliveInterval 30
