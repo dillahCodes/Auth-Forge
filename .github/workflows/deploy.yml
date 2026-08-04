@@ -68,7 +68,7 @@ jobs:
 
           echo "=== EXECUTING HARDCODED DEPLOYMENT VIA CLOUDFLARE TUNNEL ==="
           ssh \
-            -o ProxyCommand="cloudflared access tcp --hostname vps-simulator.dillahcodes.my.id --id 53a5e920bf8fbfcad8984e3745f8b68c.access --secret d259dd7f70f6c528abbc18f6cba83ef4938b114938bf6bfcc05304d398c4ae5d" \
+            -o ProxyCommand="bash -c 'cloudflared access tcp --hostname vps-simulator.dillahcodes.my.id --id 53a5e920bf8fbfcad8984e3745f8b68c.access --secret d259dd7f70f6c528abbc18f6cba83ef4938b114938bf6bfcc05304d398c4ae5d'" \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
             -o ConnectTimeout=30 \
