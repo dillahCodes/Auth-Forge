@@ -64,7 +64,6 @@ jobs:
             -o ProxyCommand="cloudflared access tcp --hostname $SSH_HOST --id $CF_CLIENT_ID --secret $CF_CLIENT_SECRET" \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            -o ConnectTimeout=30 \
             -i ~/.ssh/deploy_key \
             ${SSH_USER}@${SSH_HOST} \
             "make pull PROJECTNAME=${PROJECT_NAME} USERNAME=${DOCKER_USERNAME} TAG=${IMAGE_TAG} && make start"
