@@ -13,8 +13,8 @@ env:
   SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-  CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
-  CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+  TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_CLIENT_ID }}
+  TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
   PROJECT_NAME: authforge
   IMAGE_TAG: latest
 
@@ -51,7 +51,7 @@ jobs:
           sudo dpkg -i cloudflared.deb
           cloudflared --version
 
-      - name: Deploy via Cloudflare SSH Tunnel
+      - name: Configure SSH for Cloudflare Access
         run: |
           mkdir -p ~/.ssh
 
@@ -59,23 +59,22 @@ jobs:
           printf "%s\n" "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
-          TARGET_HOST="vps-simulator.dillahcodes.my.id"
+          TARGET_HOST=$(echo "$TUNNEL_URL" | sed -e 's|^https://||' -e 's|^http://||' -e 's|/*$||' | xargs)
 
-          echo "=== Step 1: Start Cloudflare Access TCP Listener on 127.0.0.1:2222 ==="
-          cloudflared access tcp --hostname "$TARGET_HOST" --url "127.0.0.1:2222" --id "$CF_CLIENT_ID" --secret "$CF_CLIENT_SECRET" &
-          CF_PID=$!
+          # SSH Config standar resmi Cloudflare Access (ProxyCommand membaca env vars resmi TUNNEL_SERVICE_TOKEN_*)
+          cat <<EOF > ~/.ssh/config
+          Host $TARGET_HOST
+            HostName $TARGET_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/deploy_key
+            ProxyCommand cloudflared access ssh --hostname %h
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+            ServerAliveInterval 30
+            ConnectTimeout 30
+          EOF
 
-          # Tunggu listener siap
-          sleep 3
-
-          echo "=== Step 2: Executing SSH Deployment via Local Listener ==="
-          ssh -p 2222 \
-              -o StrictHostKeyChecking=no \
-              -o UserKnownHostsFile=/dev/null \
-              -o ConnectTimeout=30 \
-              -i ~/.ssh/deploy_key \
-              $SSH_USER@127.0.0.1 \
-              "make pull PROJECTNAME=$PROJECT_NAME USERNAME=$DOCKER_USERNAME TAG=$IMAGE_TAG && make start"
-
-          # Hentikan listener
-          kill $CF_PID 2>/dev/null || true
+      - name: Execute Remote Deployment via SSH
+        run: |
+          TARGET_HOST=$(echo "$TUNNEL_URL" | sed -e 's|^https://||' -e 's|^http://||' -e 's|/*$||' | xargs)
+          ssh $TARGET_HOST "make pull PROJECTNAME=$PROJECT_NAME USERNAME=$DOCKER_USERNAME TAG=$IMAGE_TAG && make start"
