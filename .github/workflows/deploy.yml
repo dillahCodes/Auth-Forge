@@ -1,4 +1,4 @@
-name: Deploy to Local Machine via Cloudflare (vps simulator)
+name: Deploy to Local Machine via Cloudflare
 
 on:
   push:
