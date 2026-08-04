@@ -55,26 +55,29 @@ jobs:
         run: |
           mkdir -p ~/.ssh
 
-          CLEAN_URL=$(echo "${{ env.TUNNEL_URL }}" | sed -e 's|^https://||' -e 's|^http://||')
+          TARGET_URL="vps-simulator.dillahcodes.my.id"
+          echo "DEBUG: Hardcoded TARGET_URL -> $TARGET_URL"
 
-          # 1. Tulis SSH config (persis seperti referensi action)
-          echo "Host $CLEAN_URL" >> ~/.ssh/config
-          echo "  ProxyCommand cloudflared access ssh --hostname %h --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}" >> ~/.ssh/config
+          # 1. Direct test run cloudflared to see exact output
+          echo "=== Direct cloudflared execution test ==="
+          cloudflared access ssh --hostname "$TARGET_URL" --id "${{ secrets.CF_CLIENT_ID }}" --secret "${{ secrets.CF_CLIENT_SECRET }}" 2>&1 || true
+
+          # 2. Tulis SSH config dengan hardcoded hostname langsung di ProxyCommand
+          cat << EOF > ~/.ssh/config
+          Host $TARGET_URL
+            ProxyCommand cloudflared access ssh --hostname $TARGET_URL --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}
+            StrictHostKeyChecking no
+            ConnectTimeout 30
+          EOF
 
           echo "=== SSH config ==="
           cat ~/.ssh/config
 
-          # 2. Tulis SSH private key secara manual (tidak pakai webfactory/ssh-agent)
+          # 3. Tulis SSH private key
           echo "${{ env.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
-          # 3. Populate known_hosts agar SSH tidak hang di prompt
-          ssh-keyscan $CLEAN_URL >> ~/.ssh/known_hosts 2>/dev/null || true
-
-          # 4. Test koneksi dulu (opsional, errors ditolerir)
-          ssh -T -q -o StrictHostKeyChecking=no ${{ env.SSH_USER }}@$CLEAN_URL || true
-
-          # 5. Deploy
+          # 4. Deploy
           echo "=== Deploy ==="
-          ssh -i ~/.ssh/deploy_key ${{ env.SSH_USER }}@$CLEAN_URL -p 22 \
+          ssh -vvv -i ~/.ssh/deploy_key ${{ env.SSH_USER }}@$TARGET_URL -p 22 \
             "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USERNAME }} TAG=${{ env.IMAGE_TAG }} && make start"
