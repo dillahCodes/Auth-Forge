@@ -53,31 +53,20 @@ jobs:
 
       - name: Deploy via Cloudflare SSH Tunnel
         run: |
+          echo "=== READING SSH PRIVATE KEY FROM SECRET ==="
           mkdir -p ~/.ssh
-
-          # Tulis SSH private key
           printf "%s\n" "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
+          echo "=== READING TARGET HOST FROM SECRET ==="
           TARGET_HOST=$(echo "$TUNNEL_URL" | sed -e 's|^https://||' -e 's|^http://||' -e 's|/*$||' | xargs)
 
-          # 1. Jalankan Cloudflare Access TCP listener di 127.0.0.1:2222
-          echo "=== Step 1: Start Cloudflare Access TCP Listener on 127.0.0.1:2222 ==="
-          cloudflared access tcp --hostname "$TARGET_HOST" --url "127.0.0.1:2222" --id "$CF_CLIENT_ID" --secret "$CF_CLIENT_SECRET" &
-          CF_PID=$!
-
-          # Tunggu listener siap
-          sleep 3
-
-          # 2. Eksekusi SSH deployment via listener lokal
-          echo "=== Step 2: Executing SSH Deployment via Local Listener ==="
-          ssh -p 2222 \
-              -o StrictHostKeyChecking=no \
-              -o UserKnownHostsFile=/dev/null \
-              -o ConnectTimeout=30 \
-              -i ~/.ssh/deploy_key \
-              $SSH_USER@127.0.0.1 \
-              "make pull PROJECTNAME=$PROJECT_NAME USERNAME=$DOCKER_USERNAME TAG=$IMAGE_TAG && make start"
-
-          # Hentikan listener
-          kill $CF_PID 2>/dev/null || true
+          echo "=== EXECUTING DEPLOYMENT VIA CLOUDFLARE TUNNEL ==="
+          ssh \
+            -o ProxyCommand="cloudflared access tcp --hostname https://$TARGET_HOST --id $CF_CLIENT_ID --secret $CF_CLIENT_SECRET" \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -o ConnectTimeout=30 \
+            -i ~/.ssh/deploy_key \
+            $SSH_USER@$TARGET_HOST \
+            "make pull PROJECTNAME=$PROJECT_NAME USERNAME=$DOCKER_USERNAME TAG=$IMAGE_TAG && make start"
