@@ -55,18 +55,18 @@ jobs:
         run: |
           echo "=== READING SSH PRIVATE KEY FROM SECRET ==="
           mkdir -p ~/.ssh
-          printf "%s\n" "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          printf "%s\n" "${{ env.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
           echo "=== READING TARGET HOST FROM SECRET ==="
-          TARGET_HOST=$(echo "$TUNNEL_URL" | sed -e 's|^https://||' -e 's|^http://||' -e 's|/*$||' | xargs)
+          TARGET_HOST=$(echo "${{ env.TUNNEL_URL }}" | sed -e 's|^https://||' -e 's|^http://||' -e 's|/*$||' | xargs)
 
           echo "=== EXECUTING DEPLOYMENT VIA CLOUDFLARE TUNNEL ==="
           ssh \
-            -o ProxyCommand="cloudflared access tcp --hostname $TARGET_HOST --id $CF_CLIENT_ID --secret $CF_CLIENT_SECRET" \
+            -o ProxyCommand="cloudflared access tcp --hostname $TARGET_HOST --id ${{ env.CF_CLIENT_ID }} --secret ${{ env.CF_CLIENT_SECRET }}" \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
             -o ConnectTimeout=30 \
             -i ~/.ssh/deploy_key \
-            $SSH_USER@$TARGET_HOST \
-            "make pull PROJECTNAME=$PROJECT_NAME USERNAME=$DOCKER_USERNAME TAG=$IMAGE_TAG && make start"
+            ${{ env.SSH_USER }}@$TARGET_HOST \
+            "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USERNAME }} TAG=${{ env.IMAGE_TAG }} && make start"
