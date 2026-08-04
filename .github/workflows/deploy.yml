@@ -42,30 +42,21 @@ jobs:
         run: |
           docker push ${{ env.DOCKER_USERNAME }}/${{ env.PROJECT_NAME }}:${{ env.IMAGE_TAG }}
 
-      # ==========================================
-      # DEPLOY TO LOCAL MACHINE VIA CLOUDFLARED
-      # ==========================================
-      - name: Install Cloudflared
-        run: |
-          curl -L -o cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
-          sudo dpkg -i cloudflared.deb
-
-      - name: Inject SSH Key to Agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ env.SSH_PRIVATE_KEY }}
-
       - name: Setup SSH Config & Deploy
         env:
           TUNNEL_SERVICE_AUTH_ID: ${{ secrets.CF_CLIENT_ID }}
           TUNNEL_SERVICE_AUTH_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
         run: |
-          # Tulis SSH config tanpa heredoc agar tidak ada masalah indentasi
           mkdir -p ~/.ssh
 
-          # Hapus https:// di sini, ganti dengan %h
-          echo "Host ${{ env.TUNNEL_URL }}" >> ~/.ssh/config
-          echo "  ProxyCommand cloudflared access ssh --hostname %h" >> ~/.ssh/config
+          # 1. Bersihkan variabel TUNNEL_URL dari prefix https:// atau http:// jika ada
+          CLEAN_URL=$(echo "${{ env.TUNNEL_URL }}" | sed -e 's|^https://||' -e 's|^http://||')
+
+          # 2. Tulis SSH config menggunakan domain yang sudah bersih
+          echo "Host $CLEAN_URL" >> ~/.ssh/config
+
+          # 3. Masukkan Service Token secara eksplisit ke dalam ProxyCommand
+          echo "  ProxyCommand cloudflared access ssh --hostname %h --service-token-id $TUNNEL_SERVICE_AUTH_ID --service-token-secret $TUNNEL_SERVICE_AUTH_SECRET" >> ~/.ssh/config
           echo "  StrictHostKeyChecking no" >> ~/.ssh/config
           echo "  ConnectTimeout 30" >> ~/.ssh/config
 
@@ -73,5 +64,6 @@ jobs:
           cat ~/.ssh/config
 
           echo "=== Menjalankan deployment Auth-Forge ke mesin Ubuntu lokal ==="
-          ssh ${{ env.SSH_USER }}@${{ env.TUNNEL_URL }} \
+          # Gunakan variabel $CLEAN_URL yang baru untuk koneksi SSH
+          ssh ${{ env.SSH_USER }}@$CLEAN_URL \
             "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USERNAME }} TAG=${{ env.IMAGE_TAG }} && make start"
