@@ -55,22 +55,19 @@ jobs:
         env:
           CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
           CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
-          TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_CLIENT_ID }}
-          TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
         run: |
           mkdir -p ~/.ssh
 
           TARGET_URL="vps-simulator.dillahcodes.my.id"
 
-          echo "=== DIAGNOSTIC 1: Raw HTTP response from Cloudflare Access via curl ==="
-          curl -i -H "CF-Access-Client-Id: ${{ secrets.CF_CLIENT_ID }}" \
-               -H "CF-Access-Client-Secret: ${{ secrets.CF_CLIENT_SECRET }}" \
-               "https://$TARGET_URL" 2>&1 || true
+          echo "=== Step 1: Generate Access Token ==="
+          ACCESS_TOKEN=$(cloudflared access token -app "https://$TARGET_URL" --id "${{ secrets.CF_CLIENT_ID }}" --secret "${{ secrets.CF_CLIENT_SECRET }}" 2>&1)
+          echo "Token generated successfully!"
 
-          # SSH ProxyCommand menggunakan env vars resmi TUNNEL_SERVICE_TOKEN_ID & TUNNEL_SERVICE_TOKEN_SECRET
+          # SSH config menggunakan JWT token langsung (--token)
           cat << EOF > ~/.ssh/config
           Host $TARGET_URL
-            ProxyCommand cloudflared access tcp --hostname %h
+            ProxyCommand cloudflared access ssh --hostname %h --token $ACCESS_TOKEN
             StrictHostKeyChecking no
             ConnectTimeout 30
           EOF
