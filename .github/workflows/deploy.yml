@@ -43,30 +43,24 @@ jobs:
           docker push ${{ env.DOCKER_USERNAME }}/${{ env.PROJECT_NAME }}:${{ env.IMAGE_TAG }}
 
       - name: Setup SSH Config & Deploy
-        env:
-          TUNNEL_SERVICE_AUTH_ID: ${{ secrets.CF_CLIENT_ID }}
-          TUNNEL_SERVICE_AUTH_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
         run: |
           mkdir -p ~/.ssh
 
-          # 1. AMBIL & BERSIHKAN URL (Pastikan baris ini tidak hilang)
+          # 1. Bersihkan URL
           CLEAN_URL=$(echo "${{ env.TUNNEL_URL }}" | sed -e 's|^https://||' -e 's|^http://||')
           echo "DEBUG: CLEAN_URL bernilai -> $CLEAN_URL"
 
-          # 2. Cari tahu lokasi pasti dari binary cloudflared
-          CLOUDFLARED_PATH=$(which cloudflared || echo "/usr/local/bin/cloudflared")
-          echo "Lokasi cloudflared berada di: $CLOUDFLARED_PATH"
-
-          # 3. Tulis SSH config menggunakan '>' di baris pertama agar file bersih dari sisa run sebelumnya
-          echo "Host $CLEAN_URL" > ~/.ssh/config
-          echo "  ProxyCommand $CLOUDFLARED_PATH access ssh --hostname %h --service-token-id $TUNNEL_SERVICE_AUTH_ID --service-token-secret $TUNNEL_SERVICE_AUTH_SECRET" >> ~/.ssh/config
-          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
-          echo "  ConnectTimeout 30" >> ~/.ssh/config
+          # 2. Tulis SSH config secara aman dengan single-quotes heredoc (mencegah salah parsing shell)
+          cat << EOF > ~/.ssh/config
+          Host $CLEAN_URL
+            ProxyCommand cloudflared access ssh --hostname %h --service-token-id "${{ secrets.CF_CLIENT_ID }}" --service-token-secret "${{ secrets.CF_CLIENT_SECRET }}"
+            StrictHostKeyChecking no
+            ConnectTimeout 30
+          EOF
 
           echo "=== SSH config ==="
           cat ~/.ssh/config
 
           echo "=== Menjalankan deployment Auth-Forge ke mesin Ubuntu lokal ==="
-          # Pastikan menggunakan $CLEAN_URL yang sudah divalidasi ada isinya
-          ssh ${{ env.SSH_USER }}@$CLEAN_URL \
-            "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USERNAME }} TAG=${{ env.IMAGE_TAG }} && make start"
+          # Jalankan SSH secara normal. Runner akan mengeksekusi cloudflared lokal untuk menembus tunnel.
+          ssh ${{ env.SSH_USER }}@$CLEAN_URL "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USERNAME }} TAG=${{ env.IMAGE_TAG }} && make start"
