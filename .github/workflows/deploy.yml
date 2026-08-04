@@ -65,10 +65,10 @@ jobs:
                -H "CF-Access-Client-Secret: ${{ secrets.CF_CLIENT_SECRET }}" \
                "https://$TARGET_URL" 2>&1 || true
 
-          # SSH config resmi dari Cloudflare Access SSH
+          # SSH ProxyCommand menggunakan 'cloudflared access tcp' untuk raw SSH stream
           cat << EOF > ~/.ssh/config
           Host $TARGET_URL
-            ProxyCommand cloudflared access ssh --hostname %h --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}
+            ProxyCommand cloudflared access tcp --hostname %h --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}
             StrictHostKeyChecking no
             ConnectTimeout 30
           EOF
