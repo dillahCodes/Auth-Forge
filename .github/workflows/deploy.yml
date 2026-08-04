@@ -55,28 +55,13 @@ jobs:
         run: |
           mkdir -p ~/.ssh
 
-          # Bersihkan https://, http://, trailing slash, dan trailing space dari TUNNEL_URL
-          TARGET_HOST=$(echo "$TUNNEL_URL" | sed -e 's|^https://||' -e 's|^http://||' -e 's|/*$||' | xargs)
-
-          echo "=== Debug Info ==="
-          echo "TARGET_HOST=['$TARGET_HOST']"
-          echo "CF_CLIENT_ID_LEN=${#CF_CLIENT_ID}"
-          echo "CF_CLIENT_SECRET_LEN=${#CF_CLIENT_SECRET}"
-
-          echo "=== Direct Cloudflared Access Test (SSH vs TCP) ==="
-          echo "--- Testing access tcp ---"
-          cloudflared access tcp --hostname "vps-simulator.dillahcodes.my.id" --id "$CF_CLIENT_ID" --secret "$CF_CLIENT_SECRET" 2>&1 || true
-
-          echo "--- Testing access ssh ---"
-          cloudflared access ssh --hostname "vps-simulator.dillahcodes.my.id" --id "$CF_CLIENT_ID" --secret "$CF_CLIENT_SECRET" 2>&1 || true
-
-          # SSH Config menggunakan cloudflared access tcp
+          # SSH Config menggunakan env vars resmi Cloudflare CLI: TUNNEL_SERVICE_TOKEN_ID & TUNNEL_SERVICE_TOKEN_SECRET
           cat <<EOF > ~/.ssh/config
           Host vps-simulator.dillahcodes.my.id
             HostName vps-simulator.dillahcodes.my.id
             User dillahcodes
             IdentityFile ~/.ssh/deploy_key
-            ProxyCommand cloudflared access tcp --hostname %h --id "${CF_CLIENT_ID}" --secret "${CF_CLIENT_SECRET}"
+            ProxyCommand env TUNNEL_SERVICE_TOKEN_ID="$CF_CLIENT_ID" TUNNEL_SERVICE_TOKEN_SECRET="$CF_CLIENT_SECRET" cloudflared access ssh --hostname %h
             StrictHostKeyChecking no
             UserKnownHostsFile /dev/null
             ServerAliveInterval 30
