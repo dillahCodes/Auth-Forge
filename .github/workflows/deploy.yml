@@ -65,16 +65,10 @@ jobs:
                -H "CF-Access-Client-Secret: ${{ secrets.CF_CLIENT_SECRET }}" \
                "https://$TARGET_URL" 2>&1 || true
 
-          echo "=== DIAGNOSTIC 2: Test cloudflared access tcp ==="
-          cloudflared access tcp --hostname "$TARGET_URL" --id "${{ secrets.CF_CLIENT_ID }}" --secret "${{ secrets.CF_CLIENT_SECRET }}" 2>&1 &
-          TCP_PID=$!
-          sleep 2
-          kill $TCP_PID 2>/dev/null || true
-
-          # SSH config testing cloudflared access tcp
+          # SSH config resmi dari Cloudflare Access SSH
           cat << EOF > ~/.ssh/config
           Host $TARGET_URL
-            ProxyCommand cloudflared access tcp --hostname %h --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}
+            ProxyCommand cloudflared access ssh --hostname %h --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}
             StrictHostKeyChecking no
             ConnectTimeout 30
           EOF
