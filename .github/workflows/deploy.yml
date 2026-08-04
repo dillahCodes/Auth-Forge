@@ -57,25 +57,23 @@ jobs:
           ssh-private-key: ${{ env.SSH_PRIVATE_KEY }}
 
       - name: Setup SSH Config & Deploy
+        env:
+          CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
+          CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
         run: |
           mkdir -p ~/.ssh
 
-          # 1. Bersihkan URL
           CLEAN_URL=$(echo "${{ env.TUNNEL_URL }}" | sed -e 's|^https://||' -e 's|^http://||')
-          echo "DEBUG: CLEAN_URL bernilai -> $CLEAN_URL"
 
-          # 2. Tulis SSH config secara aman dengan single-quotes heredoc (mencegah salah parsing shell)
-          cat << EOF > ~/.ssh/config
-
-          Host $CLEAN_URL
-            ProxyCommand cloudflared access ssh --hostname %h --service-token-id "${{ secrets.CF_CLIENT_ID }}" --service-token-secret "${{ secrets.CF_CLIENT_SECRET }}"
-            StrictHostKeyChecking no
-            ConnectTimeout 30
-          EOF
+          # Tulis SSH config dengan printf (bebas masalah indentasi)
+          # PENTING: --hostname HARUS pakai https://%h agar cloudflared bisa parse URL
+          # CF_CLIENT_ID & CF_CLIENT_SECRET dibaca otomatis oleh cloudflared dari env
+          printf 'Host %s\n  ProxyCommand cloudflared access ssh --hostname https://%%h\n  StrictHostKeyChecking no\n  ConnectTimeout 30\n' \
+            "$CLEAN_URL" > ~/.ssh/config
 
           echo "=== SSH config ==="
           cat ~/.ssh/config
 
-          echo "=== Menjalankan deployment Auth-Forge ke mesin Ubuntu lokal ==="
-          # Jalankan SSH secara normal. Runner akan mengeksekusi cloudflared lokal untuk menembus tunnel.
-          ssh ${{ env.SSH_USER }}@$CLEAN_URL "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USERNAME }} TAG=${{ env.IMAGE_TAG }} && make start"
+          echo "=== Deploy ==="
+          ssh ${{ env.SSH_USER }}@$CLEAN_URL \
+            "make pull PROJECTNAME=${{ env.PROJECT_NAME }} USERNAME=${{ env.DOCKER_USERNAME }} TAG=${{ env.IMAGE_TAG }} && make start"
