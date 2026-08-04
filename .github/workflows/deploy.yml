@@ -63,13 +63,16 @@ jobs:
           echo "CF_CLIENT_ID_LEN=${#CF_CLIENT_ID}"
           echo "CF_CLIENT_SECRET_LEN=${#CF_CLIENT_SECRET}"
 
-          # SSH Config menggunakan quoted EOF agar variabel dievaluasi langsung oleh shell ProxyCommand
-          cat <<'EOF' > ~/.ssh/config
+          echo "=== Direct Cloudflared Access Test ==="
+          cloudflared access ssh --hostname "vps-simulator.dillahcodes.my.id" --id "$CF_CLIENT_ID" --secret "$CF_CLIENT_SECRET" 2>&1 || true
+
+          # SSH Config menggunakan --id dan --secret
+          cat <<EOF > ~/.ssh/config
           Host vps-simulator.dillahcodes.my.id
             HostName vps-simulator.dillahcodes.my.id
             User dillahcodes
             IdentityFile ~/.ssh/deploy_key
-            ProxyCommand cloudflared access ssh --hostname %h --id "$CF_CLIENT_ID" --secret "$CF_CLIENT_SECRET"
+            ProxyCommand cloudflared access ssh --hostname %h --id "${CF_CLIENT_ID}" --secret "${CF_CLIENT_SECRET}"
             StrictHostKeyChecking no
             UserKnownHostsFile /dev/null
             ServerAliveInterval 30
