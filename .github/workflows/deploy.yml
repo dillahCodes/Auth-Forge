@@ -55,29 +55,26 @@ jobs:
         env:
           CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
           CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
-          TUNNEL_SERVICE_TOKEN_ID: ${{ secrets.CF_CLIENT_ID }}
-          TUNNEL_SERVICE_TOKEN_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
         run: |
           mkdir -p ~/.ssh
 
           TARGET_URL="vps-simulator.dillahcodes.my.id"
 
-          echo "=== Variation 1: --hostname with env vars ==="
-          cloudflared access ssh --hostname "$TARGET_URL" 2>&1 || true
+          echo "=== DIAGNOSTIC 1: Raw HTTP response from Cloudflare Access via curl ==="
+          curl -i -H "CF-Access-Client-Id: ${{ secrets.CF_CLIENT_ID }}" \
+               -H "CF-Access-Client-Secret: ${{ secrets.CF_CLIENT_SECRET }}" \
+               "https://$TARGET_URL" 2>&1 || true
 
-          echo "=== Variation 2: --hostname https:// with env vars ==="
-          cloudflared access ssh --hostname "https://$TARGET_URL" 2>&1 || true
+          echo "=== DIAGNOSTIC 2: Test cloudflared access tcp ==="
+          cloudflared access tcp --hostname "$TARGET_URL" --id "${{ secrets.CF_CLIENT_ID }}" --secret "${{ secrets.CF_CLIENT_SECRET }}" 2>&1 &
+          TCP_PID=$!
+          sleep 2
+          kill $TCP_PID 2>/dev/null || true
 
-          echo "=== Variation 3: --id and --secret flags (no https://) ==="
-          cloudflared access ssh --hostname "$TARGET_URL" --id "${{ secrets.CF_CLIENT_ID }}" --secret "${{ secrets.CF_CLIENT_SECRET }}" 2>&1 || true
-
-          echo "=== Variation 4: --id and --secret flags (with https://) ==="
-          cloudflared access ssh --hostname "https://$TARGET_URL" --id "${{ secrets.CF_CLIENT_ID }}" --secret "${{ secrets.CF_CLIENT_SECRET }}" 2>&1 || true
-
-          # SSH config using env vars (recommended by Cloudflare)
+          # SSH config testing cloudflared access tcp
           cat << EOF > ~/.ssh/config
           Host $TARGET_URL
-            ProxyCommand cloudflared access ssh --hostname %h
+            ProxyCommand cloudflared access tcp --hostname %h --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}
             StrictHostKeyChecking no
             ConnectTimeout 30
           EOF
