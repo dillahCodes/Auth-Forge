@@ -43,6 +43,19 @@ services:
   # PRODUCTION DEPLOYMENT
   # ==========================================
 
+  migration:
+    image: dillahcodes/authforge-migration:latest
+    container_name: authforge-migration
+    env_file:
+      - .env
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - prod
+      - migration
+
   prod:
     image: dillahcodes/authforge:latest
     container_name: authforge-prod

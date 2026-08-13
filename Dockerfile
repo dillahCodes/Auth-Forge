@@ -34,33 +34,21 @@ CMD [ "npm", "run", "dev" ]
 # ==========================
 FROM base AS migration
 
-ENV PRISMA_CLI_BINARY_TARGETS=native
+COPY package.json ./
+COPY prisma.config.ts ./
+COPY prisma ./prisma
 
-COPY package-lock.json ./
-
-# install minimal dependencies (prisma & dotenv only)
-RUN PRISMA_VERSION=$(node -p "require('./package-lock.json').packages['node_modules/prisma']?.version || require('./package-lock.json').dependencies?.prisma?.version") && \
-    DOTENV_VERSION=$(node -p "require('./package-lock.json').packages['node_modules/dotenv']?.version || require('./package-lock.json').dependencies?.dotenv?.version || 'latest'") && \
+# install only prisma and dotenv
+RUN PRISMA_VERSION=$(node -p "require('./package.json').devDependencies?.prisma || require('./package.json').dependencies?.prisma || 'latest'") && \
+    DOTENV_VERSION=$(node -p "require('./package.json').devDependencies?.dotenv || require('./package.json').dependencies?.dotenv || 'latest'") && \
+    echo '{"name":"migration","private":true}' > package.json && \
     npm install --ignore-scripts --no-audit --no-fund "prisma@$PRISMA_VERSION" "dotenv@$DOTENV_VERSION" && \
     rm -rf /app/node_modules/@prisma/query-engine-wasm && \
     find /app/node_modules -name "libquery_engine*" -delete && \
     find /app/node_modules -name "query_engine*" -delete && \
     rm -rf /root/.npm /tmp/* package-lock.json
 
-# clean up devDependencies & bloat brought by standalone build
-RUN rm -rf \
-    node_modules/@types \
-    node_modules/typescript \
-    node_modules/prettier \
-    node_modules/@swc/core* \
-    && find node_modules -name "*.map" -delete \
-    && find node_modules -name "*.md" -delete \
-    && find node_modules -name "prisma-fmt*" -delete \
-    && find node_modules -type d -name "test" -exec rm -rf {} + \
-    && find node_modules -type d -name "tests" -exec rm -rf {} +
-
-COPY prisma.config.ts ./
-COPY prisma ./prisma
+CMD ["./node_modules/.bin/prisma", "migrate", "deploy"]
 
 # ==========================
 # Production Builder
@@ -70,10 +58,15 @@ FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# dummy DATABASE_URL for prisma generate
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+
+RUN npx prisma generate
+
 RUN npm run build
 
 # ==========================
-# Production
+# Production (Minimal)
 # ==========================
 FROM base AS prod
 
@@ -82,17 +75,12 @@ COPY --from=builder --chown=node:node /app/.next/standalone ./
 COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 COPY --from=builder --chown=node:node /app/public ./public
 
-# prisma build
-COPY --from=migration --chown=node:node /app/node_modules ./node_modules
-COPY --from=migration --chown=node:node /app/prisma ./prisma
-COPY --from=migration --chown=node:node /app/prisma.config.ts ./
-
 USER node
 
 EXPOSE 3000
 
 HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=3 \
-  CMD node -e "fetch('http://localhost:3000/').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"
+CMD node -e "fetch('http://localhost:3000/').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"
 
-CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && node server.js"]
+CMD ["node", "server.js"]
 

@@ -1,4 +1,13 @@
-.PHONY: setup dev dev-down build push pull start prod-down show
+.PHONY: setup dev dev-down build build-app build-migration push push-app push-migration pull pull-app pull-migration migrate start-app start prod-down show
+
+# ==========================================
+# CONFIGURATION / VARIABLES
+# ==========================================
+USERNAME ?= dillahcodes
+TAG ?= latest
+
+APP_IMAGE = $(USERNAME)/authforge:$(TAG)
+MIGRATION_IMAGE = $(USERNAME)/authforge-migration:$(TAG)
 
 # ==========================================
 # DEVELOPMENT
@@ -26,32 +35,64 @@ dev-down:
 	docker compose --profile dev down
 
 # ==========================================
-# CI/CD - BUILD & RELEASE
+# CI/CD - BUILD & RELEASE (DOCKER HUB)
 # ==========================================
 
-# Build production image
-build:
-	@echo "Building production image..."
-	docker build --target prod -t $(USERNAME)/authforge:$(TAG) .
+# Build all production images
+build: build-app build-migration
 
-# Push image to Docker Hub
-push:
-	@echo "Pushing image to Docker Hub..."
-	docker push $(USERNAME)/authforge:$(TAG)
+# Build main application image
+build-app:
+	@echo "Building application image: $(APP_IMAGE)..."
+	docker build --target prod -t $(APP_IMAGE) .
+
+# Build migration image
+build-migration:
+	@echo "Building migration image: $(MIGRATION_IMAGE)..."
+	docker build --target migration -t $(MIGRATION_IMAGE) .
+
+# Push all images to Docker Hub
+push: push-app push-migration
+
+# Push main application image
+push-app:
+	@echo "Pushing application image to Docker Hub: $(APP_IMAGE)..."
+	docker push $(APP_IMAGE)
+
+# Push migration image
+push-migration:
+	@echo "Pushing migration image to Docker Hub: $(MIGRATION_IMAGE)..."
+	docker push $(MIGRATION_IMAGE)
+
+# Pull all latest images (server)
+pull: pull-app pull-migration
+
+# Pull main application image
+pull-app:
+	@echo "Pulling application image: $(APP_IMAGE)..."
+	docker pull $(APP_IMAGE)
+
+# Pull migration image
+pull-migration:
+	@echo "Pulling migration image: $(MIGRATION_IMAGE)..."
+	docker pull $(MIGRATION_IMAGE)
 
 # ==========================================
 # PRODUCTION DEPLOYMENT
 # ==========================================
 
-# Pull latest image (server: no build, only pull & run)
-pull:
-	@echo "Pulling image..."
-	docker pull $(USERNAME)/authforge:$(TAG)
+# Run database migration only (auto-removes container on finish)
+migrate:
+	@echo "Running Database Migration..."
+	docker compose run --rm migration
 
-# Start production application
-start:
-	@echo "Starting Production environment..."
-	docker compose --profile prod up -d
+# Start main production application only
+start-app:
+	@echo "Starting Main Application..."
+	docker compose --profile prod up -d prod
+
+# Start full production: run migration first, then start app
+start: migrate start-app
 
 # Show Production containers
 show:
