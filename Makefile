@@ -1,4 +1,4 @@
-.PHONY: setup dev dev-down build build-app build-migration push push-app push-migration pull pull-app pull-migration migrate start-app start prod-down show
+.PHONY: setup dev dev-down build build-app build-migration push push-app push-migration pull pull-app pull-migration migrate start prod-down show
 
 # ==========================================
 # CONFIGURATION / VARIABLES
@@ -81,18 +81,19 @@ pull-migration:
 # PRODUCTION DEPLOYMENT
 # ==========================================
 
-# Run database migration only (auto-removes container on finish)
+# Run database migration manually
+# (auto-removes container on finish)
 migrate:
 	@echo "Running Database Migration..."
 	docker compose run --rm migration
 
-# Start main production application only
-start-app:
-	@echo "Starting Main Application..."
-	docker compose --profile prod up -d prod
-
-# Start full production: run migration first, then start app
-start: migrate start-app
+# Start production environment
+# (auto-runs migration init-container, then auto-removes it on success)
+start:
+	@echo "Starting Production environment..."
+	docker compose --profile prod up -d
+	@echo "Removing migration container..."
+	@docker rm authforge-migration
 
 # Show Production containers
 show:
