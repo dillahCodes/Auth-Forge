@@ -2,7 +2,7 @@
 .git
 .gitignore
 
-# Docker files (tidak butuh di dalam image)
+# Docker files
 Dockerfile*
 docker-compose*
 .dockerignore
